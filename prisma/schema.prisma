@@ -1,0 +1,424 @@
+// Claude Key Portal - Prisma Schema
+// 数据库: PostgreSQL 15+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 用户系统
+// ============================================
+
+// 用户表
+model User {
+  id                String    @id @default(uuid())
+
+  // 认证信息
+  email             String?   @unique
+  phone             String?   @unique
+  passwordHash      String
+
+  // 个人信息
+  nickname          String?
+  avatar            String?
+  bio               String?
+
+  // CRS关联
+  crsAdminToken     String?   @db.Text
+
+  // 偏好设置
+  preferences       Json      @default("{}")
+
+  // 状态
+  status            UserStatus @default(ACTIVE)
+  emailVerified     Boolean   @default(false)
+  phoneVerified     Boolean   @default(false)
+
+  // 邀请信息
+  invitedBy         String?
+  inviteCode        String?   @unique
+
+  // 时间戳
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLoginAt       DateTime?
+
+  // 关系
+  apiKeys           ApiKey[]
+  sessions          Session[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  invitees          User[]    @relation("UserInvites")
+  inviter           User?     @relation("UserInvites", fields: [invitedBy], references: [id])
+
+  @@index([email])
+  @@index([phone])
+  @@index([inviteCode])
+  @@index([createdAt])
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+// 会话表
+model Session {
+  id                String    @id @default(uuid())
+  userId            String
+
+  // Token信息
+  accessToken       String    @unique @db.Text
+  refreshToken      String    @unique @db.Text
+
+  // 设备信息
+  deviceId          String?
+  deviceName        String?
+  ip                String
+  userAgent         String    @db.Text
+  location          Json?
+
+  // 时间
+  createdAt         DateTime  @default(now())
+  expiresAt         DateTime
+  lastActivityAt    DateTime  @default(now())
+
+  // 关系
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([accessToken])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ============================================
+// API密钥管理
+// ============================================
+
+// API密钥表
+model ApiKey {
+  id                String    @id @default(uuid())
+  userId            String
+
+  // CRS关联
+  crsKeyId          String    @unique
+  crsKey            String    @unique
+
+  // 基本信息
+  name              String
+  description       String?   @db.Text
+  tags              String[]  @default([])
+
+  // 配置
+  config            Json      @default("{}")
+
+  // 状态
+  status            ApiKeyStatus @default(ACTIVE)
+
+  // 统计信息（定期从CRS同步）
+  totalCalls        BigInt    @default(0)
+  totalTokens       BigInt    @default(0)
+  lastUsedAt        DateTime?
+
+  // 时间
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  expiresAt         DateTime?
+
+  // 关系
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageRecords      UsageRecord[]
+
+  @@index([userId])
+  @@index([crsKeyId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([lastUsedAt])
+  @@map("api_keys")
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  DELETED
+  RATE_LIMITED
+}
+
+// 使用记录表（定期从CRS同步）
+model UsageRecord {
+  id                String    @id @default(uuid())
+  apiKeyId          String
+
+  // 请求信息
+  model             String
+  endpoint          String
+  method            String
+
+  // Token使用
+  promptTokens      Int
+  completionTokens  Int
+  totalTokens       Int
+
+  // 性能
+  duration          Int
+  status            Int
+
+  // 错误信息
+  errorCode         String?
+  errorMessage      String?   @db.Text
+
+  // 元数据
+  metadata          Json?
+
+  // 时间
+  timestamp         DateTime  @default(now())
+
+  // 关系
+  apiKey            ApiKey    @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId])
+  @@index([timestamp])
+  @@index([model])
+  @@index([status])
+  @@map("usage_records")
+}
+
+// ============================================
+// 通知系统
+// ============================================
+
+// 通知配置表
+model NotificationConfig {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+
+  // 渠道配置
+  channels          Json
+
+  // 通知规则
+  rules             Json      @default("[]")
+
+  // 时间
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("notification_configs")
+}
+
+// 通知记录表
+model Notification {
+  id                String    @id @default(uuid())
+  userId            String
+
+  // 通知内容
+  type              NotificationType
+  title             String
+  message           String    @db.Text
+  data              Json?
+
+  // 发送状态
+  channel           String
+  status            NotificationStatus @default(PENDING)
+  sentAt            DateTime?
+  readAt            DateTime?
+
+  // 错误信息
+  error             String?   @db.Text
+
+  // 时间
+  createdAt         DateTime  @default(now())
+
+  // 关系
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  RATE_LIMIT_WARNING
+  QUOTA_WARNING
+  ERROR_SPIKE
+  KEY_CREATED
+  KEY_DELETED
+  KEY_EXPIRED
+  SYSTEM_ANNOUNCEMENT
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+// ============================================
+// 数据导出
+// ============================================
+
+// 导出任务表
+model ExportTask {
+  id                String    @id @default(uuid())
+  userId            String
+
+  // 任务配置
+  type              ExportType
+  format            ExportFormat
+  filters           Json
+  fields            String[]
+
+  // 状态
+  status            ExportStatus @default(PROCESSING)
+  progress          Int       @default(0)
+
+  // 结果
+  fileUrl           String?
+  fileSize          BigInt?
+  recordCount       Int?
+  expiresAt         DateTime?
+
+  // 错误
+  error             String?   @db.Text
+
+  // 时间
+  createdAt         DateTime  @default(now())
+  completedAt       DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("export_tasks")
+}
+
+enum ExportType {
+  KEYS
+  USAGE
+  LOGS
+}
+
+enum ExportFormat {
+  CSV
+  JSON
+  EXCEL
+}
+
+enum ExportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+// ============================================
+// 审计日志
+// ============================================
+
+// 审计日志表
+model AuditLog {
+  id                String    @id @default(uuid())
+  userId            String?
+
+  // 操作信息
+  action            String
+  resource          String
+  resourceId        String?
+
+  // 详细信息
+  details           Json?
+
+  // 元数据
+  ip                String
+  userAgent         String    @db.Text
+
+  // 结果
+  status            String
+  error             String?   @db.Text
+
+  // 时间
+  timestamp         DateTime  @default(now())
+
+  // 关系
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+// ============================================
+// 系统配置
+// ============================================
+
+// 系统配置表
+model SystemConfig {
+  id                String    @id @default(uuid())
+
+  // 配置键值
+  key               String    @unique
+  value             Json
+
+  // 元数据
+  description       String?   @db.Text
+  category          String
+
+  // 时间
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([category])
+  @@map("system_configs")
+}
+
+// ============================================
+// 统计数据（聚合表）
+// ============================================
+
+// 日统计表
+model DailyStatistics {
+  id                String    @id @default(uuid())
+  date              DateTime  @db.Date
+
+  // 全局统计
+  totalUsers        Int       @default(0)
+  activeUsers       Int       @default(0)
+  newUsers          Int       @default(0)
+
+  totalKeys         Int       @default(0)
+  activeKeys        Int       @default(0)
+  newKeys           Int       @default(0)
+
+  totalCalls        BigInt    @default(0)
+  totalTokens       BigInt    @default(0)
+  totalErrors       Int       @default(0)
+
+  // 性能指标
+  avgResponseTime   Int       @default(0)
+  p95ResponseTime   Int       @default(0)
+  p99ResponseTime   Int       @default(0)
+
+  // 模型分布
+  modelStats        Json      @default("{}")
+
+  // 时间
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([date])
+  @@index([date])
+  @@map("daily_statistics")
+}
