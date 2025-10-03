@@ -6,7 +6,8 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Claude Key Portal',
-  description: 'CRS User Management Portal - Manage your Claude API keys with ease',
+  description:
+    'CRS User Management Portal - Manage your Claude API keys with ease',
 }
 
 export default function RootLayout({

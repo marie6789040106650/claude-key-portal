@@ -3,6 +3,7 @@
 ## 一、数据库选型
 
 ### PostgreSQL 15+
+
 - **原因**：
   - 强大的JSON支持（用于灵活存储配置）
   - 完善的事务支持
@@ -11,6 +12,7 @@
   - 社区活跃，生态完善
 
 ### Redis 7+
+
 - **用途**：
   - Session存储
   - API响应缓存
@@ -513,9 +515,11 @@ model DailyStatistics {
 ## 三、索引策略
 
 ### 1. 主键索引
+
 所有表都使用 UUID 作为主键，PostgreSQL 自动创建 B-Tree 索引。
 
 ### 2. 唯一索引
+
 ```sql
 -- 用户表
 CREATE UNIQUE INDEX idx_users_email ON users(email) WHERE email IS NOT NULL;
@@ -532,6 +536,7 @@ CREATE UNIQUE INDEX idx_api_keys_crs_key ON api_keys(crs_key);
 ```
 
 ### 3. 复合索引
+
 ```sql
 -- 使用记录查询优化
 CREATE INDEX idx_usage_records_key_time ON usage_records(api_key_id, timestamp DESC);
@@ -546,6 +551,7 @@ CREATE INDEX idx_notifications_user_status ON notifications(user_id, status, cre
 ```
 
 ### 4. 部分索引
+
 ```sql
 -- 仅索引活跃密钥
 CREATE INDEX idx_active_keys ON api_keys(user_id, created_at DESC)
@@ -561,6 +567,7 @@ WHERE status = 'FAILED';
 ```
 
 ### 5. JSON 索引
+
 ```sql
 -- 用户偏好语言
 CREATE INDEX idx_users_language ON users USING GIN ((preferences->'language'));
@@ -575,80 +582,84 @@ CREATE INDEX idx_usage_metadata ON usage_records USING GIN (metadata);
 ## 四、数据加密策略
 
 ### 1. 密码加密
+
 ```typescript
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt'
 
 // 注册时加密密码
-const saltRounds = 10;
-const passwordHash = await bcrypt.hash(password, saltRounds);
+const saltRounds = 10
+const passwordHash = await bcrypt.hash(password, saltRounds)
 
 // 登录时验证密码
-const isValid = await bcrypt.compare(password, user.passwordHash);
+const isValid = await bcrypt.compare(password, user.passwordHash)
 ```
 
 ### 2. API密钥加密
+
 ```typescript
-import crypto from 'crypto';
+import crypto from 'crypto'
 
 // 加密配置
-const algorithm = 'aes-256-gcm';
-const key = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex'); // 32字节
+const algorithm = 'aes-256-gcm'
+const key = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex') // 32字节
 
 // 加密密钥
 function encryptApiKey(plaintext: string): string {
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(algorithm, key, iv);
+  const iv = crypto.randomBytes(16)
+  const cipher = crypto.createCipheriv(algorithm, key, iv)
 
-  let encrypted = cipher.update(plaintext, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
+  let encrypted = cipher.update(plaintext, 'utf8', 'hex')
+  encrypted += cipher.final('hex')
 
-  const authTag = cipher.getAuthTag();
+  const authTag = cipher.getAuthTag()
 
   // 格式: iv:authTag:encrypted
-  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
 }
 
 // 解密密钥
 function decryptApiKey(ciphertext: string): string {
-  const [ivHex, authTagHex, encrypted] = ciphertext.split(':');
+  const [ivHex, authTagHex, encrypted] = ciphertext.split(':')
 
-  const iv = Buffer.from(ivHex, 'hex');
-  const authTag = Buffer.from(authTagHex, 'hex');
-  const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  const iv = Buffer.from(ivHex, 'hex')
+  const authTag = Buffer.from(authTagHex, 'hex')
+  const decipher = crypto.createDecipheriv(algorithm, key, iv)
 
-  decipher.setAuthTag(authTag);
+  decipher.setAuthTag(authTag)
 
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8')
+  decrypted += decipher.final('utf8')
 
-  return decrypted;
+  return decrypted
 }
 ```
 
 ### 3. 敏感信息脱敏
+
 ```typescript
 // 邮箱脱敏
 function maskEmail(email: string): string {
-  const [local, domain] = email.split('@');
-  const maskedLocal = local[0] + '***' + local[local.length - 1];
-  return `${maskedLocal}@${domain}`;
+  const [local, domain] = email.split('@')
+  const maskedLocal = local[0] + '***' + local[local.length - 1]
+  return `${maskedLocal}@${domain}`
 }
 
 // 手机号脱敏
 function maskPhone(phone: string): string {
-  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
 }
 
 // API密钥脱敏
 function maskApiKey(key: string): string {
-  if (key.length <= 8) return '***';
-  return `${key.slice(0, 4)}...${key.slice(-4)}`;
+  if (key.length <= 8) return '***'
+  return `${key.slice(0, 4)}...${key.slice(-4)}`
 }
 ```
 
 ## 五、数据迁移策略
 
 ### 1. 版本控制
+
 ```typescript
 // prisma/migrations/
 // 20250101000000_init/
@@ -657,6 +668,7 @@ function maskApiKey(key: string): string {
 ```
 
 ### 2. 迁移脚本示例
+
 ```sql
 -- 20250101000000_init/migration.sql
 -- CreateEnum
@@ -680,11 +692,12 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 ```
 
 ### 3. 数据种子
+
 ```typescript
 // prisma/seed.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function main() {
   // 创建系统配置
@@ -694,38 +707,39 @@ async function main() {
         key: 'max_keys_per_user',
         value: { value: 10 },
         category: 'limit',
-        description: '每个用户最多可创建的密钥数量'
+        description: '每个用户最多可创建的密钥数量',
       },
       {
         key: 'default_rate_limit',
         value: { value: 60 },
         category: 'limit',
-        description: '默认速率限制（请求/分钟）'
-      }
-    ]
-  });
+        description: '默认速率限制（请求/分钟）',
+      },
+    ],
+  })
 
   // 创建管理员账户
-  const adminPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = await bcrypt.hash('admin123', 10)
   await prisma.user.create({
     data: {
       email: 'admin@example.com',
       passwordHash: adminPassword,
       nickname: 'Admin',
       emailVerified: true,
-      inviteCode: 'ADMIN123'
-    }
-  });
+      inviteCode: 'ADMIN123',
+    },
+  })
 }
 
 main()
   .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .finally(() => prisma.$disconnect())
 ```
 
 ## 六、数据备份策略
 
 ### 1. 自动备份脚本
+
 ```bash
 #!/bin/bash
 # backup.sh
@@ -753,6 +767,7 @@ find $BACKUP_DIR -name "*.dump.gz" -mtime +$RETENTION_DAYS -delete
 ```
 
 ### 2. 定时任务
+
 ```cron
 # crontab -e
 
@@ -764,6 +779,7 @@ find $BACKUP_DIR -name "*.dump.gz" -mtime +$RETENTION_DAYS -delete
 ```
 
 ### 3. 恢复脚本
+
 ```bash
 #!/bin/bash
 # restore.sh
@@ -790,6 +806,7 @@ echo "Restore completed"
 ## 七、性能优化建议
 
 ### 1. 连接池配置
+
 ```typescript
 // prisma/schema.prisma
 datasource db {
@@ -804,6 +821,7 @@ datasource db {
 ```
 
 ### 2. 查询优化
+
 ```typescript
 // 使用 select 减少数据传输
 const users = await prisma.user.findMany({
@@ -812,8 +830,8 @@ const users = await prisma.user.findMany({
     email: true,
     nickname: true,
     // 不查询 passwordHash
-  }
-});
+  },
+})
 
 // 使用 include 避免 N+1 查询
 const keys = await prisma.apiKey.findMany({
@@ -821,69 +839,72 @@ const keys = await prisma.apiKey.findMany({
     user: {
       select: {
         id: true,
-        email: true
-      }
-    }
-  }
-});
+        email: true,
+      },
+    },
+  },
+})
 
 // 使用分页
 const keys = await prisma.apiKey.findMany({
   take: 20,
   skip: (page - 1) * 20,
   orderBy: {
-    createdAt: 'desc'
-  }
-});
+    createdAt: 'desc',
+  },
+})
 ```
 
 ### 3. 批量操作
+
 ```typescript
 // 批量插入
 await prisma.usageRecord.createMany({
   data: records,
-  skipDuplicates: true
-});
+  skipDuplicates: true,
+})
 
 // 批量更新
 await prisma.$transaction(
-  keys.map(key =>
+  keys.map((key) =>
     prisma.apiKey.update({
       where: { id: key.id },
-      data: { status: 'INACTIVE' }
+      data: { status: 'INACTIVE' },
     })
   )
-);
+)
 ```
 
 ## 八、数据归档策略
 
 ### 1. 归档规则
+
 ```typescript
 // 每月归档上月数据
 async function archiveOldRecords() {
-  const lastMonth = new Date();
-  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  const lastMonth = new Date()
+  lastMonth.setMonth(lastMonth.getMonth() - 1)
 
   // 归档使用记录
   await prisma.$executeRaw`
     INSERT INTO usage_records_archive
     SELECT * FROM usage_records
     WHERE timestamp < ${lastMonth}
-  `;
+  `
 
   // 删除已归档数据
   await prisma.usageRecord.deleteMany({
     where: {
       timestamp: {
-        lt: lastMonth
-      }
-    }
-  });
+        lt: lastMonth,
+      },
+    },
+  })
 }
 ```
 
 ### 2. 归档表结构
+
 ```sql
 -- 归档表（使用分区表）
 CREATE TABLE usage_records_archive (

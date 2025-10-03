@@ -12,27 +12,28 @@
 
 ### 1.2 接口分类
 
-| 接口类型 | Portal处理方式 | CRS依赖 | 缓存策略 |
-|---------|---------------|---------|---------|
-| **认证类** | 完全本地 | ❌ 无 | Redis (Session) |
-| **用户类** | 完全本地 | ❌ 无 | Redis (Profile) |
-| **密钥管理类** | 代理+增强 | ✅ 强依赖 | Redis (5分钟) |
-| **统计数据类** | 代理 | ✅ 强依赖 | Redis (1分钟) |
-| **安装指导类** | 完全本地 | ❌ 无 | 无缓存 |
+| 接口类型       | Portal处理方式 | CRS依赖   | 缓存策略        |
+| -------------- | -------------- | --------- | --------------- |
+| **认证类**     | 完全本地       | ❌ 无     | Redis (Session) |
+| **用户类**     | 完全本地       | ❌ 无     | Redis (Profile) |
+| **密钥管理类** | 代理+增强      | ✅ 强依赖 | Redis (5分钟)   |
+| **统计数据类** | 代理           | ✅ 强依赖 | Redis (1分钟)   |
+| **安装指导类** | 完全本地       | ❌ 无     | 无缓存          |
 
 ## 二、详细接口映射表
 
 ### 2.1 认证与授权接口（本地）
 
-| Portal API | 处理方式 | CRS API | 数据源 | 缓存 |
-|-----------|---------|---------|-------|------|
-| `POST /api/v1/auth/register` | 本地 | - | PostgreSQL | - |
-| `POST /api/v1/auth/login` | 本地 | - | PostgreSQL | Session |
-| `POST /api/v1/auth/refresh` | 本地 | - | PostgreSQL | Session |
-| `POST /api/v1/auth/logout` | 本地 | - | PostgreSQL | Session |
-| `POST /api/v1/auth/verification-code` | 本地 | - | Redis | Code |
+| Portal API                            | 处理方式 | CRS API | 数据源     | 缓存    |
+| ------------------------------------- | -------- | ------- | ---------- | ------- |
+| `POST /api/v1/auth/register`          | 本地     | -       | PostgreSQL | -       |
+| `POST /api/v1/auth/login`             | 本地     | -       | PostgreSQL | Session |
+| `POST /api/v1/auth/refresh`           | 本地     | -       | PostgreSQL | Session |
+| `POST /api/v1/auth/logout`            | 本地     | -       | PostgreSQL | Session |
+| `POST /api/v1/auth/verification-code` | 本地     | -       | Redis      | Code    |
 
 **数据流程**：
+
 ```typescript
 // 用户登录示例
 async login(email: string, password: string) {
@@ -55,13 +56,14 @@ async login(email: string, password: string) {
 
 ### 2.2 用户管理接口（本地）
 
-| Portal API | 处理方式 | CRS API | 数据源 | 缓存 |
-|-----------|---------|---------|-------|------|
-| `GET /api/v1/user/profile` | 本地 | - | PostgreSQL | 10分钟 |
-| `PATCH /api/v1/user/profile` | 本地 | - | PostgreSQL | 清除缓存 |
-| `POST /api/v1/user/change-password` | 本地 | - | PostgreSQL | - |
+| Portal API                          | 处理方式 | CRS API | 数据源     | 缓存     |
+| ----------------------------------- | -------- | ------- | ---------- | -------- |
+| `GET /api/v1/user/profile`          | 本地     | -       | PostgreSQL | 10分钟   |
+| `PATCH /api/v1/user/profile`        | 本地     | -       | PostgreSQL | 清除缓存 |
+| `POST /api/v1/user/change-password` | 本地     | -       | PostgreSQL | -        |
 
 **数据流程**：
+
 ```typescript
 // 获取用户信息示例
 async getProfile(userId: string) {
@@ -85,15 +87,15 @@ async getProfile(userId: string) {
 
 ### 2.3 API密钥管理接口（代理+增强）
 
-| Portal API | 处理方式 | CRS API | 请求转换 | 响应增强 |
-|-----------|---------|---------|---------|---------|
-| `GET /api/v1/keys` | 代理+过滤 | `GET /admin/api-keys` | ✅ 添加时间范围 | ✅ 合并本地notes |
-| `GET /api/v1/keys/:id` | 代理+合并 | `GET /admin/api-keys` | ✅ 从列表中筛选 | ✅ 合并本地数据 |
-| `POST /api/v1/keys` | 代理+映射 | `POST /admin/api-keys` | ✅ 转换字段格式 | ✅ 创建本地映射 |
-| `PUT /api/v1/keys/:id` | 代理+更新 | `PUT /admin/api-keys/:keyId` | ✅ 映射ID | ✅ 更新本地notes |
-| `DELETE /api/v1/keys/:id` | 代理+清理 | `DELETE /admin/api-keys/:keyId` | ✅ 映射ID | ✅ 删除本地映射 |
-| `POST /api/v1/keys/batch` | 代理 | `DELETE/PUT /admin/api-keys/batch` | ✅ 批量映射ID | ✅ 批量更新本地 |
-| `GET /api/v1/keys/tags` | 代理 | `GET /admin/api-keys/tags` | ❌ 直通 | ❌ 直通 |
+| Portal API                | 处理方式  | CRS API                            | 请求转换        | 响应增强         |
+| ------------------------- | --------- | ---------------------------------- | --------------- | ---------------- |
+| `GET /api/v1/keys`        | 代理+过滤 | `GET /admin/api-keys`              | ✅ 添加时间范围 | ✅ 合并本地notes |
+| `GET /api/v1/keys/:id`    | 代理+合并 | `GET /admin/api-keys`              | ✅ 从列表中筛选 | ✅ 合并本地数据  |
+| `POST /api/v1/keys`       | 代理+映射 | `POST /admin/api-keys`             | ✅ 转换字段格式 | ✅ 创建本地映射  |
+| `PUT /api/v1/keys/:id`    | 代理+更新 | `PUT /admin/api-keys/:keyId`       | ✅ 映射ID       | ✅ 更新本地notes |
+| `DELETE /api/v1/keys/:id` | 代理+清理 | `DELETE /admin/api-keys/:keyId`    | ✅ 映射ID       | ✅ 删除本地映射  |
+| `POST /api/v1/keys/batch` | 代理      | `DELETE/PUT /admin/api-keys/batch` | ✅ 批量映射ID   | ✅ 批量更新本地  |
+| `GET /api/v1/keys/tags`   | 代理      | `GET /admin/api-keys/tags`         | ❌ 直通         | ❌ 直通          |
 
 #### 详细数据流程
 
@@ -405,13 +407,13 @@ async deleteKey(userId: string, mappingId: string) {
 
 ### 2.4 统计数据接口（代理）
 
-| Portal API | 处理方式 | CRS API | 请求转换 | 响应转换 |
-|-----------|---------|---------|---------|---------|
-| `GET /api/v1/dashboard` | 代理+过滤 | `GET /admin/dashboard` | ❌ 直通 | ✅ 过滤用户数据 |
-| `GET /api/v1/usage/stats` | 代理+过滤 | `GET /admin/usage-stats` | ✅ 添加keyId过滤 | ✅ 过滤用户数据 |
-| `GET /api/v1/usage/trend` | 代理+过滤 | `GET /admin/usage-trend` | ✅ 添加keyId过滤 | ✅ 过滤用户数据 |
-| `GET /api/v1/usage/costs` | 代理+过滤 | `GET /admin/usage-costs` | ✅ 添加日期范围 | ✅ 过滤用户数据 |
-| `GET /api/v1/keys/:id/stats` | 代理 | `GET /admin/api-keys/:keyId/model-stats` | ✅ 映射ID | ❌ 直通 |
+| Portal API                   | 处理方式  | CRS API                                  | 请求转换         | 响应转换        |
+| ---------------------------- | --------- | ---------------------------------------- | ---------------- | --------------- |
+| `GET /api/v1/dashboard`      | 代理+过滤 | `GET /admin/dashboard`                   | ❌ 直通          | ✅ 过滤用户数据 |
+| `GET /api/v1/usage/stats`    | 代理+过滤 | `GET /admin/usage-stats`                 | ✅ 添加keyId过滤 | ✅ 过滤用户数据 |
+| `GET /api/v1/usage/trend`    | 代理+过滤 | `GET /admin/usage-trend`                 | ✅ 添加keyId过滤 | ✅ 过滤用户数据 |
+| `GET /api/v1/usage/costs`    | 代理+过滤 | `GET /admin/usage-costs`                 | ✅ 添加日期范围  | ✅ 过滤用户数据 |
+| `GET /api/v1/keys/:id/stats` | 代理      | `GET /admin/api-keys/:keyId/model-stats` | ✅ 映射ID        | ❌ 直通         |
 
 #### 详细数据流程
 
@@ -590,10 +592,10 @@ function mergeTrends(trends: any[]) {
 
 ### 2.5 安装指导接口（本地）
 
-| Portal API | 处理方式 | CRS API | 数据源 | 缓存 |
-|-----------|---------|---------|-------|------|
-| `POST /api/v1/install/script` | 本地生成 | - | 模板引擎 | 无 |
-| `POST /api/v1/install/check` | 本地 | - | 无 | 无 |
+| Portal API                    | 处理方式 | CRS API | 数据源   | 缓存 |
+| ----------------------------- | -------- | ------- | -------- | ---- |
+| `POST /api/v1/install/script` | 本地生成 | -       | 模板引擎 | 无   |
+| `POST /api/v1/install/check`  | 本地     | -       | 无       | 无   |
 
 **数据流程**：
 
@@ -642,36 +644,36 @@ async generateInstallScript(userId: string, data: GenerateScriptDto) {
 
 ```typescript
 class CRSCircuitBreaker {
-  private failures = 0;
-  private lastFailureTime = 0;
-  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private failures = 0
+  private lastFailureTime = 0
+  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED'
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'OPEN') {
       // 熔断开启，检查是否可以尝试恢复
       if (Date.now() - this.lastFailureTime > 60000) {
-        this.state = 'HALF_OPEN';
+        this.state = 'HALF_OPEN'
       } else {
-        throw new CRSUnavailableError('CRS服务暂时不可用');
+        throw new CRSUnavailableError('CRS服务暂时不可用')
       }
     }
 
     try {
-      const result = await fn();
+      const result = await fn()
       if (this.state === 'HALF_OPEN') {
-        this.state = 'CLOSED';
-        this.failures = 0;
+        this.state = 'CLOSED'
+        this.failures = 0
       }
-      return result;
+      return result
     } catch (error) {
-      this.failures++;
-      this.lastFailureTime = Date.now();
+      this.failures++
+      this.lastFailureTime = Date.now()
 
       if (this.failures >= 3) {
-        this.state = 'OPEN';
+        this.state = 'OPEN'
       }
 
-      throw error;
+      throw error
     }
   }
 }
@@ -679,87 +681,65 @@ class CRSCircuitBreaker {
 // 降级响应
 async function getDashboardWithFallback(userId: string) {
   try {
-    return await circuitBreaker.execute(() =>
-      getDashboard(userId)
-    );
+    return await circuitBreaker.execute(() => getDashboard(userId))
   } catch (error) {
     // 返回本地缓存的数据
-    const cached = await redis.get(`dashboard:${userId}:fallback`);
+    const cached = await redis.get(`dashboard:${userId}:fallback`)
     if (cached) {
       return {
         ...JSON.parse(cached),
-        warning: 'CRS服务暂时不可用，显示的是缓存数据'
-      };
+        warning: 'CRS服务暂时不可用，显示的是缓存数据',
+      }
     }
 
     // 返回基本信息
     const mappings = await prisma.apiKeyMapping.count({
-      where: { userId }
-    });
+      where: { userId },
+    })
     return {
       overview: {
         totalKeys: mappings,
         activeKeys: 0,
         totalCalls: { today: 0, yesterday: 0, change: 0 },
-        totalTokens: { today: 0, month: 0, change: 0 }
+        totalTokens: { today: 0, month: 0, change: 0 },
       },
-      warning: 'CRS服务暂时不可用'
-    };
+      warning: 'CRS服务暂时不可用',
+    }
   }
 }
 ```
 
 ### 3.2 接口错误映射
 
-| CRS错误 | Portal错误 | HTTP状态 | 用户提示 |
-|---------|-----------|---------|---------|
-| `401 Unauthorized` | `CRS_5001` | 502 | CRS认证失败，请联系管理员 |
-| `404 Not Found` | `RES_3001` | 404 | 密钥不存在 |
-| `429 Too Many Requests` | `CRS_5002` | 429 | CRS服务繁忙，请稍后重试 |
-| `500 Internal Error` | `CRS_5001` | 502 | CRS服务异常 |
-| `Timeout` | `CRS_5002` | 504 | CRS请求超时 |
+| CRS错误                 | Portal错误 | HTTP状态 | 用户提示                  |
+| ----------------------- | ---------- | -------- | ------------------------- |
+| `401 Unauthorized`      | `CRS_5001` | 502      | CRS认证失败，请联系管理员 |
+| `404 Not Found`         | `RES_3001` | 404      | 密钥不存在                |
+| `429 Too Many Requests` | `CRS_5002` | 429      | CRS服务繁忙，请稍后重试   |
+| `500 Internal Error`    | `CRS_5001` | 502      | CRS服务异常               |
+| `Timeout`               | `CRS_5002` | 504      | CRS请求超时               |
 
 ```typescript
 // 错误转换中间件
 function transformCRSError(error: CRSApiError): AppError {
   switch (error.statusCode) {
     case 401:
-      return new AppError(
-        'CRS_5001',
-        'CRS认证失败',
-        ErrorLevel.CRITICAL,
-        502
-      );
+      return new AppError('CRS_5001', 'CRS认证失败', ErrorLevel.CRITICAL, 502)
     case 404:
-      return new AppError(
-        'RES_3001',
-        '密钥不存在',
-        ErrorLevel.WARNING,
-        404
-      );
+      return new AppError('RES_3001', '密钥不存在', ErrorLevel.WARNING, 404)
     case 429:
       return new AppError(
         'CRS_5002',
         'CRS服务繁忙，请稍后重试',
         ErrorLevel.WARNING,
         429
-      );
+      )
     case 500:
     case 502:
     case 503:
-      return new AppError(
-        'CRS_5001',
-        'CRS服务异常',
-        ErrorLevel.ERROR,
-        502
-      );
+      return new AppError('CRS_5001', 'CRS服务异常', ErrorLevel.ERROR, 502)
     default:
-      return new AppError(
-        'CRS_5001',
-        'CRS API调用失败',
-        ErrorLevel.ERROR,
-        502
-      );
+      return new AppError('CRS_5001', 'CRS API调用失败', ErrorLevel.ERROR, 502)
   }
 }
 ```
@@ -787,7 +767,7 @@ const CACHE_KEYS = {
 
   // 降级缓存
   DASHBOARD_FALLBACK: (userId: string) => `dashboard:${userId}:fallback`,
-};
+}
 ```
 
 ### 4.2 缓存TTL配置
@@ -795,21 +775,21 @@ const CACHE_KEYS = {
 ```typescript
 const CACHE_TTL = {
   // 用户相关（长期）
-  USER_PROFILE: 600,          // 10分钟
-  USER_SESSION: 900,          // 15分钟
+  USER_PROFILE: 600, // 10分钟
+  USER_SESSION: 900, // 15分钟
 
   // 密钥相关（中期）
-  KEYS_LIST: 300,             // 5分钟
-  KEY_DETAIL: 600,            // 10分钟
+  KEYS_LIST: 300, // 5分钟
+  KEY_DETAIL: 600, // 10分钟
 
   // 统计相关（短期）
-  DASHBOARD: 30,              // 30秒
-  USAGE_STATS: 60,            // 1分钟
-  USAGE_TREND: 180,           // 3分钟
+  DASHBOARD: 30, // 30秒
+  USAGE_STATS: 60, // 1分钟
+  USAGE_TREND: 180, // 3分钟
 
   // 降级缓存（长期）
-  DASHBOARD_FALLBACK: 3600,   // 1小时
-};
+  DASHBOARD_FALLBACK: 3600, // 1小时
+}
 ```
 
 ### 4.3 缓存失效策略
@@ -817,7 +797,7 @@ const CACHE_TTL = {
 ```typescript
 // 写操作后清除相关缓存
 async function invalidateCache(userId: string, operation: string) {
-  const keysToDelete: string[] = [];
+  const keysToDelete: string[] = []
 
   switch (operation) {
     case 'create_key':
@@ -825,24 +805,20 @@ async function invalidateCache(userId: string, operation: string) {
       keysToDelete.push(
         CACHE_KEYS.KEYS_LIST(userId),
         CACHE_KEYS.DASHBOARD(userId)
-      );
-      break;
+      )
+      break
 
     case 'update_key':
-      keysToDelete.push(
-        CACHE_KEYS.KEYS_LIST(userId)
-      );
-      break;
+      keysToDelete.push(CACHE_KEYS.KEYS_LIST(userId))
+      break
 
     case 'update_profile':
-      keysToDelete.push(
-        CACHE_KEYS.USER_PROFILE(userId)
-      );
-      break;
+      keysToDelete.push(CACHE_KEYS.USER_PROFILE(userId))
+      break
   }
 
   if (keysToDelete.length > 0) {
-    await redis.del(...keysToDelete);
+    await redis.del(...keysToDelete)
   }
 }
 ```
@@ -858,39 +834,39 @@ async function batchGetKeyDetails(
   mappingIds: string[]
 ): Promise<KeyDetail[]> {
   // 1. 并行查询缓存
-  const cacheKeys = mappingIds.map(id => CACHE_KEYS.KEY_DETAIL(id));
-  const cached = await redis.mget(...cacheKeys);
+  const cacheKeys = mappingIds.map((id) => CACHE_KEYS.KEY_DETAIL(id))
+  const cached = await redis.mget(...cacheKeys)
 
   // 2. 找出缓存未命中的
-  const missedIds = mappingIds.filter((id, i) => !cached[i]);
+  const missedIds = mappingIds.filter((id, i) => !cached[i])
 
   if (missedIds.length > 0) {
     // 3. 批量获取映射
     const mappings = await prisma.apiKeyMapping.findMany({
-      where: { id: { in: missedIds }, userId }
-    });
+      where: { id: { in: missedIds }, userId },
+    })
 
     // 4. 一次性从CRS获取所有密钥
-    const crsKeys = await crsClient.getAllKeys();
-    const crsKeyMap = new Map(crsKeys.map(k => [k.id, k]));
+    const crsKeys = await crsClient.getAllKeys()
+    const crsKeyMap = new Map(crsKeys.map((k) => [k.id, k]))
 
     // 5. 合并数据并写入缓存
     for (const mapping of mappings) {
-      const crsKey = crsKeyMap.get(mapping.crsKeyId);
+      const crsKey = crsKeyMap.get(mapping.crsKeyId)
       if (crsKey) {
-        const detail = { ...crsKey, ...mapping };
+        const detail = { ...crsKey, ...mapping }
         await redis.setex(
           CACHE_KEYS.KEY_DETAIL(mapping.id),
           CACHE_TTL.KEY_DETAIL,
           JSON.stringify(detail)
-        );
+        )
       }
     }
   }
 
   // 6. 再次获取缓存（此时应全部命中）
-  const allCached = await redis.mget(...cacheKeys);
-  return allCached.map(c => JSON.parse(c!));
+  const allCached = await redis.mget(...cacheKeys)
+  return allCached.map((c) => JSON.parse(c!))
 }
 ```
 
@@ -899,35 +875,31 @@ async function batchGetKeyDetails(
 ```typescript
 // 限制并发CRS请求数
 class CRSRequestQueue {
-  private queue: Array<() => Promise<any>> = [];
-  private running = 0;
-  private maxConcurrent = 5;
+  private queue: Array<() => Promise<any>> = []
+  private running = 0
+  private maxConcurrent = 5
 
   async add<T>(fn: () => Promise<T>): Promise<T> {
     if (this.running >= this.maxConcurrent) {
-      await new Promise(resolve =>
-        this.queue.push(resolve as any)
-      );
+      await new Promise((resolve) => this.queue.push(resolve as any))
     }
 
-    this.running++;
+    this.running++
     try {
-      return await fn();
+      return await fn()
     } finally {
-      this.running--;
-      const next = this.queue.shift();
-      if (next) next();
+      this.running--
+      const next = this.queue.shift()
+      if (next) next()
     }
   }
 }
 
-const crsQueue = new CRSRequestQueue();
+const crsQueue = new CRSRequestQueue()
 
 // 使用队列
 async function getUserKeys(userId: string) {
-  return crsQueue.add(() =>
-    keysService.getUserKeys(userId)
-  );
+  return crsQueue.add(() => keysService.getUserKeys(userId))
 }
 ```
 

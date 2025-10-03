@@ -13,23 +13,23 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
-      - ./backups:/backups  # 备份目录
+      - ./backups:/backups # 备份目录
     networks:
       - claude-portal-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
       interval: 30s
       timeout: 10s
       retries: 5
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   # Redis 缓存（生产环境）
   redis:
@@ -37,22 +37,22 @@ services:
     container_name: claude-portal-redis-prod
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_prod_data:/data
     networks:
       - claude-portal-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 30s
       timeout: 10s
       retries: 5
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   # Next.js 应用（生产环境）
   app:
@@ -63,7 +63,7 @@ services:
         - NODE_ENV=production
     container_name: claude-portal-app-prod
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       # 数据库配置（优先使用远程 Supabase）
       DATABASE_URL: ${DATABASE_URL}
@@ -101,24 +101,28 @@ services:
       - claude-portal-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1',
+        ]
       interval: 30s
       timeout: 10s
       start_period: 40s
       retries: 3
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "50m"
-        max-file: "5"
+        max-size: '50m'
+        max-file: '5'
 
   # Nginx 反向代理（可选）
   nginx:
     image: nginx:alpine
     container_name: claude-portal-nginx-prod
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
@@ -129,10 +133,10 @@ services:
       - claude-portal-network
     restart: unless-stopped
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
 networks:
   claude-portal-network:

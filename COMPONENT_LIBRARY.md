@@ -62,18 +62,18 @@ npx shadcn-ui@latest add pagination
 
 ```tsx
 // components/ui/stat-card.tsx
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import { LucideIcon } from 'lucide-react'
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
-  change?: number;
-  trend?: 'up' | 'down' | 'neutral';
-  icon?: LucideIcon;
-  description?: string;
-  className?: string;
+  title: string
+  value: string | number
+  change?: number
+  trend?: 'up' | 'down' | 'neutral'
+  icon?: LucideIcon
+  description?: string
+  className?: string
 }
 
 export function StatCard({
@@ -83,19 +83,19 @@ export function StatCard({
   trend = 'neutral',
   icon: Icon,
   description,
-  className
+  className,
 }: StatCardProps) {
   const getTrendColor = () => {
-    if (trend === 'up') return 'text-green-600';
-    if (trend === 'down') return 'text-red-600';
-    return 'text-gray-600';
-  };
+    if (trend === 'up') return 'text-green-600'
+    if (trend === 'down') return 'text-red-600'
+    return 'text-gray-600'
+  }
 
   const getTrendIcon = () => {
-    if (trend === 'up') return '↑';
-    if (trend === 'down') return '↓';
-    return '→';
-  };
+    if (trend === 'up') return '↑'
+    if (trend === 'down') return '↓'
+    return '→'
+  }
 
   return (
     <Card className={cn('transition-shadow hover:shadow-md', className)}>
@@ -103,16 +103,14 @@ export function StatCard({
         <CardTitle className="text-sm font-medium text-gray-600">
           {title}
         </CardTitle>
-        {Icon && (
-          <Icon className="h-4 w-4 text-gray-400" />
-        )}
+        {Icon && <Icon className="h-4 w-4 text-gray-400" />}
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-gray-900">
-          {value}
-        </div>
+        <div className="text-3xl font-bold text-gray-900">{value}</div>
         {change !== undefined && (
-          <div className={cn('mt-1 flex items-center text-sm', getTrendColor())}>
+          <div
+            className={cn('mt-1 flex items-center text-sm', getTrendColor())}
+          >
             <span className="mr-1">{getTrendIcon()}</span>
             <span>{Math.abs(change)}%</span>
             <span className="ml-1 text-gray-500">vs 上周期</span>
@@ -123,15 +121,16 @@ export function StatCard({
         )}
       </CardContent>
     </Card>
-  );
+  )
 }
 ```
 
 **使用示例**:
-```tsx
-import { KeyIcon } from 'lucide-react';
 
-<StatCard
+```tsx
+import { KeyIcon } from 'lucide-react'
+
+;<StatCard
   title="总密钥数"
   value={8}
   change={25}
@@ -147,59 +146,56 @@ import { KeyIcon } from 'lucide-react';
 
 ```tsx
 // components/ui/key-status-badge.tsx
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
-type KeyStatus = 'active' | 'inactive' | 'expired' | 'expiring_soon';
+type KeyStatus = 'active' | 'inactive' | 'expired' | 'expiring_soon'
 
 interface KeyStatusBadgeProps {
-  status: KeyStatus;
-  className?: string;
+  status: KeyStatus
+  className?: string
 }
 
 const statusConfig = {
   active: {
     label: '活跃',
     variant: 'success' as const,
-    className: 'bg-green-100 text-green-800 border-green-200'
+    className: 'bg-green-100 text-green-800 border-green-200',
   },
   inactive: {
     label: '禁用',
     variant: 'secondary' as const,
-    className: 'bg-gray-100 text-gray-800 border-gray-200'
+    className: 'bg-gray-100 text-gray-800 border-gray-200',
   },
   expired: {
     label: '已过期',
     variant: 'destructive' as const,
-    className: 'bg-red-100 text-red-800 border-red-200'
+    className: 'bg-red-100 text-red-800 border-red-200',
   },
   expiring_soon: {
     label: '即将过期',
     variant: 'warning' as const,
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200'
-  }
-};
+    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  },
+}
 
 export function KeyStatusBadge({ status, className }: KeyStatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status]
 
   return (
     <Badge
       variant={config.variant}
-      className={cn(
-        'border font-medium',
-        config.className,
-        className
-      )}
+      className={cn('border font-medium', config.className, className)}
     >
       <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />
       {config.label}
     </Badge>
-  );
+  )
 }
 ```
 
 **使用示例**:
+
 ```tsx
 <KeyStatusBadge status="active" />
 <KeyStatusBadge status="expired" />
@@ -211,62 +207,56 @@ export function KeyStatusBadge({ status, className }: KeyStatusBadgeProps) {
 
 ```tsx
 // components/ui/empty-state.tsx
-import { Button } from '@/components/ui/button';
-import { LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button'
+import { LucideIcon } from 'lucide-react'
 
 interface EmptyStateProps {
-  icon: LucideIcon;
-  title: string;
-  description?: string;
+  icon: LucideIcon
+  title: string
+  description?: string
   action?: {
-    label: string;
-    onClick: () => void;
-  };
+    label: string
+    onClick: () => void
+  }
 }
 
 export function EmptyState({
   icon: Icon,
   title,
   description,
-  action
+  action,
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="rounded-full bg-gray-100 p-4">
         <Icon className="h-12 w-12 text-gray-400" />
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-gray-900">
-        {title}
-      </h3>
+      <h3 className="mt-4 text-lg font-semibold text-gray-900">{title}</h3>
       {description && (
-        <p className="mt-2 max-w-sm text-sm text-gray-500">
-          {description}
-        </p>
+        <p className="mt-2 max-w-sm text-sm text-gray-500">{description}</p>
       )}
       {action && (
-        <Button
-          onClick={action.onClick}
-          className="mt-6"
-        >
+        <Button onClick={action.onClick} className="mt-6">
           {action.label}
         </Button>
       )}
     </div>
-  );
+  )
 }
 ```
 
 **使用示例**:
-```tsx
-import { KeyIcon } from 'lucide-react';
 
-<EmptyState
+```tsx
+import { KeyIcon } from 'lucide-react'
+
+;<EmptyState
   icon={KeyIcon}
   title="暂无API密钥"
   description="创建您的第一个API密钥以开始使用服务"
   action={{
     label: '创建密钥',
-    onClick: () => router.push('/keys/new')
+    onClick: () => router.push('/keys/new'),
   }}
 />
 ```
@@ -277,47 +267,42 @@ import { KeyIcon } from 'lucide-react';
 
 ```tsx
 // components/ui/copy-button.tsx
-'use client';
+'use client'
 
-import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
-import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/use-toast'
+import { Check, Copy } from 'lucide-react'
+import { useState } from 'react'
 
 interface CopyButtonProps {
-  value: string;
-  label?: string;
+  value: string
+  label?: string
 }
 
 export function CopyButton({ value, label = '复制' }: CopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
       toast({
         title: '已复制',
-        description: '内容已复制到剪贴板'
-      });
+        description: '内容已复制到剪贴板',
+      })
 
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       toast({
         title: '复制失败',
         description: '请手动复制内容',
-        variant: 'destructive'
-      });
+        variant: 'destructive',
+      })
     }
-  };
+  }
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleCopy}
-      className="gap-2"
-    >
+    <Button variant="outline" size="sm" onClick={handleCopy} className="gap-2">
       {copied ? (
         <>
           <Check className="h-4 w-4" />
@@ -330,11 +315,12 @@ export function CopyButton({ value, label = '复制' }: CopyButtonProps) {
         </>
       )}
     </Button>
-  );
+  )
 }
 ```
 
 **使用示例**:
+
 ```tsx
 <div className="flex items-center gap-2">
   <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm">
@@ -350,19 +336,19 @@ export function CopyButton({ value, label = '复制' }: CopyButtonProps) {
 
 ```tsx
 // components/ui/code-block.tsx
-'use client';
+'use client'
 
-import { CopyButton } from '@/components/ui/copy-button';
-import { cn } from '@/lib/utils';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CopyButton } from '@/components/ui/copy-button'
+import { cn } from '@/lib/utils'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 interface CodeBlockProps {
-  code: string;
-  language?: string;
-  showLineNumbers?: boolean;
-  filename?: string;
-  className?: string;
+  code: string
+  language?: string
+  showLineNumbers?: boolean
+  filename?: string
+  className?: string
 }
 
 export function CodeBlock({
@@ -370,15 +356,13 @@ export function CodeBlock({
   language = 'bash',
   showLineNumbers = false,
   filename,
-  className
+  className,
 }: CodeBlockProps) {
   return (
     <div className={cn('overflow-hidden rounded-lg border', className)}>
       {filename && (
         <div className="flex items-center justify-between border-b bg-gray-50 px-4 py-2">
-          <span className="text-sm font-medium text-gray-700">
-            {filename}
-          </span>
+          <span className="text-sm font-medium text-gray-700">{filename}</span>
           <CopyButton value={code} label="复制代码" />
         </div>
       )}
@@ -395,18 +379,19 @@ export function CodeBlock({
           customStyle={{
             margin: 0,
             borderRadius: 0,
-            padding: '1rem'
+            padding: '1rem',
           }}
         >
           {code}
         </SyntaxHighlighter>
       </div>
     </div>
-  );
+  )
 }
 ```
 
 **使用示例**:
+
 ```tsx
 const installScript = `#!/bin/bash
 API_KEY="cr_abc123..."
@@ -418,9 +403,9 @@ cat > ~/.config/claude-code/config.json <<EOF
   "apiKey": "$API_KEY",
   "baseURL": "$BASE_URL"
 }
-EOF`;
+EOF`
 
-<CodeBlock
+;<CodeBlock
   code={installScript}
   language="bash"
   filename="install.sh"
@@ -434,7 +419,7 @@ EOF`;
 
 ```tsx
 // components/ui/data-table.tsx
-'use client';
+'use client'
 
 import {
   Table,
@@ -442,28 +427,28 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from '@/components/ui/table';
+  TableRow,
+} from '@/components/ui/table'
 import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
   SortingState,
-  useReactTable
-} from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
-import { useState } from 'react';
+  useReactTable,
+} from '@tanstack/react-table'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+import { useState } from 'react'
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data
+  data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([])
 
   const table = useReactTable({
     data,
@@ -472,9 +457,9 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     state: {
-      sorting
-    }
-  });
+      sorting,
+    },
+  })
 
   return (
     <div className="rounded-md border">
@@ -488,7 +473,7 @@ export function DataTable<TData, TValue>({
                     <div
                       className={cn(
                         header.column.getCanSort() &&
-                        'flex cursor-pointer select-none items-center gap-2 hover:text-gray-900'
+                          'flex cursor-pointer select-none items-center gap-2 hover:text-gray-900'
                       )}
                       onClick={header.column.getToggleSortingHandler()}
                     >
@@ -523,20 +508,14 @@ export function DataTable<TData, TValue>({
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 暂无数据
               </TableCell>
             </TableRow>
@@ -544,31 +523,34 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
-  );
+  )
 }
 ```
 
 **使用示例**:
+
 ```tsx
 const columns: ColumnDef<Key>[] = [
   {
     accessorKey: 'name',
     header: '名称',
-    cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue('name')}</div>
+    ),
   },
   {
     accessorKey: 'status',
     header: '状态',
-    cell: ({ row }) => <KeyStatusBadge status={row.getValue('status')} />
+    cell: ({ row }) => <KeyStatusBadge status={row.getValue('status')} />,
   },
   {
     accessorKey: 'usage',
     header: '今日调用',
-    cell: ({ row }) => <div>{row.getValue('usage')}</div>
-  }
-];
+    cell: ({ row }) => <div>{row.getValue('usage')}</div>,
+  },
+]
 
-<DataTable columns={columns} data={keys} />
+;<DataTable columns={columns} data={keys} />
 ```
 
 ---
@@ -577,42 +559,42 @@ const columns: ColumnDef<Key>[] = [
 
 ```tsx
 // components/ui/search-input.tsx
-'use client';
+'use client'
 
-import { Input } from '@/components/ui/input';
-import { Search, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { useDebouncedCallback } from 'use-debounce';
+import { Input } from '@/components/ui/input'
+import { Search, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useDebouncedCallback } from 'use-debounce'
 
 interface SearchInputProps {
-  placeholder?: string;
-  onSearch: (value: string) => void;
-  debounceMs?: number;
-  className?: string;
+  placeholder?: string
+  onSearch: (value: string) => void
+  debounceMs?: number
+  className?: string
 }
 
 export function SearchInput({
   placeholder = '搜索...',
   onSearch,
   debounceMs = 500,
-  className
+  className,
 }: SearchInputProps) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState('')
 
   const debouncedSearch = useDebouncedCallback((searchValue: string) => {
-    onSearch(searchValue);
-  }, debounceMs);
+    onSearch(searchValue)
+  }, debounceMs)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setValue(newValue);
-    debouncedSearch(newValue);
-  };
+    const newValue = e.target.value
+    setValue(newValue)
+    debouncedSearch(newValue)
+  }
 
   const handleClear = () => {
-    setValue('');
-    onSearch('');
-  };
+    setValue('')
+    onSearch('')
+  }
 
   return (
     <div className="relative">
@@ -633,7 +615,7 @@ export function SearchInput({
         </button>
       )}
     </div>
-  );
+  )
 }
 ```
 
@@ -643,11 +625,11 @@ export function SearchInput({
 
 ```tsx
 // components/ui/loading-button.tsx
-import { Button, ButtonProps } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Button, ButtonProps } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 interface LoadingButtonProps extends ButtonProps {
-  loading?: boolean;
+  loading?: boolean
 }
 
 export function LoadingButton({
@@ -661,7 +643,7 @@ export function LoadingButton({
       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children}
     </Button>
-  );
+  )
 }
 ```
 
@@ -679,7 +661,7 @@ npm install recharts
 
 ```tsx
 // components/charts/line-chart.tsx
-'use client';
+'use client'
 
 import {
   CartesianGrid,
@@ -688,18 +670,18 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
-} from 'recharts';
+  YAxis,
+} from 'recharts'
 
 interface LineChartProps {
-  data: Array<Record<string, any>>;
-  xKey: string;
+  data: Array<Record<string, any>>
+  xKey: string
   lines: Array<{
-    key: string;
-    color: string;
-    name: string;
-  }>;
-  height?: number;
+    key: string
+    color: string
+    name: string
+  }>
+  height?: number
 }
 
 export function LineChart({ data, xKey, lines, height = 300 }: LineChartProps) {
@@ -707,12 +689,7 @@ export function LineChart({ data, xKey, lines, height = 300 }: LineChartProps) {
     <ResponsiveContainer width="100%" height={height}>
       <RechartsLineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-        <XAxis
-          dataKey={xKey}
-          stroke="#6b7280"
-          fontSize={12}
-          tickLine={false}
-        />
+        <XAxis dataKey={xKey} stroke="#6b7280" fontSize={12} tickLine={false} />
         <YAxis
           stroke="#6b7280"
           fontSize={12}
@@ -724,7 +701,7 @@ export function LineChart({ data, xKey, lines, height = 300 }: LineChartProps) {
             backgroundColor: '#fff',
             border: '1px solid #e5e7eb',
             borderRadius: '0.5rem',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
           }}
         />
         {lines.map((line) => (
@@ -740,24 +717,25 @@ export function LineChart({ data, xKey, lines, height = 300 }: LineChartProps) {
         ))}
       </RechartsLineChart>
     </ResponsiveContainer>
-  );
+  )
 }
 ```
 
 **使用示例**:
+
 ```tsx
 const chartData = [
   { date: '01-01', calls: 1200, errors: 20 },
   { date: '01-02', calls: 1400, errors: 15 },
-  { date: '01-03', calls: 1600, errors: 10 }
-];
+  { date: '01-03', calls: 1600, errors: 10 },
+]
 
-<LineChart
+;<LineChart
   data={chartData}
   xKey="date"
   lines={[
     { key: 'calls', color: '#3b82f6', name: '调用数' },
-    { key: 'errors', color: '#ef4444', name: '错误数' }
+    { key: 'errors', color: '#ef4444', name: '错误数' },
   ]}
   height={350}
 />
@@ -769,7 +747,7 @@ const chartData = [
 
 ```tsx
 // components/charts/pie-chart.tsx
-'use client';
+'use client'
 
 import {
   Cell,
@@ -777,16 +755,16 @@ import {
   Pie,
   PieChart as RechartsPieChart,
   ResponsiveContainer,
-  Tooltip
-} from 'recharts';
+  Tooltip,
+} from 'recharts'
 
 interface PieChartProps {
   data: Array<{
-    name: string;
-    value: number;
-  }>;
-  colors?: string[];
-  height?: number;
+    name: string
+    value: number
+  }>
+  colors?: string[]
+  height?: number
 }
 
 const DEFAULT_COLORS = [
@@ -795,13 +773,13 @@ const DEFAULT_COLORS = [
   '#f59e0b',
   '#ef4444',
   '#8b5cf6',
-  '#ec4899'
-];
+  '#ec4899',
+]
 
 export function PieChart({
   data,
   colors = DEFAULT_COLORS,
-  height = 300
+  height = 300,
 }: PieChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -819,17 +797,14 @@ export function PieChart({
           dataKey="value"
         >
           {data.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={colors[index % colors.length]}
-            />
+            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
           ))}
         </Pie>
         <Tooltip />
         <Legend />
       </RechartsPieChart>
     </ResponsiveContainer>
-  );
+  )
 }
 ```
 
@@ -841,35 +816,30 @@ export function PieChart({
 
 ```tsx
 // components/layout/dashboard-layout.tsx
-'use client';
+'use client'
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-import { useState } from 'react';
+import { Sidebar } from '@/components/layout/sidebar'
+import { Header } from '@/components/layout/header'
+import { useState } from 'react'
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onMenuClick={() => setSidebarOpen(true)} />
       <div className="flex">
-        <Sidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main className="flex-1 p-6 lg:ml-64">
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
     </div>
-  );
+  )
 }
 ```
 
@@ -879,35 +849,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
 ```tsx
 // components/layout/sidebar.tsx
-'use client';
+'use client'
 
-import { cn } from '@/lib/utils';
-import {
-  Home,
-  Key,
-  BarChart3,
-  Download,
-  Settings,
-  X
-} from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils'
+import { Home, Key, BarChart3, Download, Settings, X } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navigation = [
   { name: '仪表板', href: '/', icon: Home },
   { name: '密钥管理', href: '/keys', icon: Key },
   { name: '使用统计', href: '/usage', icon: BarChart3 },
   { name: '安装指导', href: '/install', icon: Download },
-  { name: '设置', href: '/settings', icon: Settings }
-];
+  { name: '设置', href: '/settings', icon: Settings },
+]
 
 interface SidebarProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <>
@@ -928,13 +891,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex h-16 items-center justify-between px-6 border-b">
-          <span className="text-xl font-bold text-gray-900">
-            Claude Portal
-          </span>
-          <button
-            onClick={onClose}
-            className="lg:hidden"
-          >
+          <span className="text-xl font-bold text-gray-900">Claude Portal</span>
+          <button onClick={onClose} className="lg:hidden">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -942,8 +900,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         {/* 导航 */}
         <nav className="p-4 space-y-1">
           {navigation.map((item) => {
-            const isActive = pathname === item.href ||
-              pathname.startsWith(item.href + '/');
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + '/')
 
             return (
               <Link
@@ -959,12 +917,12 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 <item.icon className="h-5 w-5" />
                 {item.name}
               </Link>
-            );
+            )
           })}
         </nav>
       </aside>
     </>
-  );
+  )
 }
 ```
 
@@ -974,33 +932,26 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
 ```tsx
 // components/layout/header.tsx
-'use client';
+'use client'
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Bell,
-  Menu,
-  Moon,
-  Sun,
-  User,
-  LogOut
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Bell, Menu, Moon, Sun, User, LogOut } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 interface HeaderProps {
-  onMenuClick: () => void;
+  onMenuClick: () => void
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme()
 
   return (
     <header className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -1069,7 +1020,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
     </header>
-  );
+  )
 }
 ```
 
@@ -1081,22 +1032,22 @@ export function Header({ onMenuClick }: HeaderProps) {
 
 ```tsx
 // hooks/use-debounce.ts
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 export function useDebounce<T>(value: T, delay: number = 500): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+      setDebouncedValue(value)
+    }, delay)
 
     return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
+      clearTimeout(handler)
+    }
+  }, [value, delay])
 
-  return debouncedValue;
+  return debouncedValue
 }
 ```
 
@@ -1106,28 +1057,28 @@ export function useDebounce<T>(value: T, delay: number = 500): T {
 
 ```tsx
 // hooks/use-media-query.ts
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(false)
 
   useEffect(() => {
-    const media = window.matchMedia(query);
+    const media = window.matchMedia(query)
     if (media.matches !== matches) {
-      setMatches(media.matches);
+      setMatches(media.matches)
     }
 
-    const listener = () => setMatches(media.matches);
-    media.addEventListener('change', listener);
+    const listener = () => setMatches(media.matches)
+    media.addEventListener('change', listener)
 
-    return () => media.removeEventListener('change', listener);
-  }, [matches, query]);
+    return () => media.removeEventListener('change', listener)
+  }, [matches, query])
 
-  return matches;
+  return matches
 }
 
 // 使用
-const isMobile = useMediaQuery('(max-width: 768px)');
+const isMobile = useMediaQuery('(max-width: 768px)')
 ```
 
 ---
@@ -1136,7 +1087,7 @@ const isMobile = useMediaQuery('(max-width: 768px)');
 
 ```tsx
 // hooks/use-local-storage.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 
 export function useLocalStorage<T>(
   key: string,
@@ -1144,30 +1095,30 @@ export function useLocalStorage<T>(
 ): [T, (value: T) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
-      return initialValue;
+      return initialValue
     }
 
     try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
     } catch (error) {
-      console.error(error);
-      return initialValue;
+      console.error(error)
+      return initialValue
     }
-  });
+  })
 
   const setValue = (value: T) => {
     try {
-      setStoredValue(value);
+      setStoredValue(value)
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(value));
+        window.localStorage.setItem(key, JSON.stringify(value))
       }
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  };
+  }
 
-  return [storedValue, setValue];
+  return [storedValue, setValue]
 }
 ```
 
@@ -1179,40 +1130,38 @@ export function useLocalStorage<T>(
 
 ```tsx
 // app/(dashboard)/keys/page.tsx
-'use client';
+'use client'
 
-import { Button } from '@/components/ui/button';
-import { DataTable } from '@/components/ui/data-table';
-import { EmptyState } from '@/components/ui/empty-state';
-import { KeyStatusBadge } from '@/components/ui/key-status-badge';
-import { SearchInput } from '@/components/ui/search-input';
-import { Plus, Key } from 'lucide-react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button'
+import { DataTable } from '@/components/ui/data-table'
+import { EmptyState } from '@/components/ui/empty-state'
+import { KeyStatusBadge } from '@/components/ui/key-status-badge'
+import { SearchInput } from '@/components/ui/search-input'
+import { Plus, Key } from 'lucide-react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function KeysPage() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
 
   const columns = [
     {
       accessorKey: 'name',
-      header: '名称'
+      header: '名称',
     },
     {
       accessorKey: 'status',
       header: '状态',
-      cell: ({ row }) => (
-        <KeyStatusBadge status={row.getValue('status')} />
-      )
+      cell: ({ row }) => <KeyStatusBadge status={row.getValue('status')} />,
     },
     {
       accessorKey: 'todayCalls',
-      header: '今日调用'
-    }
-  ];
+      header: '今日调用',
+    },
+  ]
 
-  const keys = []; // 从API获取
+  const keys = [] // 从API获取
 
   if (keys.length === 0) {
     return (
@@ -1222,10 +1171,10 @@ export default function KeysPage() {
         description="创建您的第一个API密钥以开始使用服务"
         action={{
           label: '创建密钥',
-          onClick: () => router.push('/keys/new')
+          onClick: () => router.push('/keys/new'),
         }}
       />
-    );
+    )
   }
 
   return (
@@ -1239,15 +1188,12 @@ export default function KeysPage() {
       </div>
 
       <div className="flex gap-4">
-        <SearchInput
-          placeholder="搜索密钥..."
-          onSearch={setSearchQuery}
-        />
+        <SearchInput placeholder="搜索密钥..." onSearch={setSearchQuery} />
       </div>
 
       <DataTable columns={columns} data={keys} />
     </div>
-  );
+  )
 }
 ```
 
@@ -1257,34 +1203,34 @@ export default function KeysPage() {
 
 ```tsx
 // app/(dashboard)/page.tsx
-'use client';
+'use client'
 
-import { StatCard } from '@/components/ui/stat-card';
-import { LineChart } from '@/components/charts/line-chart';
-import { PieChart } from '@/components/charts/pie-chart';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { StatCard } from '@/components/ui/stat-card'
+import { LineChart } from '@/components/charts/line-chart'
+import { PieChart } from '@/components/charts/pie-chart'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   KeyIcon,
   ActivityIcon,
   CoinsIcon,
   AlertCircleIcon,
   Plus,
-  RefreshCw
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+  RefreshCw,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const router = useRouter()
 
   // 模拟数据
   const stats = {
     totalKeys: 8,
     todayCalls: 1542,
     todayTokens: 154200,
-    errorRate: 0.5
-  };
+    errorRate: 0.5,
+  }
 
   const trendData = [
     { date: '12-25', calls: 1200, tokens: 120000 },
@@ -1293,20 +1239,20 @@ export default function DashboardPage() {
     { date: '12-28', calls: 1300, tokens: 130000 },
     { date: '12-29', calls: 1500, tokens: 150000 },
     { date: '12-30', calls: 1600, tokens: 160000 },
-    { date: '12-31', calls: 1542, tokens: 154200 }
-  ];
+    { date: '12-31', calls: 1542, tokens: 154200 },
+  ]
 
   const modelDistribution = [
     { name: 'Claude 3.5 Sonnet', value: 65 },
     { name: 'Claude 3 Opus', value: 25 },
-    { name: 'Claude 3 Haiku', value: 10 }
-  ];
+    { name: 'Claude 3 Haiku', value: 10 },
+  ]
 
   const topKeys = [
     { id: '1', name: '开发环境', calls: 542, status: 'active' },
     { id: '2', name: '测试环境', calls: 387, status: 'active' },
-    { id: '3', name: '生产环境', calls: 613, status: 'active' }
-  ];
+    { id: '3', name: '生产环境', calls: 613, status: 'active' },
+  ]
 
   return (
     <div className="space-y-6">
@@ -1375,7 +1321,7 @@ export default function DashboardPage() {
               xKey="date"
               lines={[
                 { key: 'calls', color: '#3b82f6', name: '调用数' },
-                { key: 'tokens', color: '#10b981', name: 'Token数' }
+                { key: 'tokens', color: '#10b981', name: 'Token数' },
               ]}
               height={300}
             />
@@ -1427,7 +1373,7 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 ```
 
@@ -1437,16 +1383,16 @@ export default function DashboardPage() {
 
 ```tsx
 // app/(dashboard)/keys/[id]/page.tsx
-'use client';
+'use client'
 
-import { KeyStatusBadge } from '@/components/ui/key-status-badge';
-import { CopyButton } from '@/components/ui/copy-button';
-import { LoadingButton } from '@/components/ui/loading-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart } from '@/components/charts/line-chart';
-import { PieChart } from '@/components/charts/pie-chart';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+import { KeyStatusBadge } from '@/components/ui/key-status-badge'
+import { CopyButton } from '@/components/ui/copy-button'
+import { LoadingButton } from '@/components/ui/loading-button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LineChart } from '@/components/charts/line-chart'
+import { PieChart } from '@/components/charts/pie-chart'
+import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1456,13 +1402,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog';
-import { Trash2, Edit, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Trash2, Edit, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
 
 export default function KeyDetailPage({ params }: { params: { id: string } }) {
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // 模拟数据
   const keyData = {
@@ -1484,20 +1430,20 @@ export default function KeyDetailPage({ params }: { params: { id: string } }) {
       { date: '12-28', calls: 480, errors: 2 },
       { date: '12-29', calls: 520, errors: 1 },
       { date: '12-30', calls: 550, errors: 2 },
-      { date: '12-31', calls: 542, errors: 1 }
+      { date: '12-31', calls: 542, errors: 1 },
     ],
     modelUsage: [
       { name: 'claude-3-5-sonnet', value: 70 },
-      { name: 'claude-3-opus', value: 30 }
-    ]
-  };
+      { name: 'claude-3-opus', value: 30 },
+    ],
+  }
 
   const handleDelete = async () => {
-    setIsDeleting(true);
+    setIsDeleting(true)
     // 调用删除API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsDeleting(false);
-  };
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsDeleting(false)
+  }
 
   return (
     <div className="space-y-6">
@@ -1508,9 +1454,7 @@ export default function KeyDetailPage({ params }: { params: { id: string } }) {
             <h1 className="text-2xl font-semibold">{keyData.name}</h1>
             <KeyStatusBadge status={keyData.status as any} />
           </div>
-          <p className="text-sm text-gray-500">
-            创建于 {keyData.createdAt}
-          </p>
+          <p className="text-sm text-gray-500">创建于 {keyData.createdAt}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="icon">
@@ -1634,7 +1578,7 @@ export default function KeyDetailPage({ params }: { params: { id: string } }) {
               xKey="date"
               lines={[
                 { key: 'calls', color: '#3b82f6', name: '调用数' },
-                { key: 'errors', color: '#ef4444', name: '错误数' }
+                { key: 'errors', color: '#ef4444', name: '错误数' },
               ]}
             />
           </CardContent>
@@ -1653,7 +1597,7 @@ export default function KeyDetailPage({ params }: { params: { id: string } }) {
         </Card>
       </div>
     </div>
-  );
+  )
 }
 ```
 
@@ -1667,7 +1611,7 @@ export default function KeyDetailPage({ params }: { params: { id: string } }) {
 // tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"],
+  darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -1677,21 +1621,21 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: '2rem',
       screens: {
-        "2xl": "1400px",
+        '2xl': '1400px',
       },
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
           50: '#eff6ff',
           100: '#dbeafe',
           200: '#bfdbfe',
@@ -1702,7 +1646,7 @@ module.exports = {
           700: '#1d4ed8',
           800: '#1e40af',
           900: '#1e3a8a',
-          950: '#172554'
+          950: '#172554',
         },
         success: {
           DEFAULT: '#22c55e',
@@ -1711,7 +1655,7 @@ module.exports = {
           100: '#dcfce7',
           500: '#22c55e',
           600: '#16a34a',
-          700: '#15803d'
+          700: '#15803d',
         },
         warning: {
           DEFAULT: '#f59e0b',
@@ -1720,7 +1664,7 @@ module.exports = {
           100: '#fef3c7',
           500: '#f59e0b',
           600: '#d97706',
-          700: '#b45309'
+          700: '#b45309',
         },
         error: {
           DEFAULT: '#ef4444',
@@ -1729,31 +1673,31 @@ module.exports = {
           100: '#fee2e2',
           500: '#ef4444',
           600: '#dc2626',
-          700: '#b91c1c'
-        }
+          700: '#b91c1c',
+        },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       keyframes: {
-        "accordion-down": {
+        'accordion-down': {
           from: { height: 0 },
-          to: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: 0 },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require('tailwindcss-animate')],
 }
 ```
 
@@ -1936,6 +1880,7 @@ yarn install
 
 ✅ 组件设计已完成
 ⏭️ **接下来可以开始实际开发**:
+
 1. 初始化 Next.js 项目
 2. 安装所有依赖和 Shadcn/ui 组件
 3. 配置 Tailwind CSS 和全局样式

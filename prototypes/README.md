@@ -56,6 +56,7 @@ python3 -m http.server 8000
 ## 📄 页面列表
 
 ### 1. 首页 (index.html)
+
 - **功能**: 产品介绍、功能展示、CTA
 - **状态**: ✅ 完成
 - **特点**:
@@ -65,6 +66,7 @@ python3 -m http.server 8000
   - 原型导航（开发用）
 
 ### 2. 登录页面 (login.html)
+
 - **功能**: 用户登录
 - **状态**: ✅ 完成
 - **特点**:
@@ -74,6 +76,7 @@ python3 -m http.server 8000
   - 渐变背景
 
 ### 3. 注册页面 (register.html)
+
 - **功能**: 用户注册
 - **状态**: ✅ 完成
 - **特点**:
@@ -83,6 +86,7 @@ python3 -m http.server 8000
   - 密码强度提示
 
 ### 4. 仪表板 (dashboard.html)
+
 - **功能**: 数据概览
 - **状态**: ✅ 完成
 - **特点**:
@@ -92,6 +96,7 @@ python3 -m http.server 8000
   - 响应式侧边栏
 
 ### 5. 密钥管理 (keys.html)
+
 - **功能**: 密钥 CRUD
 - **状态**: ✅ 完成
 - **特点**:
@@ -102,6 +107,7 @@ python3 -m http.server 8000
   - 状态标签
 
 ### 6. 安装指导 (install.html)
+
 - **功能**: 配置步骤
 - **状态**: ✅ 完成
 - **特点**:
@@ -115,6 +121,7 @@ python3 -m http.server 8000
 ## 🎨 设计规范
 
 ### 颜色系统
+
 ```css
 Primary Blue:    #3B82F6 (Blue-500)
 Success Green:   #10B981 (Green-500)
@@ -124,15 +131,18 @@ Gray Scale:      #F9FAFB - #111827
 ```
 
 ### 字体
+
 - **字体族**: Inter, -apple-system, BlinkMacSystemFont, sans-serif
 - **基础大小**: 16px (1rem)
 - **标题**: 2xl - 5xl
 
 ### 间距
+
 - 使用 Tailwind spacing scale (4px 基数)
 - 常用: p-4, p-6, gap-4, gap-6
 
 ### 组件
+
 - **按钮**: 圆角 8px, 过渡效果
 - **卡片**: 白色背景, 阴影, hover 效果
 - **表单**: 边框高亮, focus ring
@@ -147,6 +157,7 @@ Gray Scale:      #F9FAFB - #111827
 - **Vanilla JavaScript** - 交互逻辑
 
 ### CDN 资源
+
 ```html
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -160,6 +171,7 @@ Gray Scale:      #F9FAFB - #111827
 ## ✨ 交互功能
 
 ### 已实现
+
 - ✅ 表单验证（登录、注册）
 - ✅ 密钥复制到剪贴板
 - ✅ 模态框显示/隐藏
@@ -169,6 +181,7 @@ Gray Scale:      #F9FAFB - #111827
 - ✅ 响应式侧边栏
 
 ### 模拟数据
+
 - 登录/注册表单验证通过后跳转
 - 密钥列表使用静态数据
 - 图表数据为示例数据
@@ -179,11 +192,13 @@ Gray Scale:      #F9FAFB - #111827
 ## 📱 响应式设计
 
 ### 断点
+
 - **Mobile**: < 768px
 - **Tablet**: 768px - 1024px
 - **Desktop**: > 1024px
 
 ### 适配
+
 - ✅ 移动端侧边栏可折叠
 - ✅ 卡片网格自适应
 - ✅ 表格/列表响应式
@@ -194,12 +209,14 @@ Gray Scale:      #F9FAFB - #111827
 ## 🎯 原型用途
 
 ### ✅ 适合用于
+
 - UI/UX 设计验证
 - 用户流程演示
 - 团队讨论和评审
 - 客户展示
 
 ### ❌ 不包含
+
 - 真实的后端 API
 - 数据库连接
 - 用户认证逻辑
@@ -243,6 +260,7 @@ Gray Scale:      #F9FAFB - #111827
 ## 🎉 完成情况
 
 ### Phase 1: 核心页面 ✅
+
 - [x] 登录页面
 - [x] 注册页面
 - [x] 仪表板
@@ -251,6 +269,7 @@ Gray Scale:      #F9FAFB - #111827
 - [x] 首页
 
 ### Phase 2: 交互功能 ✅
+
 - [x] 表单验证
 - [x] 模态框
 - [x] 复制功能

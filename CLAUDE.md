@@ -1,4 +1,5 @@
 # Claude Key Portal 项目配置
+
 # Claude Key Portal Project Configuration
 
 > **项目**: Claude Key Portal - CRS 用户管理门户
@@ -26,6 +27,7 @@ Claude Key Portal = CRS 的用户管理门户
 ### 职责边界强制执行
 
 **必须本地实现**:
+
 - ✅ 用户注册、登录、认证
 - ✅ 用户信息管理
 - ✅ 用户-密钥映射关系
@@ -34,6 +36,7 @@ Claude Key Portal = CRS 的用户管理门户
 - ✅ 安装指导和配置生成
 
 **必须代理 CRS**:
+
 - ✅ 密钥创建（调用 CRS Admin API）
 - ✅ 密钥更新（调用 CRS Admin API）
 - ✅ 密钥删除（调用 CRS Admin API）
@@ -41,6 +44,7 @@ Claude Key Portal = CRS 的用户管理门户
 - ✅ 密钥状态（从 CRS 获取状态）
 
 **严禁实现**:
+
 - ❌ 密钥生成算法
 - ❌ 密钥验证逻辑
 - ❌ API 请求中转
@@ -57,6 +61,7 @@ Claude Key Portal = CRS 的用户管理门户
 开始任何开发工作前，必须参考以下文档：
 
 1. **项目定位和背景**
+
    ```
    阅读: PROJECT_CORE_DOCS/01_项目背景.md
    目的: 理解项目是什么，为什么做这个项目
@@ -64,6 +69,7 @@ Claude Key Portal = CRS 的用户管理门户
    ```
 
 2. **功能需求和边界**
+
    ```
    阅读: PROJECT_CORE_DOCS/02_功能需求和边界.md
    目的: 明确做什么，不做什么
@@ -71,6 +77,7 @@ Claude Key Portal = CRS 的用户管理门户
    ```
 
 3. **CRS 集成规范**
+
    ```
    阅读: API_MAPPING_SPECIFICATION.md
    目的: 了解如何与 CRS 交互
@@ -81,6 +88,7 @@ Claude Key Portal = CRS 的用户管理门户
    ```
 
 4. **数据库设计**
+
    ```
    阅读: DATABASE_SCHEMA.md
    目的: 理解数据模型
@@ -141,6 +149,7 @@ git commit -m "refactor: extract validation logic"
 所有与 CRS 交互的代码必须：
 
 1. **使用 Circuit Breaker 模式**
+
    ```typescript
    import { crsClient } from '@/lib/crs-client'
 
@@ -155,11 +164,12 @@ git commit -m "refactor: extract validation logic"
    ```
 
 2. **实现超时和重试**
+
    ```typescript
    const result = await crsClient.createKey(data, {
-     timeout: 5000,      // 5秒超时
-     retries: 2,         // 重试2次
-     fallback: 'cached'  // 失败时使用缓存
+     timeout: 5000, // 5秒超时
+     retries: 2, // 重试2次
+     fallback: 'cached', // 失败时使用缓存
    })
    ```
 
@@ -168,7 +178,7 @@ git commit -m "refactor: extract validation logic"
    // 缓存统计数据 1 分钟
    const stats = await getCachedCrsStats(userId, {
      ttl: 60,
-     key: `crs:stats:${userId}`
+     key: `crs:stats:${userId}`,
    })
    ```
 
@@ -229,17 +239,14 @@ class CrsClient {
     }
 
     // 自动登录获取新token
-    const response = await fetch(
-      `${process.env.CRS_BASE_URL}/web/auth/login`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: process.env.CRS_ADMIN_USERNAME,
-          password: process.env.CRS_ADMIN_PASSWORD
-        })
-      }
-    )
+    const response = await fetch(`${process.env.CRS_BASE_URL}/web/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: process.env.CRS_ADMIN_USERNAME,
+        password: process.env.CRS_ADMIN_PASSWORD,
+      }),
+    })
 
     const { success, token, expiresIn } = await response.json()
     if (!success) {
@@ -261,7 +268,7 @@ class CrsClient {
         {
           ...options,
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             ...options?.headers,
           },
@@ -302,7 +309,7 @@ try {
     return NextResponse.json(
       {
         error: 'CRS服务暂时不可用，请稍后重试',
-        fallback: true
+        fallback: true,
       },
       { status: 503 }
     )
@@ -334,7 +341,8 @@ const ERROR_MESSAGES = {
   // 认证错误
   INVALID_CREDENTIALS: '邮箱或密码错误',
   EMAIL_EXISTS: '该邮箱已被注册',
-  WEAK_PASSWORD: '密码强度不够，请使用至少8位字符，包含大小写字母、数字和特殊符号',
+  WEAK_PASSWORD:
+    '密码强度不够，请使用至少8位字符，包含大小写字母、数字和特殊符号',
 
   // 权限错误
   UNAUTHORIZED: '请先登录',
@@ -481,7 +489,7 @@ export function useKeys() {
       const response = await fetch('/api/keys')
       return response.json()
     },
-    staleTime: 60 * 1000,    // 1分钟内数据视为新鲜
+    staleTime: 60 * 1000, // 1分钟内数据视为新鲜
     cacheTime: 5 * 60 * 1000, // 缓存5分钟
     refetchOnWindowFocus: true,
   })
@@ -513,11 +521,9 @@ const isValid = await bcrypt.compare(password, hashedPassword)
 import jwt from 'jsonwebtoken'
 
 // ✅ 生成 Token
-const token = jwt.sign(
-  { userId, email },
-  process.env.JWT_SECRET!,
-  { expiresIn: '24h' }
-)
+const token = jwt.sign({ userId, email }, process.env.JWT_SECRET!, {
+  expiresIn: '24h',
+})
 
 // ✅ 验证 Token
 const decoded = jwt.verify(token, process.env.JWT_SECRET!)
@@ -591,23 +597,24 @@ export async function createKey(userId: string, data: CreateKeyInput) {
 **请求**:
 \`\`\`typescript
 {
-  name: string;
-  description?: string;
-  rateLimit?: number;
+name: string;
+description?: string;
+rateLimit?: number;
 }
 \`\`\`
 
 **响应**:
 \`\`\`typescript
 {
-  id: string;
-  key: string;
-  name: string;
-  createdAt: string;
+id: string;
+key: string;
+name: string;
+createdAt: string;
 }
 \`\`\`
 
 **错误**:
+
 - 400: 输入验证失败
 - 503: CRS 服务不可用
 ```
@@ -643,6 +650,7 @@ NODE_ENV=production
 ### 部署平台策略
 
 **主要方案**: **Vercel** (生产环境)
+
 - ✅ Next.js 官方平台，零配置部署
 - ✅ 原生支持 Prisma ORM（直连 PostgreSQL）
 - ✅ 免费额度充足（100 GB 带宽/月，足够1000+用户使用）
@@ -650,11 +658,13 @@ NODE_ENV=production
 - ✅ 最佳开发体验（Git 集成、实时日志）
 
 **备选方案**: **Docker 自托管** (可选)
+
 - 仅在 Vercel 免费额度不足时考虑
 - 项目已配置 Docker 支持（`Dockerfile`、`docker-compose.yml`）
 - 适合企业内网部署或需要完全控制的场景
 
 **不推荐**: **Cloudflare Pages**
+
 - ❌ Workers 不支持 TCP 连接，Prisma 需要 Data Proxy（$25/月额外成本）
 - ❌ 需要重写大量代码（340+ 小时工作量）
 - 详见: [部署平台分析](./DEPLOYMENT_PLATFORM_ANALYSIS.md)
@@ -787,10 +797,12 @@ NODE_ENV=production
 - **CRS 源码**: https://github.com/Wei-Shaw/claude-relay-service
 
 **API 架构** (已验证):
+
 - 认证API: `POST /web/auth/login` - 管理员登录获取token
 - Admin API基础路径: `/admin` (不是 `/admin-next`)
 
 **主要 API 端点**:
+
 - `POST /web/auth/login` - 管理员登录
 - `GET /admin/api-keys` - 获取密钥列表
 - `POST /admin/api-keys` - 创建密钥
@@ -811,4 +823,4 @@ NODE_ENV=production
 
 ---
 
-*"清晰的约束，是项目成功的保障！"*
+_"清晰的约束，是项目成功的保障！"_

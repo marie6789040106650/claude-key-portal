@@ -14,6 +14,7 @@
 不同文档对推荐的部署平台描述不一致。
 
 **CLAUDE.md** (项目配置文件):
+
 ```markdown
 ### 部署平台优先级
 
@@ -23,12 +24,14 @@
 ```
 
 **README.md** (项目主文档):
+
 ```markdown
 ## 📦 部署
 
 ### Vercel (推荐)
 
 # 安装 Vercel CLI
+
 npm i -g vercel
 
 ### Docker
@@ -37,16 +40,19 @@ docker build -t claude-key-portal .
 ```
 
 **问题**:
+
 1. CLAUDE.md 明确指出 Cloudflare Pages 是优先选择
 2. README.md 推荐 Vercel，完全没有提到 Cloudflare Pages
 3. 两者存在直接冲突
 
 **影响**:
+
 - 开发者可能会选择错误的部署平台
 - 与生产环境配置（R2, Upstash Redis）的区域优化策略不一致
 - Cloudflare Pages 与 R2、Workers 集成更好，符合整体架构
 
 **建议修复**:
+
 - ✅ **采纳 CLAUDE.md 的优先级**（Cloudflare Pages → Vercel → 自托管）
 - ✅ 在 README.md 中更新部署章节
 - ✅ 理由：
@@ -63,69 +69,82 @@ docker build -t claude-key-portal .
 CRS Admin API 的基础路径在不同文档中描述不一致。
 
 **CRS_API_VERIFICATION.md** (API 验证文档 - 已验证):
+
 ```markdown
 ## 验证结论
 
 ✅ **正确的 API 架构**:
+
 - 登录 API: `POST /web/auth/login`
 - Admin API 基础路径: `/admin` (不是 `/admin-next`)
 - 登录页面 (Web UI): `/admin-next/login`
 
 **关键区分**:
+
 - `/admin-next/*` - Web 界面路由（React 前端）
 - `/admin/*` - API 端点（后端接口）
 ```
 
 **CLAUDE.md** (项目配置文件 - 正确):
+
 ```markdown
 **CRS Admin 后台**: https://claude.just-play.fun/admin-next (Web UI)
 **CRS Admin 登录页**: https://claude.just-play.fun/admin-next/login
 
 **API 架构** (已验证):
+
 - 认证API: `POST /web/auth/login` - 管理员登录获取token
 - Admin API基础路径: `/admin` (不是 `/admin-next`)
 
 **主要 API 端点**:
+
 - `GET /admin/api-keys` - 获取密钥列表
 - `POST /admin/api-keys` - 创建密钥
 ```
 
 **DEVELOPMENT_READINESS_REPORT.md** (开发准备报告 - ❌ 错误):
+
 ```markdown
 ### 核心依赖
+
 - **CRS 部署地址**: https://claude.just-play.fun
-- **CRS Admin API**: https://claude.just-play.fun/admin-next  ❌ 错误！
+- **CRS Admin API**: https://claude.just-play.fun/admin-next ❌ 错误！
 - **CRS 源码**: https://github.com/Wei-Shaw/claude-relay-service
 ```
 
 **PROJECT_CORE_DOCS/README.md** (核心文档 - ❌ 错误):
+
 ```markdown
-- Admin API: https://claude.just-play.fun/admin-next  ❌ 错误！
+- Admin API: https://claude.just-play.fun/admin-next ❌ 错误！
 ```
 
 **API_MAPPING_SPECIFICATION.md** (API 规范 - 部分混淆):
+
 ```markdown
-| Portal API | CRS API |
-|------------|---------|
-| `GET /api/v1/keys` | `GET /admin/api-keys` | ✅ 正确
-| `GET /api/v1/dashboard` | `GET /admin/dashboard` | ✅ 正确
-| ... | ... |
+| Portal API              | CRS API                |
+| ----------------------- | ---------------------- | ------- |
+| `GET /api/v1/keys`      | `GET /admin/api-keys`  | ✅ 正确 |
+| `GET /api/v1/dashboard` | `GET /admin/dashboard` | ✅ 正确 |
+| ...                     | ...                    |
 
 但在某些地方出现：
-GET /admin-next/dashboard  ❌ 错误！应该是 /admin/dashboard
+GET /admin-next/dashboard ❌ 错误！应该是 /admin/dashboard
 ```
 
 **问题**:
+
 1. `/admin-next` 是 Web UI 路由（React 前端），不是 API 端点
 2. 实际的 API 基础路径是 `/admin`
 3. 多个文档错误地将 `/admin-next` 标记为 API 路径
 
 **影响**:
+
 - 严重！会导致 API 调用失败（404 错误）
 - 开发者可能花费大量时间调试错误的端点
 - 与 CRS_API_VERIFICATION.md 的验证结果直接矛盾
 
 **建议修复**:
+
 - ✅ **统一使用验证过的正确路径**
 - ✅ 需要更新的文档：
   1. `DEVELOPMENT_READINESS_REPORT.md` - 第 93 行
@@ -143,37 +162,46 @@ GET /admin-next/dashboard  ❌ 错误！应该是 /admin/dashboard
 项目当前阶段的描述略有差异。
 
 **README.md**:
+
 ```markdown
 ### Phase 2: MVP 开发 🚧 (进行中)
+
 - [ ] Sprint 0: 项目初始化（2天）
 - [ ] Sprint 1: 用户认证（3-4天）
-...
+      ...
 ```
 
 **实际状态**:
+
 - 我们目前还在 Sprint 0 之前
 - 刚完成生产环境配置
 - 还未初始化 Git 仓库和 Next.js 项目
 
 **问题**:
+
 - README.md 说 "Phase 2: MVP 开发 (进行中)"，但实际上还在 Phase 1 末期
 - Sprint 0 还未开始（待初始化 Git 和项目结构）
 
 **影响**:
+
 - 轻微：不影响技术实现，但可能让新加入者误解项目进度
 - 文档与实际进度不符
 
 **建议修复**:
+
 - ✅ 将 README.md 中的状态更新为更准确的描述
 - ✅ 可选方案：
+
   ```markdown
   ### Phase 1: 规划设计 ✅ (已完成)
+
   - [x] 项目文档
   - [x] 设计规范
   - [x] 技术架构
-  - [x] 生产环境配置  ← 新增
+  - [x] 生产环境配置 ← 新增
 
   ### Phase 2: MVP 开发 📋 (准备中)
+
   - [ ] Sprint 0: 项目初始化（2天） ← 即将开始
   ```
 
@@ -184,6 +212,7 @@ GET /admin-next/dashboard  ❌ 错误！应该是 /admin/dashboard
 ### 1. ✅ 技术栈版本一致
 
 所有文档中的技术栈版本描述一致：
+
 - Node.js: **20 LTS / 20.x**
 - TypeScript: **5.x**
 - Next.js: **14** (App Router)
@@ -191,6 +220,7 @@ GET /admin-next/dashboard  ❌ 错误！应该是 /admin/dashboard
 - Redis: **7+**
 
 **检查的文档**:
+
 - README.md
 - CLAUDE.md
 - DEVELOPMENT_READINESS_REPORT.md
@@ -203,17 +233,20 @@ GET /admin-next/dashboard  ❌ 错误！应该是 /admin/dashboard
 所有最新配置文档使用相同的凭据：
 
 **Supabase**:
+
 - 项目 ID: `gvcfrzaxfehydtxiaxcw`
 - 区域: us-west-1
 - 文档来源: `.env.production.template`, `CONFIGURATION_GUIDE.md`, `PRODUCTION_ENVIRONMENT_SETUP.md`
 
 **Cloudflare R2**:
+
 - Bucket: `claude-portal`
 - Access Key ID: `c16e3c386460a2e0926b4de73d963205`
 - Region: WNAM (us-west-1)
 - 文档来源: `.env.production.template`, `CONFIGURATION_GUIDE.md`, `PRODUCTION_ENVIRONMENT_SETUP.md`
 
 **Upstash Redis**:
+
 - Endpoint: `next-woodcock-18201.upstash.io`
 - Region: us-west-1
 - 文档来源: `.env.production.template`, `CONFIGURATION_GUIDE.md`, `PRODUCTION_ENVIRONMENT_SETUP.md`
@@ -228,15 +261,16 @@ GET /admin-next/dashboard  ❌ 错误！应该是 /admin/dashboard
 
 **一致的职责划分**:
 
-| 功能 | Portal | CRS | 文档来源 |
-|-----|--------|-----|---------|
-| 用户管理 | ✅ | ❌ | README.md, CLAUDE.md, 01_项目背景.md |
-| 密钥生成 | ❌ | ✅ | README.md, CLAUDE.md, 02_功能需求和边界.md |
-| 密钥验证 | ❌ | ✅ | 所有核心文档 |
-| 使用统计 | ❌ 数据来自CRS | ✅ | 所有核心文档 |
-| 界面展示 | ✅ | ❌ | 所有核心文档 |
+| 功能     | Portal         | CRS | 文档来源                                    |
+| -------- | -------------- | --- | ------------------------------------------- |
+| 用户管理 | ✅             | ❌  | README.md, CLAUDE.md, 01\_项目背景.md       |
+| 密钥生成 | ❌             | ✅  | README.md, CLAUDE.md, 02\_功能需求和边界.md |
+| 密钥验证 | ❌             | ✅  | 所有核心文档                                |
+| 使用统计 | ❌ 数据来自CRS | ✅  | 所有核心文档                                |
+| 界面展示 | ✅             | ❌  | 所有核心文档                                |
 
 **一致的系统架构**:
+
 ```
 Portal (用户界面层)
     ↓ 调用 Admin API
@@ -252,11 +286,13 @@ Claude API (Anthropic)
 ### 4. ✅ CRS 管理员凭据一致
 
 所有文档中的 CRS 管理员凭据一致：
+
 - 用户名: `cr_admin_4ce18cd2`
 - 密码: `HCTBMoiK3PZD0eDC`
 - 登录页面: `https://claude.just-play.fun/admin-next/login`
 
 **检查的文档**:
+
 - `.env.local.template`
 - `.env.production.template`
 - `CONFIGURATION_GUIDE.md`
@@ -271,6 +307,7 @@ Claude API (Anthropic)
 **🔴 RED → 🟢 GREEN → 🔵 REFACTOR**
 
 示例流程一致出现在：
+
 - README.md
 - CLAUDE.md
 - TDD_GIT_WORKFLOW.md
@@ -316,7 +353,9 @@ grep -rn "/admin-next" --include="*.md" . | grep -i "api\|endpoint"
 ```
 
 **手动修复位置**:
+
 1. `DEVELOPMENT_READINESS_REPORT.md:93`
+
    ```markdown
    - 修改前: **CRS Admin API**: https://claude.just-play.fun/admin-next
    - 修改后: **CRS Admin API**: https://claude.just-play.fun/admin
@@ -349,18 +388,23 @@ grep -rn "/admin-next" --include="*.md" . | grep -i "api\|endpoint"
 最佳选择，与 R2、Redis 在同一生态：
 
 \`\`\`bash
+
 # 安装 Wrangler CLI
+
 npm i -g wrangler
 
 # 部署到 Cloudflare Pages
+
 wrangler pages deploy .next
 
 # 配置环境变量
+
 wrangler pages secret put DATABASE_URL
 wrangler pages secret put REDIS_URL
 \`\`\`
 
 **优势**:
+
 - ✅ 与 R2、Upstash Redis 在同一区域（us-west-1）
 - ✅ 免费额度更慷慨（无限请求）
 - ✅ Edge Functions 延迟更低
@@ -371,17 +415,22 @@ wrangler pages secret put REDIS_URL
 开发体验优秀：
 
 \`\`\`bash
+
 # 安装 Vercel CLI
+
 npm i -g vercel
 
 # 部署
+
 vercel
 
 # 生产部署
+
 vercel --prod
 \`\`\`
 
 **优势**:
+
 - ✅ Next.js 原生支持
 - ✅ 自动 Preview 部署
 - ✅ 优秀的开发体验
@@ -391,15 +440,18 @@ vercel --prod
 适合特殊需求：
 
 \`\`\`bash
+
 # 构建镜像
+
 docker build -t claude-key-portal .
 
 # 运行容器
+
 docker run -p 3000:3000 \\
-  -e DATABASE_URL="..." \\
-  -e REDIS_URL="..." \\
-  -e CRS_BASE_URL="https://claude.just-play.fun" \\
-  claude-key-portal
+-e DATABASE_URL="..." \\
+-e REDIS_URL="..." \\
+-e CRS_BASE_URL="https://claude.just-play.fun" \\
+claude-key-portal
 \`\`\`
 ```
 
@@ -413,12 +465,14 @@ docker run -p 3000:3000 \\
 ## 🛣️ 路线图
 
 ### Phase 1: 规划设计 ✅ (已完成)
+
 - [x] 项目文档
 - [x] 设计规范
 - [x] 技术架构
 - [x] 生产环境配置 (Supabase, R2, Redis)
 
 ### Phase 2: MVP 开发 📋 (准备中)
+
 - [ ] **Sprint 0**: 项目初始化（2天）← 即将开始
   - [ ] Git 仓库初始化
   - [ ] Next.js 项目搭建
@@ -437,17 +491,20 @@ docker run -p 3000:3000 \\
 修复完成后，使用此清单验证：
 
 ### CRS API 路径验证
+
 - [ ] 所有文档中 "Admin API" 指向 `/admin`
 - [ ] 所有文档中 "登录页面" 指向 `/admin-next/login`
 - [ ] 代码中使用 `${CRS_BASE_URL}/admin/*` 而不是 `/admin-next/*`
 - [ ] API_MAPPING_SPECIFICATION.md 中所有 CRS 端点使用 `/admin`
 
 ### 部署平台验证
+
 - [ ] README.md 推荐 Cloudflare Pages 作为首选
 - [ ] CLAUDE.md 与 README.md 的部署优先级一致
 - [ ] 文档解释了为什么选择 Cloudflare Pages
 
 ### 项目阶段验证
+
 - [ ] README.md 反映实际进度（Phase 1 完成，Phase 2 准备中）
 - [ ] Sprint 0 标记为 "即将开始"
 - [ ] 不存在 "进行中" 的误导性描述
@@ -458,11 +515,13 @@ docker run -p 3000:3000 \\
 
 **发现的矛盾**: 3 处
 **严重程度分布**:
+
 - P0 紧急: 1 处（CRS API 路径）
 - P1 重要: 1 处（部署平台）
 - P2 次要: 1 处（项目阶段）
 
 **已验证一致的内容**: 5 大类
+
 - ✅ 技术栈版本
 - ✅ 生产环境配置
 - ✅ 项目定位和职责边界
@@ -470,6 +529,7 @@ docker run -p 3000:3000 \\
 - ✅ TDD 工作流
 
 **推荐行动**:
+
 1. 立即修复 P0（CRS API 路径）- 防止运行时错误
 2. 在 Sprint 0 开始前修复 P1（部署平台）- 确保架构决策正确
 3. 可选修复 P2（项目阶段）- 提升文档准确性

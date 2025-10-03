@@ -52,15 +52,15 @@
 
 ### 职责边界
 
-| 功能 | Portal | CRS |
-|-----|--------|-----|
-| **用户管理** | ✅ | ❌ |
-| **密钥生成** | ❌ | ✅ |
-| **密钥验证** | ❌ | ✅ |
-| **使用统计** | ❌ | ✅ |
-| **界面展示** | ✅ | ❌ |
-| **数据可视化** | ✅ | ❌ |
-| **安装指导** | ✅ | ❌ |
+| 功能           | Portal | CRS |
+| -------------- | ------ | --- |
+| **用户管理**   | ✅     | ❌  |
+| **密钥生成**   | ❌     | ✅  |
+| **密钥验证**   | ❌     | ✅  |
+| **使用统计**   | ❌     | ✅  |
+| **界面展示**   | ✅     | ❌  |
+| **数据可视化** | ✅     | ❌  |
+| **安装指导**   | ✅     | ❌  |
 
 ---
 
@@ -79,6 +79,7 @@ python3 -m http.server 8000
 ```
 
 **原型包含**:
+
 - ✅ 首页/欢迎页
 - ✅ 登录/注册页面
 - ✅ 仪表板（带图表）
@@ -111,6 +112,7 @@ cp .env.production.template .env.production
 ```
 
 **必需配置**：
+
 - `DATABASE_URL` - PostgreSQL 数据库连接
 - `REDIS_URL` - Redis 连接
 - `CRS_BASE_URL` - CRS服务地址
@@ -155,20 +157,24 @@ npm test -- --testNamePattern="user registration"
 ## 📚 文档
 
 ### 📖 完整文档索引
+
 👉 查看 [**DOCS_INDEX.md**](./DOCS_INDEX.md) - 文档导航中心
 
 ### 快速开始文档
+
 - [**CONFIGURATION_GUIDE.md**](./CONFIGURATION_GUIDE.md) - 环境配置指南
 - [**DEVELOPMENT_READINESS_REPORT.md**](./DEVELOPMENT_READINESS_REPORT.md) - 开发准备报告
 - [**TDD_GIT_WORKFLOW.md**](./TDD_GIT_WORKFLOW.md) - TDD 和 Git 工作流
 
 ### 核心文档
+
 - [**PROJECT_CORE_DOCS/**](./PROJECT_CORE_DOCS/) - 项目核心文档目录
-  - [01_项目背景.md](./PROJECT_CORE_DOCS/01_项目背景.md) - 项目定位和动机
-  - [02_功能需求和边界.md](./PROJECT_CORE_DOCS/02_功能需求和边界.md) - 功能范围
-  - [03_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md) - 开发路线图
+  - [01\_项目背景.md](./PROJECT_CORE_DOCS/01_项目背景.md) - 项目定位和动机
+  - [02\_功能需求和边界.md](./PROJECT_CORE_DOCS/02_功能需求和边界.md) - 功能范围
+  - [03\_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md) - 开发路线图
 
 ### 技术规范
+
 - [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) - 数据库设计
 - [**API_MAPPING_SPECIFICATION.md**](./API_MAPPING_SPECIFICATION.md) - API 规范
 - [**UI_DESIGN_SPECIFICATION.md**](./UI_DESIGN_SPECIFICATION.md) - UI/UX 设计
@@ -302,6 +308,7 @@ subject: 简短描述
 ```
 
 示例:
+
 ```bash
 test: add user registration validation test
 feat: implement user registration endpoint
@@ -357,6 +364,7 @@ vercel --prod
 ```
 
 **选择 Vercel 的原因**:
+
 - ✅ **零配置部署** - Next.js 官方平台，开箱即用
 - ✅ **完整 Prisma 支持** - 直连 PostgreSQL，无需额外配置
 - ✅ **免费额度充足** - 100 GB 带宽/月，足够 1000+ 用户使用
@@ -364,6 +372,7 @@ vercel --prod
 - ✅ **自动优化** - HTTPS、CDN、图片优化全自动
 
 **成本估算**（Hobby 免费计划）:
+
 - 带宽: 100 GB/月（预计1000用户使用 ~30 GB）
 - 构建: 6000 分钟/月
 - 函数调用: 无限次
@@ -374,11 +383,13 @@ vercel --prod
 ### 备选方案：Docker 自托管 (可选)
 
 **注意**: 仅在以下情况考虑自托管
+
 - Vercel 免费额度耗尽（月访问量 > 10万）
 - 企业内网部署需求
 - 需要完全控制基础设施
 
 项目已配置 Docker 支持，但**优先使用 Vercel**。Docker 配置文件位于：
+
 - `Dockerfile` - 生产环境构建
 - `docker-compose.yml` - 本地开发环境
 - `docker-compose.prod.yml` - 生产部署（含 Nginx）
@@ -395,6 +406,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 详见项目中的 Docker 配置文件。
+
 </details>
 
 ---
@@ -404,12 +416,14 @@ docker-compose -f docker-compose.prod.yml up -d
 **重要提示**: 由于技术限制，不推荐使用 Cloudflare Pages
 
 **原因**:
+
 - ❌ Cloudflare Workers 不支持 TCP 连接
 - ❌ Prisma 需要 Data Proxy（额外 $25/月）
 - ❌ 需要重写大量代码（340+ 小时）
 - ❌ 实际成本更高（$25/月 vs Vercel $0/月）
 
 **如果一定要使用**，需要：
+
 1. 使用 Prisma Data Proxy（付费服务）
 2. 或替换为 Supabase JS SDK（放弃 Prisma）
 3. 重写认证逻辑（替换 bcrypt）
@@ -421,6 +435,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ## 🛣️ 路线图
 
 ### Phase 1: 规划设计 ✅ (已完成)
+
 - [x] 项目文档
 - [x] 设计规范
 - [x] 技术架构
@@ -428,6 +443,7 @@ docker-compose -f docker-compose.prod.yml up -d
 - [x] 部署平台分析和选型
 
 ### Phase 2: MVP 开发 📋 (准备中)
+
 - [ ] **Sprint 0: 项目初始化（2天）** ← 即将开始
   - [ ] Git 仓库初始化
   - [ ] Next.js 项目搭建
@@ -439,17 +455,19 @@ docker-compose -f docker-compose.prod.yml up -d
 - [ ] Sprint 4: 安装指导（2-3天）
 
 ### Phase 3: 生产部署 📋 (计划中)
+
 - [ ] 环境配置和安全加固
 - [ ] 监控和日志
 - [ ] 正式上线
 
 ### Phase 4: 功能扩展 🌟 (未来)
+
 - [ ] 个性化功能
 - [ ] 高级统计
 - [ ] 团队协作
 - [ ] 移动端优化
 
-详细路线图请参考 [03_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md)
+详细路线图请参考 [03\_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md)
 
 ---
 
