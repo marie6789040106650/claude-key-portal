@@ -28,10 +28,23 @@ describe('POST /api/install/generate', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    // Suppress console.error during tests
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    // Reset mock implementations to default success behavior
     ;(verifyToken as jest.Mock).mockReturnValue({
       userId: mockUserId,
       email: 'test@example.com',
     })
+    ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue({
+      id: 'key-1',
+      userId: mockUserId,
+      keyValue: 'cr_test_key_value_123',
+    })
+  })
+
+  afterEach(() => {
+    // Restore console.error
+    jest.restoreAllMocks()
   })
 
   describe('成功场景', () => {
@@ -72,7 +85,7 @@ describe('POST /api/install/generate', () => {
       expect(data.script).toContain(mockKey.keyValue)
       expect(data.filename).toBe('setup_claude.sh')
       expect(data.instructions).toBeDefined()
-      expect(data.instructions).toBeInstanceOf(Array)
+      expect(Array.isArray(data.instructions)).toBe(true)
     })
 
     it('应该为 macOS zsh 生成正确的脚本', async () => {
@@ -430,7 +443,11 @@ describe('POST /api/install/generate', () => {
 
   describe('安全性检查', () => {
     it('应该验证 JWT 令牌', async () => {
-      // Arrange
+      // Arrange - Mock verifyToken to throw error for missing/invalid token
+      ;(verifyToken as jest.Mock).mockImplementation(() => {
+        throw new Error('Token无效或已过期')
+      })
+
       const request = new Request('http://localhost/api/install/generate', {
         method: 'POST',
         headers: {
