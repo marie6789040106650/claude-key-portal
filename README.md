@@ -166,6 +166,16 @@ npm test -- --testNamePattern="user registration"
 - [**DEVELOPMENT_READINESS_REPORT.md**](./DEVELOPMENT_READINESS_REPORT.md) - 开发准备报告
 - [**TDD_GIT_WORKFLOW.md**](./TDD_GIT_WORKFLOW.md) - TDD 和 Git 工作流
 
+### Sprint 开发文档
+
+- [**docs/SPRINT_INDEX.md**](./docs/SPRINT_INDEX.md) - Sprint 开发历程总览
+- [**docs/DOCUMENTATION_STANDARD.md**](./docs/DOCUMENTATION_STANDARD.md) - 文档管理标准
+- **Sprint 规划和总结**:
+  - Sprint 3: [TODOLIST (缺失)]() | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | [API 文档](./docs/API_ENDPOINTS_SPRINT3.md)
+  - Sprint 4: [TODOLIST](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | [API 文档 (待补齐)]()
+  - Sprint 5: [TODOLIST](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | [API 文档](./docs/API_ENDPOINTS_SPRINT5.md)
+  - Sprint 6: [TODOLIST](./docs/SPRINT_6_TODOLIST.md) | [SUMMARY (待创建)]() | [API 文档 (待创建)]()
+
 ### 核心文档
 
 - [**PROJECT_CORE_DOCS/**](./PROJECT_CORE_DOCS/) - 项目核心文档目录
@@ -180,6 +190,10 @@ npm test -- --testNamePattern="user registration"
 - [**UI_DESIGN_SPECIFICATION.md**](./UI_DESIGN_SPECIFICATION.md) - UI/UX 设计
 - [**COMPONENT_LIBRARY.md**](./COMPONENT_LIBRARY.md) - 组件库
 - [**PAGE_HIERARCHY_AND_MODULES.md**](./PAGE_HIERARCHY_AND_MODULES.md) - 页面结构
+
+### 项目审计报告
+
+- [**PROJECT_STRUCTURE_AUDIT.md**](./docs/PROJECT_STRUCTURE_AUDIT.md) - 项目结构审计（2025-10-04）
 
 ---
 
@@ -432,39 +446,78 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ---
 
-## 🛣️ 路线图
+## 🛣️ 开发进度
 
-### Phase 1: 规划设计 ✅ (已完成)
+### 当前状态
 
-- [x] 项目文档
-- [x] 设计规范
-- [x] 技术架构
-- [x] 生产环境配置 (Supabase, R2, Redis)
-- [x] 部署平台分析和选型
+| Sprint | 功能 | 规划 | 总结 | API 文档 | 状态 |
+|--------|------|------|------|---------|------|
+| Sprint 0 | 项目初始化 | - | [AUDIT](./docs/SPRINT_0_AUDIT_REPORT.md) | - | ✅ |
+| Sprint 2 | CRS 集成基础 | - | [SUMMARY](./docs/SPRINT_2_SUMMARY.md) | - | ✅ |
+| Sprint 3 | 安装指导 | ⚠️ | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | [API](./docs/API_ENDPOINTS_SPRINT3.md) | ✅ |
+| Sprint 4 | 密钥管理 | [TODO](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | ⚠️ | ✅ |
+| Sprint 5 | 账户设置 | [TODO](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | [API](./docs/API_ENDPOINTS_SPRINT5.md) | ✅ |
+| Sprint 6 | 通知系统 | [TODO](./docs/SPRINT_6_TODOLIST.md) | ⏳ | ⏳ | 🚧 |
 
-### Phase 2: MVP 开发 📋 (准备中)
+**图例**: ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中
 
-- [ ] **Sprint 0: 项目初始化（2天）** ← 即将开始
-  - [ ] Git 仓库初始化
-  - [ ] Next.js 项目搭建
-  - [ ] 数据库初始化（Prisma）
-  - [ ] 测试环境配置
-- [ ] Sprint 1: 用户认证（3-4天）
-- [ ] Sprint 2: CRS 集成 + 密钥管理（4-5天）
-- [ ] Sprint 3: 统计展示（3-4天）
-- [ ] Sprint 4: 安装指导（2-3天）
+### 测试统计
+
+```
+总测试数: 250 个
+通过:     242 个 (96.8%)
+跳过:       8 个 (3.2%)
+失败:       0 个 (0%)
+
+测试覆盖率: > 80% (目标达成)
+```
+
+### Phase 1: 基础功能 ✅ (已完成)
+
+- [x] **Sprint 0**: 项目初始化和 TDD 环境
+  - [x] Git 仓库和分支策略
+  - [x] Next.js 14 + TypeScript 搭建
+  - [x] Prisma + PostgreSQL 配置
+  - [x] Jest 测试环境
+- [x] **Sprint 2**: CRS 集成基础
+  - [x] CRS Client 封装
+  - [x] 用户认证系统（注册/登录）
+  - [x] JWT 令牌管理
+- [x] **Sprint 3**: 安装指导
+  - [x] 多平台脚本生成 (macOS/Linux/Windows)
+  - [x] 环境变量配置
+  - [x] 安装说明生成
+- [x] **Sprint 4**: 密钥管理
+  - [x] 密钥 CRUD 操作（代理 CRS）
+  - [x] 密钥列表展示
+  - [x] 统计数据 Dashboard
+- [x] **Sprint 5**: 账户设置
+  - [x] 用户资料管理（GET/PUT）
+  - [x] 密码修改和强度验证
+  - [x] 会话管理（列表/登出设备）
+
+### Phase 2: 增强功能 🚧 (进行中)
+
+- [x] ~~Sprint 1: 用户认证~~ (已合并到 Sprint 2)
+- [ ] **Sprint 6**: 通知系统 ← 当前 Sprint
+  - [ ] 通知配置 API
+  - [ ] 通知记录 API
+  - [ ] 邮件通知服务
+  - [ ] Webhook 通知支持
+- [ ] Sprint 7: 数据可视化优化
+- [ ] Sprint 8: 性能优化和缓存
 
 ### Phase 3: 生产部署 📋 (计划中)
 
 - [ ] 环境配置和安全加固
-- [ ] 监控和日志
-- [ ] 正式上线
+- [ ] 监控和日志系统
+- [ ] Vercel 部署上线
 
 ### Phase 4: 功能扩展 🌟 (未来)
 
-- [ ] 个性化功能
-- [ ] 高级统计
-- [ ] 团队协作
+- [ ] 个性化功能（备注、标签、收藏）
+- [ ] 高级统计和分析
+- [ ] 团队协作功能
 - [ ] 移动端优化
 
 详细路线图请参考 [03\_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md)
