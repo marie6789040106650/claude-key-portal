@@ -1,6 +1,7 @@
 /**
  * 用户登录功能测试
  * Sprint 1 - 🔴 RED Phase
+ * @jest-environment node
  */
 
 import { POST } from '@/app/api/auth/login/route'

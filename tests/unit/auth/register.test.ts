@@ -1,6 +1,7 @@
 /**
  * 用户注册功能测试
  * Sprint 1 - 🔴 RED Phase
+ * @jest-environment node
  */
 
 import { POST } from '@/app/api/auth/register/route'
@@ -403,8 +404,9 @@ describe('POST /api/auth/register', () => {
       ;(prisma.user.create as jest.Mock).mockResolvedValue({
         id: 'user_123',
         email: 'test@example.com',
-        passwordHash: 'hashed_password',
+        nickname: null,
         createdAt: new Date(),
+        // passwordHash 不应该在 select 结果中
       })
 
       const request = new Request('http://localhost:3000/api/auth/register', {
