@@ -127,22 +127,39 @@ prototypes/
 
 ## 🔧 开发规范约束 / Development Standards
 
-### TDD 强制执行
+### TDD + 集成验证 强制执行（混合方案）
 
-所有功能开发必须遵循 TDD 流程：
+**项目决策**: 所有涉及CRS的功能，必须采用混合测试方案
 
 ```bash
-# 1. 🔴 RED: 先写测试
-git commit -m "test: add user registration validation test"
+开发阶段 (Day 1-4):
+# 1. 🔴 RED: 先写测试（Mock CRS）
+git commit -m "test: add key management tests (🔴 RED)"
 
 # 2. 🟢 GREEN: 再写实现
-git commit -m "feat: implement user registration"
+git commit -m "feat: implement key management (🟢 GREEN)"
 
 # 3. 🔵 REFACTOR: 重构优化
-git commit -m "refactor: extract validation logic"
+git commit -m "refactor: extract utilities (🔵 REFACTOR)"
+
+集成验证阶段 (Day 5): ← 强制执行！
+# 4. ✅ 运行CRS集成测试
+npx tsx scripts/test-crs-xxx.ts
+
+# 5. 🔧 修复问题（如果有）
+git commit -m "fix: adjust API format to match CRS"
+
+# 6. 📝 记录测试结果
+更新 docs/INTEGRATION_TEST_LOG.md
 ```
 
-**违反 TDD 的代码不允许合并！**
+**铁律**:
+- ✅ TDD开发使用Mock保持快速迭代
+- ✅ 功能完成后必须进行CRS集成验证
+- ✅ 集成测试通过才能合并到develop
+- ❌ 不允许跳过集成验证环节
+
+详见: `docs/CRS_INTEGRATION_STANDARD.md`
 
 ### CRS 集成规范
 
