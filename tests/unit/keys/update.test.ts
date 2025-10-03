@@ -401,6 +401,159 @@ describe('PATCH /api/keys/[id]', () => {
       expect(crsClient.updateKey).not.toHaveBeenCalled()
       expect(prisma.apiKey.update).not.toHaveBeenCalled()
     })
+
+    it('应该成功设置到期时间', async () => {
+      // Arrange
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 30) // 30天后
+
+      const existingKey = {
+        id: mockKeyId,
+        userId: mockUserId,
+        crsKeyId: mockCrsKeyId,
+        name: 'Test Key',
+        expiresAt: null,
+      }
+
+      const updatedKey = {
+        ...existingKey,
+        expiresAt: futureDate,
+      }
+
+      ;(jwt.verify as jest.Mock).mockReturnValue({
+        userId: mockUserId,
+        type: 'access',
+      })
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(existingKey)
+      ;(prisma.apiKey.update as jest.Mock).mockResolvedValue(updatedKey)
+
+      const request = new Request(
+        `http://localhost:3000/api/keys/${mockKeyId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${mockAccessToken}`,
+          },
+          body: JSON.stringify({
+            expiresAt: futureDate.toISOString(),
+          }),
+        }
+      )
+
+      // Act
+      const response = await PATCH(request, { params: { id: mockKeyId } })
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.key.expiresAt).toBe(futureDate.toISOString())
+      expect(prisma.apiKey.update).toHaveBeenCalledWith({
+        where: { id: mockKeyId },
+        data: { expiresAt: futureDate },
+        select: expect.any(Object),
+      })
+    })
+
+    it('应该成功清除到期时间', async () => {
+      // Arrange
+      const existingKey = {
+        id: mockKeyId,
+        userId: mockUserId,
+        crsKeyId: mockCrsKeyId,
+        name: 'Test Key',
+        expiresAt: new Date('2025-12-31'),
+      }
+
+      const updatedKey = {
+        ...existingKey,
+        expiresAt: null,
+      }
+
+      ;(jwt.verify as jest.Mock).mockReturnValue({
+        userId: mockUserId,
+        type: 'access',
+      })
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(existingKey)
+      ;(prisma.apiKey.update as jest.Mock).mockResolvedValue(updatedKey)
+
+      const request = new Request(
+        `http://localhost:3000/api/keys/${mockKeyId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${mockAccessToken}`,
+          },
+          body: JSON.stringify({
+            expiresAt: null,
+          }),
+        }
+      )
+
+      // Act
+      const response = await PATCH(request, { params: { id: mockKeyId } })
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.key.expiresAt).toBeNull()
+      expect(prisma.apiKey.update).toHaveBeenCalledWith({
+        where: { id: mockKeyId },
+        data: { expiresAt: null },
+        select: expect.any(Object),
+      })
+    })
+
+    it('应该成功更新到期时间', async () => {
+      // Arrange
+      const oldDate = new Date('2025-12-31')
+      const newDate = new Date('2026-06-30')
+
+      const existingKey = {
+        id: mockKeyId,
+        userId: mockUserId,
+        crsKeyId: mockCrsKeyId,
+        name: 'Test Key',
+        expiresAt: oldDate,
+      }
+
+      const updatedKey = {
+        ...existingKey,
+        expiresAt: newDate,
+      }
+
+      ;(jwt.verify as jest.Mock).mockReturnValue({
+        userId: mockUserId,
+        type: 'access',
+      })
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(existingKey)
+      ;(prisma.apiKey.update as jest.Mock).mockResolvedValue(updatedKey)
+
+      const request = new Request(
+        `http://localhost:3000/api/keys/${mockKeyId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${mockAccessToken}`,
+          },
+          body: JSON.stringify({
+            expiresAt: newDate.toISOString(),
+          }),
+        }
+      )
+
+      // Act
+      const response = await PATCH(request, { params: { id: mockKeyId } })
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.key.expiresAt).toBe(newDate.toISOString())
+      expect(prisma.apiKey.update).toHaveBeenCalledWith({
+        where: { id: mockKeyId },
+        data: { expiresAt: newDate },
+        select: expect.any(Object),
+      })
+    })
   })
 
   describe('❌ 失败场景 - 认证授权', () => {
@@ -704,6 +857,86 @@ describe('PATCH /api/keys/[id]', () => {
       // Assert
       expect(response.status).toBe(400)
       expect(data.error).toContain('标签')
+    })
+
+    it('应该拒绝过去的到期时间', async () => {
+      // Arrange
+      const existingKey = {
+        id: mockKeyId,
+        userId: mockUserId,
+        crsKeyId: mockCrsKeyId,
+        name: 'Test Key',
+        expiresAt: null,
+      }
+
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 1) // 昨天
+
+      ;(jwt.verify as jest.Mock).mockReturnValue({
+        userId: mockUserId,
+        type: 'access',
+      })
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(existingKey)
+
+      const request = new Request(
+        `http://localhost:3000/api/keys/${mockKeyId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${mockAccessToken}`,
+          },
+          body: JSON.stringify({
+            expiresAt: pastDate.toISOString(),
+          }),
+        }
+      )
+
+      // Act
+      const response = await PATCH(request, { params: { id: mockKeyId } })
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(400)
+      expect(data.error).toContain('到期时间')
+      expect(data.error).toMatch(/不能.*过去|必须.*未来/)
+    })
+
+    it('应该拒绝无效的日期格式', async () => {
+      // Arrange
+      const existingKey = {
+        id: mockKeyId,
+        userId: mockUserId,
+        crsKeyId: mockCrsKeyId,
+        name: 'Test Key',
+        expiresAt: null,
+      }
+
+      ;(jwt.verify as jest.Mock).mockReturnValue({
+        userId: mockUserId,
+        type: 'access',
+      })
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(existingKey)
+
+      const request = new Request(
+        `http://localhost:3000/api/keys/${mockKeyId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${mockAccessToken}`,
+          },
+          body: JSON.stringify({
+            expiresAt: 'invalid-date-string',
+          }),
+        }
+      )
+
+      // Act
+      const response = await PATCH(request, { params: { id: mockKeyId } })
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(400)
+      expect(data.error).toMatch(/无效.*日期|日期.*格式/)
     })
   })
 
