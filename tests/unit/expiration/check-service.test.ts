@@ -36,8 +36,8 @@ describe('ExpirationCheckService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    service = new ExpirationCheckService()
     mockNotificationService = new NotificationService()
+    service = new ExpirationCheckService(mockNotificationService)
   })
 
   describe('checkExpirations() - 检查所有到期密钥', () => {

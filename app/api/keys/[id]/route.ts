@@ -22,6 +22,27 @@ const updateKeySchema = z.object({
     errorMap: () => ({ message: '状态值必须是ACTIVE或PAUSED' }),
   }).optional(),
   tags: z.array(z.string(), { invalid_type_error: '标签必须是数组' }).optional(),
+  expiresAt: z
+    .string()
+    .datetime({ message: '无效的日期格式' })
+    .nullable()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value) return true // null 或 undefined 允许
+        const date = new Date(value)
+        return !isNaN(date.getTime()) // 验证日期有效性
+      },
+      { message: '无效的日期格式' }
+    )
+    .refine(
+      (value) => {
+        if (!value) return true // null 或 undefined 允许
+        const date = new Date(value)
+        return date > new Date() // 不能是过去的日期
+      },
+      { message: '到期时间不能设置为过去' }
+    ),
 })
 
 /**
@@ -134,9 +155,9 @@ export async function PATCH(
     }
 
     // 7. 分离CRS字段和本地字段
-    const { tags, ...crsFields } = validatedData
+    const { tags, expiresAt, ...crsFields } = validatedData
     const hasCrsUpdate = Object.keys(crsFields).length > 0
-    const hasLocalUpdate = tags !== undefined
+    const hasLocalUpdate = tags !== undefined || expiresAt !== undefined
 
     // 8. 更新CRS（如果有CRS字段更新）
     if (hasCrsUpdate) {
@@ -155,7 +176,12 @@ export async function PATCH(
     }
 
     if (hasLocalUpdate) {
-      updateData.tags = tags
+      if (tags !== undefined) {
+        updateData.tags = tags
+      }
+      if (expiresAt !== undefined) {
+        updateData.expiresAt = expiresAt ? new Date(expiresAt) : null
+      }
     }
 
     try {
@@ -179,6 +205,7 @@ export async function PATCH(
           totalRequests: true,
           createdAt: true,
           lastUsedAt: true,
+          expiresAt: true,
         },
       })
 
