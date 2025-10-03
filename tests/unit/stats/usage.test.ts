@@ -1,6 +1,8 @@
 /**
  * Usage Stats API 测试
  * GET /api/stats/usage - 获取使用统计数据
+ *
+ * @jest-environment node
  */
 
 import { GET } from '@/app/api/stats/usage/route'

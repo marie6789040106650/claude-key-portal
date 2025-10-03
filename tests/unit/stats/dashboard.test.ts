@@ -1,6 +1,8 @@
 /**
  * Dashboard API 测试
  * GET /api/dashboard - 获取用户仪表板数据
+ *
+ * @jest-environment node
  */
 
 import { GET } from '@/app/api/dashboard/route'
@@ -81,17 +83,15 @@ describe('GET /api/dashboard', () => {
 
       // Assert
       expect(response.status).toBe(200)
-      expect(data).toEqual({
-        overview: {
-          totalKeys: 3,
-          activeKeys: 2,
-          pausedKeys: 1,
-          totalTokensUsed: 3000,
-          totalRequests: 30,
-          monthlyUsage: 1500,
-        },
-        recentActivity: expect.any(Array),
+      expect(data.overview).toEqual({
+        totalKeys: 3,
+        activeKeys: 2,
+        pausedKeys: 1,
+        totalTokensUsed: 3000,
+        totalRequests: 30,
+        monthlyUsage: 1500,
       })
+      expect(Array.isArray(data.recentActivity)).toBe(true)
 
       expect(verifyToken).toHaveBeenCalledWith(mockToken)
       expect(prisma.apiKey.count).toHaveBeenCalledWith({
