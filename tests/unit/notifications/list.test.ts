@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * 通知记录 API 单元测试
  * 测试 GET /api/user/notifications (列表、详情、标记已读、删除)
  */

@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * 通知配置 API 单元测试
  * 测试 GET/PUT /api/user/notification-config
  */

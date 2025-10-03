@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * 单个通知操作 API 单元测试
  * 测试 GET/DELETE /api/user/notifications/[id]
  * 测试 PUT /api/user/notifications/[id]/read

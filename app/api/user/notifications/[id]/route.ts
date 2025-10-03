@@ -85,7 +85,11 @@ export async function DELETE(
 
       return NextResponse.json({ message: '通知已删除' })
     } catch (deleteError: any) {
-      if (deleteError.code === 'P2025' || deleteError.message.includes('not found')) {
+      if (
+        deleteError.code === 'P2025' ||
+        deleteError.message.includes('not found') ||
+        deleteError.message.includes('does not exist')
+      ) {
         return NextResponse.json({ error: '通知不存在' }, { status: 404 })
       }
       throw deleteError

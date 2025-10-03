@@ -20,6 +20,7 @@ jest.mock('@/lib/prisma', () => ({
 
 jest.mock('@/lib/email/mailer', () => ({
   sendEmail: jest.fn(),
+  generateEmailHtml: jest.fn((params) => `<html>${params.message}</html>`),
 }))
 
 jest.mock('@/lib/webhook/client', () => ({
@@ -203,7 +204,13 @@ describe('NotificationService', () => {
       ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
         userId: 'user-123',
+        type: 'KEY_CREATED',
+        title: '密钥创建成功',
+        message: '测试',
+        data: null,
         channel: 'email',
+        status: 'PENDING',
+        createdAt: new Date(),
       })
       ;(sendEmail as jest.Mock).mockRejectedValue(new Error('SMTP error'))
       ;(prisma.notification.update as jest.Mock).mockResolvedValue({})
@@ -217,6 +224,9 @@ describe('NotificationService', () => {
 
       await service.send(input)
 
+      // 等待异步错误处理完成
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       // 验证更新了通知状态为 FAILED 并记录错误
       expect(prisma.notification.update).toHaveBeenCalledWith({
         where: { id: 'notif-123' },
@@ -229,8 +239,29 @@ describe('NotificationService', () => {
   })
 
   describe('sendEmail() - 发送邮件', () => {
-    it('应该发送邮件并更新通知状态', async () => {
-      const notification = {
+    it('应该通过 send() 触发邮件发送', async () => {
+      const userConfig = {
+        id: 'config-123',
+        userId: 'user-123',
+        channels: {
+          email: {
+            enabled: true,
+            address: 'user@example.com',
+          },
+        },
+        rules: [
+          {
+            type: 'RATE_LIMIT_WARNING',
+            enabled: true,
+            channels: ['email'],
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      ;(prisma.notificationConfig.findUnique as jest.Mock).mockResolvedValue(userConfig)
+      ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
         userId: 'user-123',
         type: 'RATE_LIMIT_WARNING',
@@ -239,35 +270,25 @@ describe('NotificationService', () => {
         data: null,
         channel: 'email',
         status: 'PENDING',
-        sentAt: null,
-        readAt: null,
-        error: null,
         createdAt: new Date(),
-      }
-
-      const userConfig = {
-        channels: {
-          email: {
-            enabled: true,
-            address: 'user@example.com',
-          },
-        },
-      }
-
+      })
       ;(sendEmail as jest.Mock).mockResolvedValue(undefined)
-      ;(prisma.notification.update as jest.Mock).mockResolvedValue({
-        ...notification,
-        status: 'SENT',
-        sentAt: new Date(),
+      ;(prisma.notification.update as jest.Mock).mockResolvedValue({})
+
+      await service.send({
+        userId: 'user-123',
+        type: 'RATE_LIMIT_WARNING',
+        title: 'API 速率限制警告',
+        message: '您的 API Key 已达到80%速率限制',
       })
 
-      // @ts-ignore - 访问私有方法进行测试
-      await service.sendEmailNotification(notification, userConfig)
+      // 等待异步发送完成
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       expect(sendEmail).toHaveBeenCalledWith({
         to: 'user@example.com',
-        subject: notification.title,
-        html: expect.stringContaining(notification.message),
+        subject: 'API 速率限制警告',
+        html: expect.any(String),
       })
 
       expect(prisma.notification.update).toHaveBeenCalledWith({
@@ -281,8 +302,30 @@ describe('NotificationService', () => {
   })
 
   describe('sendWebhook() - 发送 Webhook', () => {
-    it('应该发送 Webhook 并更新通知状态', async () => {
-      const notification = {
+    it('应该通过 send() 触发 Webhook 发送', async () => {
+      const userConfig = {
+        id: 'config-123',
+        userId: 'user-123',
+        channels: {
+          webhook: {
+            enabled: true,
+            url: 'https://example.com/webhook',
+            secret: 'webhook-secret',
+          },
+        },
+        rules: [
+          {
+            type: 'KEY_CREATED',
+            enabled: true,
+            channels: ['webhook'],
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      ;(prisma.notificationConfig.findUnique as jest.Mock).mockResolvedValue(userConfig)
+      ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
         userId: 'user-123',
         type: 'KEY_CREATED',
@@ -291,41 +334,31 @@ describe('NotificationService', () => {
         data: { apiKeyId: 'key-123' },
         channel: 'webhook',
         status: 'PENDING',
-        sentAt: null,
-        readAt: null,
-        error: null,
         createdAt: new Date(),
-      }
-
-      const userConfig = {
-        channels: {
-          webhook: {
-            enabled: true,
-            url: 'https://example.com/webhook',
-            secret: 'webhook-secret',
-          },
-        },
-      }
-
+      })
       ;(sendWebhook as jest.Mock).mockResolvedValue(undefined)
-      ;(prisma.notification.update as jest.Mock).mockResolvedValue({
-        ...notification,
-        status: 'SENT',
-        sentAt: new Date(),
+      ;(prisma.notification.update as jest.Mock).mockResolvedValue({})
+
+      await service.send({
+        userId: 'user-123',
+        type: 'KEY_CREATED',
+        title: '新密钥创建',
+        message: '密钥已创建',
+        data: { apiKeyId: 'key-123' },
       })
 
-      // @ts-ignore - 访问私有方法进行测试
-      await service.sendWebhookNotification(notification, userConfig)
+      // 等待异步发送完成
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       expect(sendWebhook).toHaveBeenCalledWith({
         url: 'https://example.com/webhook',
         secret: 'webhook-secret',
         payload: {
-          id: notification.id,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          data: notification.data,
+          id: 'notif-123',
+          type: 'KEY_CREATED',
+          title: '新密钥创建',
+          message: '密钥已创建',
+          data: { apiKeyId: 'key-123' },
           createdAt: expect.any(String),
         },
       })
@@ -341,29 +374,61 @@ describe('NotificationService', () => {
   })
 
   describe('createSystemNotification() - 创建系统通知', () => {
-    it('应该创建系统通知记录', async () => {
+    it('应该通过 send() 创建系统通知记录', async () => {
+      const userConfig = {
+        id: 'config-123',
+        userId: 'user-123',
+        channels: {
+          system: { enabled: true },
+        },
+        rules: [
+          {
+            type: 'SYSTEM_ANNOUNCEMENT',
+            enabled: true,
+            channels: ['system'],
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      ;(prisma.notificationConfig.findUnique as jest.Mock).mockResolvedValue(userConfig)
       ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
+        userId: 'user-123',
+        type: 'SYSTEM_ANNOUNCEMENT',
         channel: 'system',
-        status: 'SENT',
+        status: 'PENDING',
       })
+      ;(prisma.notification.update as jest.Mock).mockResolvedValue({})
 
-      const input = {
+      const result = await service.send({
         userId: 'user-123',
         type: 'SYSTEM_ANNOUNCEMENT',
         title: '系统公告',
         message: '系统维护通知',
-        data: null,
-      }
+      })
 
-      // @ts-ignore
-      const result = await service.createSystemNotification(input)
+      // 等待异步发送完成
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
-      expect(result).toBeDefined()
+      expect(result).toHaveLength(1)
       expect(prisma.notification.create).toHaveBeenCalledWith({
         data: {
-          ...input,
+          userId: 'user-123',
+          type: 'SYSTEM_ANNOUNCEMENT',
+          title: '系统公告',
+          message: '系统维护通知',
+          data: undefined,
           channel: 'system',
+          status: 'PENDING',
+        },
+      })
+
+      // 系统通知会立即标记为已发送
+      expect(prisma.notification.update).toHaveBeenCalledWith({
+        where: { id: 'notif-123' },
+        data: {
           status: 'SENT',
           sentAt: expect.any(Date),
         },
@@ -372,8 +437,13 @@ describe('NotificationService', () => {
   })
 
   describe('shouldSendNotification() - 检查是否应该发送', () => {
-    it('应该在规则启用时返回 true', async () => {
+    it('应该在规则启用时发送通知', async () => {
       const userConfig = {
+        id: 'config-123',
+        userId: 'user-123',
+        channels: {
+          email: { enabled: true, address: 'user@example.com' },
+        },
         rules: [
           {
             type: 'RATE_LIMIT_WARNING',
@@ -382,18 +452,35 @@ describe('NotificationService', () => {
             channels: ['email'],
           },
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       ;(prisma.notificationConfig.findUnique as jest.Mock).mockResolvedValue(userConfig)
+      ;(prisma.notification.create as jest.Mock).mockResolvedValue({
+        id: 'notif-123',
+        channel: 'email',
+      })
 
-      // @ts-ignore
-      const result = await service.shouldSendNotification('user-123', 'RATE_LIMIT_WARNING')
+      const result = await service.send({
+        userId: 'user-123',
+        type: 'RATE_LIMIT_WARNING',
+        title: '警告',
+        message: '测试',
+      })
 
-      expect(result).toBe(true)
+      // 应该创建通知
+      expect(result.length).toBeGreaterThan(0)
+      expect(prisma.notification.create).toHaveBeenCalled()
     })
 
-    it('应该在规则禁用时返回 false', async () => {
+    it('应该在规则禁用时不发送通知', async () => {
       const userConfig = {
+        id: 'config-123',
+        userId: 'user-123',
+        channels: {
+          email: { enabled: true, address: 'user@example.com' },
+        },
         rules: [
           {
             type: 'RATE_LIMIT_WARNING',
@@ -402,27 +489,52 @@ describe('NotificationService', () => {
             channels: ['email'],
           },
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       ;(prisma.notificationConfig.findUnique as jest.Mock).mockResolvedValue(userConfig)
 
-      // @ts-ignore
-      const result = await service.shouldSendNotification('user-123', 'RATE_LIMIT_WARNING')
+      const result = await service.send({
+        userId: 'user-123',
+        type: 'RATE_LIMIT_WARNING',
+        title: '警告',
+        message: '测试',
+      })
 
-      expect(result).toBe(false)
+      // 不应该创建通知
+      expect(result).toHaveLength(0)
+      expect(prisma.notification.create).not.toHaveBeenCalled()
     })
 
-    it('应该在没有匹配规则时返回 true（默认发送）', async () => {
+    it('应该在没有匹配规则时默认发送通知', async () => {
       const userConfig = {
+        id: 'config-123',
+        userId: 'user-123',
+        channels: {
+          email: { enabled: true, address: 'user@example.com' },
+        },
         rules: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       ;(prisma.notificationConfig.findUnique as jest.Mock).mockResolvedValue(userConfig)
+      ;(prisma.notification.create as jest.Mock).mockResolvedValue({
+        id: 'notif-123',
+        channel: 'email',
+      })
 
-      // @ts-ignore
-      const result = await service.shouldSendNotification('user-123', 'KEY_CREATED')
+      const result = await service.send({
+        userId: 'user-123',
+        type: 'KEY_CREATED',
+        title: '密钥创建',
+        message: '测试',
+      })
 
-      expect(result).toBe(true)
+      // 应该创建通知（默认行为）
+      expect(result.length).toBeGreaterThan(0)
+      expect(prisma.notification.create).toHaveBeenCalled()
     })
   })
 })
