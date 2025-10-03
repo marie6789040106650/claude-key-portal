@@ -53,6 +53,7 @@ model User {
   sessions          Session[]
   notifications     Notification[]
   auditLogs         AuditLog[]
+  passwordHistory   PasswordHistory[]
   invitees          User[]    @relation("UserInvites")
   inviter           User?     @relation("UserInvites", fields: [invitedBy], references: [id])
 
@@ -99,6 +100,25 @@ model Session {
   @@index([refreshToken])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+// 密码历史表（记录密码修改历史）
+model PasswordHistory {
+  id                String    @id @default(uuid())
+  userId            String
+
+  // 密码哈希
+  hashedPassword    String
+
+  // 时间
+  createdAt         DateTime  @default(now())
+
+  // 关系
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("password_history")
 }
 
 // ============================================

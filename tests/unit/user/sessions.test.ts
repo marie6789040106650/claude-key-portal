@@ -15,7 +15,7 @@ import { verifyToken } from '@/lib/auth'
 // Mock 依赖
 jest.mock('@/lib/prisma', () => ({
   prisma: {
-    userSession: {
+    session: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       delete: jest.fn(),
@@ -52,24 +52,30 @@ describe('GET /api/user/sessions', () => {
         {
           id: 'session-1',
           userId: mockUserId,
-          token: 'token-1',
-          deviceInfo: 'Chrome on macOS',
-          ipAddress: '192.168.1.1',
-          lastActive: new Date('2025-10-03T10:00:00Z'),
+          accessToken: 'token-1',
+          refreshToken: 'refresh-1',
+          deviceName: 'Chrome on macOS',
+          userAgent: 'Mozilla/5.0...',
+          ip: '192.168.1.1',
+          lastActivityAt: new Date('2025-10-03T10:00:00Z'),
           createdAt: new Date('2025-10-01T10:00:00Z'),
+          expiresAt: new Date('2025-10-04T10:00:00Z'),
         },
         {
           id: 'session-2',
           userId: mockUserId,
-          token: 'token-2',
-          deviceInfo: 'Safari on iPhone',
-          ipAddress: '192.168.1.2',
-          lastActive: new Date('2025-10-03T11:00:00Z'),
+          accessToken: 'token-2',
+          refreshToken: 'refresh-2',
+          deviceName: 'Safari on iPhone',
+          userAgent: 'Mozilla/5.0...',
+          ip: '192.168.1.2',
+          lastActivityAt: new Date('2025-10-03T11:00:00Z'),
           createdAt: new Date('2025-10-02T10:00:00Z'),
+          expiresAt: new Date('2025-10-04T11:00:00Z'),
         },
       ]
 
-      ;(prisma.userSession.findMany as jest.Mock).mockResolvedValue(mockSessions)
+      ;(prisma.session.findMany as jest.Mock).mockResolvedValue(mockSessions)
 
       const request = new Request('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
@@ -87,9 +93,9 @@ describe('GET /api/user/sessions', () => {
         deviceInfo: 'Chrome on macOS',
         ipAddress: '192.168.1.1',
       })
-      expect(prisma.userSession.findMany).toHaveBeenCalledWith({
+      expect(prisma.session.findMany).toHaveBeenCalledWith({
         where: { userId: mockUserId },
-        orderBy: { lastActive: 'desc' },
+        orderBy: { lastActivityAt: 'desc' },
       })
     })
 
@@ -99,14 +105,18 @@ describe('GET /api/user/sessions', () => {
         {
           id: 'session-1',
           userId: mockUserId,
-          token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-          deviceInfo: 'Chrome',
-          lastActive: new Date(),
+          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          refreshToken: 'refresh-token',
+          deviceName: 'Chrome',
+          userAgent: 'Mozilla/5.0...',
+          ip: '192.168.1.1',
+          lastActivityAt: new Date(),
           createdAt: new Date(),
+          expiresAt: new Date(),
         },
       ]
 
-      ;(prisma.userSession.findMany as jest.Mock).mockResolvedValue(mockSessions)
+      ;(prisma.session.findMany as jest.Mock).mockResolvedValue(mockSessions)
 
       const request = new Request('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
@@ -117,8 +127,8 @@ describe('GET /api/user/sessions', () => {
       const data = await response.json()
 
       // Assert
-      expect(data.sessions[0].token).toMatch(/^eyJh\.{3}XVCJ9$/)
-      expect(data.sessions[0].token).not.toBe(mockSessions[0].token)
+      expect(data.sessions[0].token).toMatch(/^eyJh\.{3}VCJ9$/)
+      expect(data.sessions[0].token).not.toBe(mockSessions[0].accessToken)
     })
 
     it('应该按最后活跃时间降序排列', async () => {
@@ -127,18 +137,30 @@ describe('GET /api/user/sessions', () => {
         {
           id: 'session-new',
           userId: mockUserId,
-          lastActive: new Date('2025-10-03'),
+          accessToken: 'token-new',
+          refreshToken: 'refresh-new',
+          deviceName: 'Chrome',
+          userAgent: 'Mozilla/5.0...',
+          ip: '192.168.1.1',
+          lastActivityAt: new Date('2025-10-03'),
           createdAt: new Date(),
+          expiresAt: new Date(),
         },
         {
           id: 'session-old',
           userId: mockUserId,
-          lastActive: new Date('2025-10-01'),
+          accessToken: 'token-old',
+          refreshToken: 'refresh-old',
+          deviceName: 'Safari',
+          userAgent: 'Mozilla/5.0...',
+          ip: '192.168.1.2',
+          lastActivityAt: new Date('2025-10-01'),
           createdAt: new Date(),
+          expiresAt: new Date(),
         },
       ]
 
-      ;(prisma.userSession.findMany as jest.Mock).mockResolvedValue(mockSessions)
+      ;(prisma.session.findMany as jest.Mock).mockResolvedValue(mockSessions)
 
       const request = new Request('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
@@ -148,15 +170,15 @@ describe('GET /api/user/sessions', () => {
       await GET(request)
 
       // Assert
-      expect(prisma.userSession.findMany).toHaveBeenCalledWith({
+      expect(prisma.session.findMany).toHaveBeenCalledWith({
         where: { userId: mockUserId },
-        orderBy: { lastActive: 'desc' },
+        orderBy: { lastActivityAt: 'desc' },
       })
     })
 
     it('应该返回空数组（用户没有活跃 Session）', async () => {
       // Arrange
-      ;(prisma.userSession.findMany as jest.Mock).mockResolvedValue([])
+      ;(prisma.session.findMany as jest.Mock).mockResolvedValue([])
 
       const request = new Request('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
@@ -194,7 +216,7 @@ describe('GET /api/user/sessions', () => {
 
     it('应该处理数据库错误', async () => {
       // Arrange
-      ;(prisma.userSession.findMany as jest.Mock).mockRejectedValue(
+      ;(prisma.session.findMany as jest.Mock).mockRejectedValue(
         new Error('Database connection failed')
       )
 
@@ -236,11 +258,18 @@ describe('DELETE /api/user/sessions/[id]', () => {
       const mockSession = {
         id: 'session-to-delete',
         userId: mockUserId,
-        token: 'token-123',
+        accessToken: 'token-123',
+        refreshToken: 'refresh-123',
+        deviceName: 'Chrome',
+        userAgent: 'Mozilla/5.0...',
+        ip: '192.168.1.1',
+        lastActivityAt: new Date(),
+        createdAt: new Date(),
+        expiresAt: new Date(),
       }
 
-      ;(prisma.userSession.findUnique as jest.Mock).mockResolvedValue(mockSession)
-      ;(prisma.userSession.delete as jest.Mock).mockResolvedValue(mockSession)
+      ;(prisma.session.findUnique as jest.Mock).mockResolvedValue(mockSession)
+      ;(prisma.session.delete as jest.Mock).mockResolvedValue(mockSession)
 
       const request = new Request('http://localhost/api/user/sessions/session-to-delete', {
         method: 'DELETE',
@@ -256,7 +285,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
       // Assert
       expect(response.status).toBe(200)
       expect(data.message).toBe('Session 已删除')
-      expect(prisma.userSession.delete).toHaveBeenCalledWith({
+      expect(prisma.session.delete).toHaveBeenCalledWith({
         where: { id: 'session-to-delete' },
       })
     })
@@ -265,7 +294,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
   describe('错误场景', () => {
     it('应该拒绝删除不存在的 Session', async () => {
       // Arrange
-      ;(prisma.userSession.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(prisma.session.findUnique as jest.Mock).mockResolvedValue(null)
 
       const request = new Request('http://localhost/api/user/sessions/nonexistent', {
         method: 'DELETE',
@@ -281,7 +310,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
       // Assert
       expect(response.status).toBe(404)
       expect(data.error).toBe('Session 不存在')
-      expect(prisma.userSession.delete).not.toHaveBeenCalled()
+      expect(prisma.session.delete).not.toHaveBeenCalled()
     })
 
     it('应该拒绝删除其他用户的 Session', async () => {
@@ -289,10 +318,17 @@ describe('DELETE /api/user/sessions/[id]', () => {
       const otherUserSession = {
         id: 'session-other',
         userId: 'other-user-id',
-        token: 'token-other',
+        accessToken: 'token-other',
+        refreshToken: 'refresh-other',
+        deviceName: 'Safari',
+        userAgent: 'Mozilla/5.0...',
+        ip: '192.168.1.2',
+        lastActivityAt: new Date(),
+        createdAt: new Date(),
+        expiresAt: new Date(),
       }
 
-      ;(prisma.userSession.findUnique as jest.Mock).mockResolvedValue(otherUserSession)
+      ;(prisma.session.findUnique as jest.Mock).mockResolvedValue(otherUserSession)
 
       const request = new Request('http://localhost/api/user/sessions/session-other', {
         method: 'DELETE',
@@ -308,7 +344,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
       // Assert
       expect(response.status).toBe(403)
       expect(data.error).toBe('无权删除此 Session')
-      expect(prisma.userSession.delete).not.toHaveBeenCalled()
+      expect(prisma.session.delete).not.toHaveBeenCalled()
     })
   })
 })
@@ -335,7 +371,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
   describe('成功场景', () => {
     it('应该删除所有其他 Session（保留当前）', async () => {
       // Arrange
-      ;(prisma.userSession.deleteMany as jest.Mock).mockResolvedValue({ count: 3 })
+      ;(prisma.session.deleteMany as jest.Mock).mockResolvedValue({ count: 3 })
 
       const request = new Request('http://localhost/api/user/sessions', {
         method: 'DELETE',
@@ -350,7 +386,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
       expect(response.status).toBe(200)
       expect(data.message).toBe('已登出所有其他设备')
       expect(data.count).toBe(3)
-      expect(prisma.userSession.deleteMany).toHaveBeenCalledWith({
+      expect(prisma.session.deleteMany).toHaveBeenCalledWith({
         where: {
           userId: mockUserId,
           id: { not: mockCurrentSessionId },
@@ -360,7 +396,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
 
     it('应该返回删除数量为0（没有其他 Session）', async () => {
       // Arrange
-      ;(prisma.userSession.deleteMany as jest.Mock).mockResolvedValue({ count: 0 })
+      ;(prisma.session.deleteMany as jest.Mock).mockResolvedValue({ count: 0 })
 
       const request = new Request('http://localhost/api/user/sessions', {
         method: 'DELETE',
@@ -400,7 +436,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
 
     it('应该处理数据库错误', async () => {
       // Arrange
-      ;(prisma.userSession.deleteMany as jest.Mock).mockRejectedValue(
+      ;(prisma.session.deleteMany as jest.Mock).mockRejectedValue(
         new Error('Database connection failed')
       )
 

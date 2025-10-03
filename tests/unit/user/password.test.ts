@@ -56,7 +56,9 @@ describe('PUT /api/user/password', () => {
       }
 
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
+      ;(bcrypt.compare as jest.Mock)
+        .mockResolvedValueOnce(true) // 旧密码验证通过
+        .mockResolvedValueOnce(false) // 新旧密码不同
       ;(bcrypt.hash as jest.Mock).mockResolvedValue('hashed_new_password')
       ;(prisma.user.update as jest.Mock).mockResolvedValue({
         ...mockUser,
@@ -100,7 +102,9 @@ describe('PUT /api/user/password', () => {
       }
 
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
+      ;(bcrypt.compare as jest.Mock)
+        .mockResolvedValueOnce(true) // 旧密码验证通过
+        .mockResolvedValueOnce(false) // 新旧密码不同
       ;(bcrypt.hash as jest.Mock).mockResolvedValue('hashed_new_password')
       ;(prisma.user.update as jest.Mock).mockResolvedValue(mockUser)
       ;(prisma.passwordHistory.create as jest.Mock).mockResolvedValue({})
@@ -423,8 +427,11 @@ describe('PUT /api/user/password', () => {
       }
 
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
+      ;(bcrypt.compare as jest.Mock)
+        .mockResolvedValueOnce(true) // 旧密码验证通过
+        .mockResolvedValueOnce(false) // 新旧密码不同
       ;(bcrypt.hash as jest.Mock).mockResolvedValue('hashed_new')
+      ;(prisma.passwordHistory.create as jest.Mock).mockResolvedValue({})
       ;(prisma.user.update as jest.Mock).mockRejectedValue(
         new Error('Database connection failed')
       )
