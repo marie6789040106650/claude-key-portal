@@ -1,0 +1,95 @@
+# Docker Compose - Development Environment
+# 用于本地开发，提供完整的开发环境（PostgreSQL + Redis + App）
+
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: claude-portal-postgres-dev
+    environment:
+      POSTGRES_DB: claude_portal_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - claude-portal-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: claude-portal-redis-dev
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - claude-portal-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js 应用（开发模式）
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: claude-portal-app-dev
+    ports:
+      - "3000:3000"
+    environment:
+      # 数据库配置
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/claude_portal_dev
+
+      # Redis 配置
+      REDIS_URL: redis://redis:6379
+
+      # CRS 配置
+      CRS_BASE_URL: https://claude.just-play.fun
+      CRS_ADMIN_USERNAME: ${CRS_ADMIN_USERNAME}
+      CRS_ADMIN_PASSWORD: ${CRS_ADMIN_PASSWORD}
+
+      # JWT 配置
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-me}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-nextauth-secret-change-me}
+      NEXTAUTH_URL: http://localhost:3000
+
+      # 应用配置
+      NODE_ENV: development
+      NEXT_PUBLIC_DOMAIN: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      # 挂载源代码（热重载）
+      - .:/app
+      # 排除 node_modules 和 .next
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - claude-portal-network
+    command: npm run dev
+
+networks:
+  claude-portal-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local

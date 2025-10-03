@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>密钥管理 - Claude Key Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/custom.css">
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white border-b border-gray-200 fixed top-0 w-full z-40">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <button onclick="toggleSidebar()" class="mr-3 lg:hidden text-gray-600 hover:text-gray-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900">Claude Key Portal</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff" class="w-8 h-8 rounded-full">
+                        <span class="text-sm font-medium text-gray-700 hidden sm:block">user@example.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-16 flex">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white border-r border-gray-200 fixed left-0 h-full overflow-y-auto">
+            <nav class="p-4 space-y-1">
+                <a href="dashboard.html" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    仪表板
+                </a>
+                <a href="keys.html" class="nav-link active flex items-center px-4 py-3 text-gray-700 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
+                    密钥管理
+                </a>
+                <a href="usage.html" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    使用统计
+                </a>
+                <a href="install.html" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    安装指导
+                </a>
+                <div class="pt-4 mt-4 border-t border-gray-200">
+                    <a href="settings.html" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        设置
+                    </a>
+                    <a href="login.html" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        退出登录
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 ml-0 lg:ml-64 p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">密钥管理</h1>
+                    <p class="text-gray-600 mt-1">管理您的 API 密钥</p>
+                </div>
+                <button onclick="openModal('createKeyModal')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition btn flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    创建密钥
+                </button>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <input type="text" placeholder="搜索密钥..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option>全部状态</option>
+                            <option>活跃</option>
+                            <option>已停用</option>
+                            <option>已过期</option>
+                        </select>
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option>最近创建</option>
+                            <option>最多使用</option>
+                            <option>名称 A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 密钥列表 -->
+            <div class="space-y-4">
+                <!-- 密钥卡片 1 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 card">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">Production Key</h3>
+                                <span class="badge badge-success">活跃</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">生产环境主密钥</p>
+                            <div class="flex items-center gap-2">
+                                <code class="bg-gray-100 px-3 py-1 rounded text-sm font-mono">sk-ant-api03-...xyz789</code>
+                                <button onclick="showToast('已复制密钥', 'success')" class="p-1 text-gray-500 hover:text-gray-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">今日调用</p>
+                            <p class="text-lg font-semibold text-gray-900">856</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">今日Token</p>
+                            <p class="text-lg font-semibold text-gray-900">67.2K</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">速率限制</p>
+                            <p class="text-lg font-semibold text-gray-900">100/分钟</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">创建时间</p>
+                            <p class="text-sm text-gray-700">2024-01-15</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 密钥卡片 2 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 card">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">Development Key</h3>
+                                <span class="badge badge-success">活跃</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">开发测试密钥</p>
+                            <div class="flex items-center gap-2">
+                                <code class="bg-gray-100 px-3 py-1 rounded text-sm font-mono">sk-ant-api03-...abc123</code>
+                                <button onclick="showToast('已复制密钥', 'success')" class="p-1 text-gray-500 hover:text-gray-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">今日调用</p>
+                            <p class="text-lg font-semibold text-gray-900">234</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">今日Token</p>
+                            <p class="text-lg font-semibold text-gray-900">18.5K</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">速率限制</p>
+                            <p class="text-lg font-semibold text-gray-900">50/分钟</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">创建时间</p>
+                            <p class="text-sm text-gray-700">2024-02-20</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 密钥卡片 3 - 已停用 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 card opacity-75">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">Staging Key (Old)</h3>
+                                <span class="badge badge-error">已停用</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">旧的测试密钥</p>
+                            <div class="flex items-center gap-2">
+                                <code class="bg-gray-100 px-3 py-1 rounded text-sm font-mono">sk-ant-api03-...old456</code>
+                                <button onclick="showToast('已复制密钥', 'success')" class="p-1 text-gray-500 hover:text-gray-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                            <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">今日调用</p>
+                            <p class="text-lg font-semibold text-gray-900">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">今日Token</p>
+                            <p class="text-lg font-semibold text-gray-900">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">速率限制</p>
+                            <p class="text-lg font-semibold text-gray-900">25/分钟</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">停用时间</p>
+                            <p class="text-sm text-gray-700">2024-02-28</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页 -->
+            <div class="flex items-center justify-between mt-6">
+                <p class="text-sm text-gray-600">显示 1-3 共 12 个密钥</p>
+                <div class="flex gap-2">
+                    <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
+                        上一页
+                    </button>
+                    <button class="px-3 py-2 bg-blue-600 text-white rounded-lg">1</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">2</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">3</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        下一页
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 创建密钥模态框 -->
+    <div id="createKeyModal" class="modal">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">创建新密钥</h3>
+            <form>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">密钥名称</label>
+                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="例如: Production API Key">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">描述（可选）</label>
+                    <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="描述这个密钥的用途..."></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">速率限制（每分钟）</label>
+                    <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="100">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('createKeyModal')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        取消
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        创建密钥
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

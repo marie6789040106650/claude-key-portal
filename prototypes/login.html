@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Claude Key Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/custom.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <!-- 登录卡片 -->
+    <div class="w-full max-w-md">
+        <!-- Logo 和标题 -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Claude Key Portal</h1>
+            <p class="text-gray-600">CRS 用户管理门户</p>
+        </div>
+
+        <!-- 登录表单卡片 -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">登录账号</h2>
+
+            <form onsubmit="return validateLoginForm(event)">
+                <!-- 邮箱 -->
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                        邮箱地址
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="your@email.com"
+                        required
+                    >
+                </div>
+
+                <!-- 密码 -->
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        密码
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="••••••••"
+                        required
+                    >
+                </div>
+
+                <!-- 记住我 和 忘记密码 -->
+                <div class="flex items-center justify-between mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-600">记住我</span>
+                    </label>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700">忘记密码？</a>
+                </div>
+
+                <!-- 登录按钮 -->
+                <button
+                    type="submit"
+                    class="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 transition btn"
+                >
+                    登录
+                </button>
+            </form>
+
+            <!-- 分隔线 -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-white text-gray-500">或</span>
+                </div>
+            </div>
+
+            <!-- 注册链接 -->
+            <div class="text-center">
+                <span class="text-gray-600">还没有账号？</span>
+                <a href="register.html" class="text-blue-600 font-medium hover:text-blue-700">立即注册</a>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="text-center mt-8 text-sm text-gray-600">
+            <p>© 2025 Claude Key Portal. All rights reserved.</p>
+            <div class="mt-2">
+                <a href="#" class="hover:text-blue-600">使用条款</a>
+                <span class="mx-2">•</span>
+                <a href="#" class="hover:text-blue-600">隐私政策</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

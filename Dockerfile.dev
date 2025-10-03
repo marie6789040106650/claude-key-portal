@@ -1,0 +1,27 @@
+# Claude Key Portal - Development Dockerfile
+# 用于本地开发环境，支持热重载
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 安装 Prisma CLI 全局依赖
+RUN npm install -g prisma
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Expose port
+EXPOSE 3000
+
+# 开发模式启动（支持热重载）
+CMD ["npm", "run", "dev"]
