@@ -183,10 +183,21 @@ class CrsClient {
     status: string
     createdAt: Date
   }> {
-    return this.request('/api-keys', {
+    const response = await this.request<any>('/api-keys', {
       method: 'POST',
       body: JSON.stringify(data),
     })
+
+    // 映射CRS响应字段到我们的接口
+    return {
+      id: response.id,
+      key: response.apiKey, // CRS返回apiKey字段，映射到key
+      name: response.name,
+      description: response.description,
+      monthlyLimit: response.monthlyLimit,
+      status: response.isActive ? 'ACTIVE' : 'PAUSED',
+      createdAt: response.createdAt,
+    }
   }
 
   /**
@@ -218,13 +229,18 @@ class CrsClient {
 
   /**
    * 获取密钥统计信息
+   *
+   * ⚠️ 注意：CRS当前不提供此端点
+   * GET /admin/api-keys/:id/stats 返回404
+   * TODO: 等待CRS提供stats端点或使用替代方案
    */
   async getKeyStats(keyId: string): Promise<{
     totalTokens: number
     totalRequests: number
     monthlyUsage: number
   }> {
-    return this.request(`/api-keys/${keyId}/stats`)
+    throw new Error('CRS stats endpoint not available - feature pending')
+    // return this.request(`/api-keys/${keyId}/stats`)
   }
 
   /**
