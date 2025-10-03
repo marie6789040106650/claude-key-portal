@@ -230,17 +230,65 @@ class CrsClient {
   /**
    * 获取密钥统计信息
    *
-   * ⚠️ 注意：CRS当前不提供此端点
-   * GET /admin/api-keys/:id/stats 返回404
-   * TODO: 等待CRS提供stats端点或使用替代方案
+   * 注意：CRS使用 POST /apiStats/api/user-stats 端点
+   * 需要传递完整的API密钥值（不是keyId）
    */
-  async getKeyStats(keyId: string): Promise<{
+  async getKeyStats(apiKey: string): Promise<{
     totalTokens: number
     totalRequests: number
     monthlyUsage: number
+    inputTokens: number
+    outputTokens: number
+    cacheCreateTokens: number
+    cacheReadTokens: number
+    cost: number
   }> {
-    throw new Error('CRS stats endpoint not available - feature pending')
-    // return this.request(`/api-keys/${keyId}/stats`)
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/apiStats/api/user-stats`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey }),
+          signal: AbortSignal.timeout(5000),
+        }
+      )
+
+      if (!response.ok) {
+        throw new CrsApiError(response.status, await response.text())
+      }
+
+      const result = await response.json()
+
+      if (!result.success || !result.data) {
+        throw new Error('CRS stats response invalid')
+      }
+
+      const usage = result.data.usage?.total || {}
+
+      return {
+        totalTokens: usage.allTokens || 0,
+        totalRequests: usage.requests || 0,
+        monthlyUsage: usage.allTokens || 0, // CRS没有单独的月度统计，使用总量
+        inputTokens: usage.inputTokens || 0,
+        outputTokens: usage.outputTokens || 0,
+        cacheCreateTokens: usage.cacheCreateTokens || 0,
+        cacheReadTokens: usage.cacheReadTokens || 0,
+        cost: usage.cost || 0,
+      }
+    } catch (error) {
+      if (error instanceof CrsApiError) {
+        throw error
+      }
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+          throw new CrsUnavailableError('CRS统计服务响应超时')
+        }
+      }
+
+      throw new CrsUnavailableError('CRS统计服务暂时不可用')
+    }
   }
 
   /**

@@ -13,15 +13,15 @@
 - [x] 密钥更新（PUT /admin/api-keys/:id）
 - [x] 密钥删除（DELETE /admin/api-keys/:id）
 - [x] 仪表板数据（GET /admin/dashboard）
-- [⚠️] 密钥统计（GET /admin/api-keys/:id/stats） - CRS端点不存在
+- [x] 密钥统计（POST /apiStats/api/user-stats）
 
 ### 测试状态
 - **测试时间**: 2025-10-03 22:16
 - **测试人员**: Claude AI Agent
-- **测试结果**: ✅ 通过（5/6项成功，1项跳过）
+- **测试结果**: ✅ 完全通过（6/6项全部成功）
 - **CRS版本**: 生产环境
 - **CRS地址**: https://claude.just-play.fun
-- **发现问题**: 2个API格式问题
+- **发现问题**: 3个API格式问题
 - **修复情况**: ✅ 已全部修复
 
 ### 执行命令
@@ -75,7 +75,7 @@ return {
 
 ---
 
-#### 问题2: Stats端点不存在 ⚠️
+#### 问题2: Stats端点路径错误 ⚠️
 
 **描述**: CRS没有提供`GET /admin/api-keys/:id/stats`端点
 
@@ -88,24 +88,79 @@ return {
 }
 ```
 
-**修复方案**:
-1. 在`lib/crs-client.ts`中标记该方法为待实现：
+**实际端点**: `POST /apiStats/api/user-stats`
+
+**发现过程**:
+1. 通过浏览器DevTools分析CRS Admin前端发现真实API
+2. 该端点需要传递完整的API密钥值（不是keyId）
+3. 响应包含完整的使用统计、限制、账户等信息
+
+**实际请求格式**:
 ```typescript
-async getKeyStats(keyId: string): Promise<...> {
-  throw new Error('CRS stats endpoint not available - feature pending')
-  // TODO: 等待CRS提供stats端点或使用替代方案
+POST /apiStats/api/user-stats
+Content-Type: application/json
+
+{
+  "apiKey": "cr_..."
 }
 ```
 
-2. 在集成测试中跳过该测试：
-```typescript
-console.log('⚠️  跳过：CRS暂不提供stats端点')
+**实际响应格式**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "name": "...",
+    "usage": {
+      "total": {
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "cacheCreateTokens": 0,
+        "cacheReadTokens": 0,
+        "allTokens": 0,
+        "requests": 0,
+        "cost": 0,
+        "formattedCost": "$0.000000"
+      }
+    },
+    "limits": { ... },
+    "accounts": { ... },
+    "restrictions": { ... }
+  }
+}
 ```
 
-**后续计划**:
-- 联系CRS团队确认stats端点计划
-- 或考虑从其他端点获取统计数据
-- 暂时不影响核心功能使用
+**修复方案**:
+在`lib/crs-client.ts`中更新`getKeyStats`方法：
+```typescript
+async getKeyStats(apiKey: string): Promise<...> {
+  const response = await fetch(`${this.baseUrl}/apiStats/api/user-stats`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey }),
+    signal: AbortSignal.timeout(5000),
+  })
+
+  const result = await response.json()
+  const usage = result.data.usage?.total || {}
+
+  return {
+    totalTokens: usage.allTokens || 0,
+    totalRequests: usage.requests || 0,
+    inputTokens: usage.inputTokens || 0,
+    outputTokens: usage.outputTokens || 0,
+    cacheCreateTokens: usage.cacheCreateTokens || 0,
+    cacheReadTokens: usage.cacheReadTokens || 0,
+    cost: usage.cost || 0,
+  }
+}
+```
+
+**提交记录**: 已修复，修改文件：
+- `lib/crs-client.ts` (完全重写getKeyStats方法)
+- `scripts/test-crs-connection.ts` (恢复stats测试)
 
 ---
 
@@ -154,10 +209,14 @@ console.log('⚠️  跳过：CRS暂不提供stats端点')
    更新: description, status
 ```
 
-#### 5. 密钥统计 ⚠️ SKIPPED
+#### 5. 密钥统计 ✅
 ```
-⚠️  跳过：CRS暂不提供stats端点
-   说明: GET /admin/api-keys/:id/stats 返回404
+✅ 统计数据获取成功!
+   总Token数: 0
+   总请求数: 0
+   输入Token: 0
+   输出Token: 0
+   成本: 0
 ```
 
 #### 6. 删除密钥 ✅
@@ -176,18 +235,18 @@ console.log('⚠️  跳过：CRS暂不提供stats端点')
 | `/admin/api-keys` | POST | ✅ 正常 | 创建密钥（返回`apiKey`字段） |
 | `/admin/api-keys/:id` | PUT | ✅ 正常 | 更新密钥 |
 | `/admin/api-keys/:id` | DELETE | ✅ 正常 | 删除密钥 |
-| `/admin/api-keys/:id/stats` | GET | ❌ 404 | 端点不存在 |
+| `/apiStats/api/user-stats` | POST | ✅ 正常 | 密钥统计（需传递apiKey值） |
 
 ---
 
 ### Sprint 2 集成验证总结
 
 **单元测试**: ✅ 93/93 通过
-**集成测试**: ✅ 5/6 通过（1项跳过）
+**集成测试**: ✅ 6/6 全部通过
 **代码修复**: ✅ 完成
 **文档更新**: ✅ 完成
 
-**结论**: Sprint 2的CRS集成验证完成！所有核心功能（认证、密钥CRUD、仪表板）都与真实CRS成功对接。Stats功能待CRS提供端点后实现。
+**结论**: Sprint 2的CRS集成验证完美完成！所有功能（认证、密钥CRUD、统计、仪表板）都与真实CRS成功对接。发现并修复了3个API格式差异问题。
 
 **下一步**: 可以开始Sprint 3 - 使用统计和仪表板开发
 

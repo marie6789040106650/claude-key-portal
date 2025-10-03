@@ -67,10 +67,16 @@ async function testCrsConnection() {
     })
     console.log('✅ 密钥更新成功!\n')
 
-    // 5. 测试获取密钥统计（跳过 - 端点不存在）
+    // 5. 测试获取密钥统计
     console.log('5️⃣ 测试获取密钥统计...')
-    console.log('⚠️  跳过：CRS暂不提供stats端点')
-    console.log('   说明: GET /admin/api-keys/:id/stats 返回404\n')
+    const stats = await crsClient.getKeyStats(testKey.key)
+    console.log('✅ 统计数据获取成功!')
+    console.log('   总Token数:', stats.totalTokens)
+    console.log('   总请求数:', stats.totalRequests)
+    console.log('   输入Token:', stats.inputTokens)
+    console.log('   输出Token:', stats.outputTokens)
+    console.log('   成本:', stats.cost)
+    console.log()
 
     // 6. 测试删除密钥
     console.log('6️⃣ 测试删除密钥...')
