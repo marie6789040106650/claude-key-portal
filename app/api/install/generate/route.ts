@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateScript, getInstructions } from '@/lib/script-templates'
+import {
+  isValidPlatform,
+  isValidEnvironment,
+  type Platform,
+} from '@/lib/platform-detector'
 
 /**
  * 生成平台安装脚本
@@ -63,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. 验证平台参数
-    if (!['macos', 'windows', 'linux'].includes(platform)) {
+    if (!isValidPlatform(platform)) {
       return NextResponse.json(
         { error: '不支持的平台: platform 必须是 macos, windows 或 linux' },
         { status: 400 }
@@ -71,13 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. 验证环境参数
-    const validEnvironments: Record<string, string[]> = {
-      macos: ['bash', 'zsh', 'fish'],
-      windows: ['powershell', 'cmd'],
-      linux: ['bash', 'zsh', 'fish'],
-    }
-
-    if (!validEnvironments[platform]?.includes(environment)) {
+    if (!isValidEnvironment(platform, environment)) {
       return NextResponse.json(
         {
           error: `无效的 environment 参数: ${platform} 平台不支持 ${environment}`,
