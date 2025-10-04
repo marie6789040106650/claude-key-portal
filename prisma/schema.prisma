@@ -492,3 +492,43 @@ model ExpirationReminder {
   @@index([sentAt])
   @@map("expiration_reminders")
 }
+
+// ============================================
+// Cron Job 定时任务系统
+// ============================================
+
+// Cron Job 执行日志表
+model CronJobLog {
+  id      String @id @default(uuid())
+  jobName String
+
+  // 执行状态
+  status CronJobStatus @default(RUNNING)
+
+  // 执行时间
+  startAt  DateTime
+  endAt    DateTime?
+  duration Int? // 毫秒
+
+  // 执行结果
+  result Json?
+  error  String? @db.Text
+
+  // 元数据
+  metadata Json?
+
+  // 时间
+  createdAt DateTime @default(now())
+
+  @@index([jobName])
+  @@index([status])
+  @@index([startAt])
+  @@index([createdAt])
+  @@map("cron_job_logs")
+}
+
+enum CronJobStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
