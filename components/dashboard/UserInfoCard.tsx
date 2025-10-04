@@ -136,6 +136,7 @@ export function UserInfoCard({
 
   return (
     <Card
+      data-testid="user-info-card"
       role="region"
       aria-label="用户信息"
       className={`bg-white rounded-lg shadow-md ${compact ? 'p-4' : 'p-6'} ${className}`}
@@ -181,13 +182,13 @@ export function UserInfoCard({
           <div className="flex-1 min-w-0">
             {!isEditing ? (
               <>
-                <h3 className="text-xl font-bold truncate max-w-[200px]">
+                <h3 data-testid="user-nickname" className="text-xl font-bold truncate max-w-[200px]">
                   {user.nickname || user.email}
                 </h3>
-                <p className="text-gray-600 text-sm truncate max-w-[300px]">{user.email}</p>
+                <p data-testid="user-email" className="text-gray-600 text-sm truncate max-w-[300px]">{user.email}</p>
 
                 {user.createdAt && (
-                  <p className="text-gray-500 text-xs mt-1">
+                  <p data-testid="user-register-date" className="text-gray-500 text-xs mt-1">
                     注册于 {formatDate(user.createdAt)}
                   </p>
                 )}
@@ -235,10 +236,10 @@ export function UserInfoCard({
         {/* 操作按钮 */}
         {editable && !isEditing && (
           <div className="flex flex-col space-y-2">
-            <Button size="sm" onClick={() => setIsEditing(true)}>
+            <Button data-testid="edit-profile-button" size="sm" onClick={() => setIsEditing(true)}>
               编辑资料
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setIsChangingPassword(true)}>
+            <Button data-testid="change-password-button" size="sm" variant="outline" onClick={() => setIsChangingPassword(true)}>
               修改密码
             </Button>
           </div>
@@ -249,13 +250,13 @@ export function UserInfoCard({
       {(user.apiKeyCount !== undefined || user.totalRequests !== undefined) && (
         <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t">
           {user.apiKeyCount !== undefined && (
-            <div className="text-center">
+            <div data-testid="user-api-key-count" className="text-center">
               <div className="text-2xl font-bold">{user.apiKeyCount}</div>
               <div className="text-sm text-gray-500">个密钥</div>
             </div>
           )}
           {user.totalRequests !== undefined && (
-            <div className="text-center">
+            <div data-testid="user-total-requests" className="text-center">
               <div className="text-2xl font-bold">{formatNumber(user.totalRequests)}</div>
               <div className="text-sm text-gray-500">次请求</div>
             </div>
