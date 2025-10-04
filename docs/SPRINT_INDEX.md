@@ -15,10 +15,12 @@
 | Sprint 3 | 安装指导 | ⚠️ 缺失 | [SUMMARY](./SPRINT_3_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT3.md) | ✅ |
 | Sprint 4 | 密钥管理 | [TODOLIST](./SPRINT_4_TODOLIST.md) | [SUMMARY](./SPRINT_4_SUMMARY.md) | ⚠️ 待补齐 | ✅ |
 | Sprint 5 | 账户设置 | [TODOLIST](./SPRINT_5_TODOLIST.md) | [SUMMARY](./SPRINT_5_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT5.md) | ✅ |
-| Sprint 6 | 通知系统 | [TODOLIST](./SPRINT_6_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 🚧 进行中 |
+| Sprint 6 | 通知系统 | [TODOLIST](./SPRINT_6_TODOLIST.md) | [SUMMARY](./SPRINT_6_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT6.md) | ✅ |
+| Sprint 7 | API Key到期提醒 | [TODOLIST](./SPRINT_7_TODOLIST.md) | [SUMMARY](./SPRINT_7_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT7.md) | ✅ |
+| Sprint 8 | Cron Job定时任务 | [TODOLIST](./SPRINT_8_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 📋 待开始 |
 
 **图例**:
-✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中
+✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始
 
 ---
 
@@ -159,34 +161,99 @@
 
 ---
 
-### Sprint 6 - 通知系统 🚧
+### Sprint 6 - 通知系统 ✅
 
-**周期**: 2025-10-04 ~ (进行中)
-**目标**: 密钥事件通知和告警系统
+**周期**: 2025-10-04
+**目标**: 多渠道通知系统和消息管理
 
-**规划功能**:
-- [ ] 通知配置 API (`GET/PUT /api/user/notifications`)
-- [ ] 通知记录 API (`GET /api/notifications`)
-- [ ] 邮件通知服务
-  - [ ] 密钥创建/删除通知
-  - [ ] 使用量告警
-  - [ ] 异常活动警报
-- [ ] Webhook 通知支持
-- [ ] 系统通知 (应用内)
+**主要成果**:
+- ✅ 通知配置 API (`GET/PUT /api/user/notifications`)
+- ✅ 通知记录 API (`GET /api/notifications`)
+- ✅ 多渠道通知服务
+  - ✅ 邮件通知（Nodemailer）
+  - ✅ Webhook通知
+  - ✅ 系统通知（应用内）
+- ✅ 通知规则引擎
+- ✅ 46 个单元测试，100% 通过
 
-**预计测试**: 45 个单元测试
-
-**技术重点**:
-- 邮件模板引擎
-- Webhook 可靠性保证
-- 通知去重和限流
+**技术亮点**:
+- 邮件HTML模板生成
+- Webhook重试机制
+- 通知规则配置化
+- 异步通知发送
 
 **文档**:
-- [SPRINT_6_TODOLIST.md](./SPRINT_6_TODOLIST.md) - 规划文档
+- [SPRINT_6_TODOLIST.md](./SPRINT_6_TODOLIST.md)
+- [SPRINT_6_SUMMARY.md](./SPRINT_6_SUMMARY.md)
+- [API_ENDPOINTS_SPRINT6.md](./API_ENDPOINTS_SPRINT6.md)
+
+---
+
+### Sprint 7 - API Key到期提醒系统 ✅
+
+**周期**: 2025-10-04
+**目标**: 自动化到期检查和多渠道提醒
+
+**主要成果**:
+- ✅ API Key到期时间管理（PATCH /api/keys/[id]）
+- ✅ 提醒配置 API（GET/PUT /api/user/expiration-settings）
+- ✅ ExpirationCheckService - 到期检查服务
+- ✅ ExpirationReminder 防重复机制
+- ✅ 集成NotificationService多渠道通知
+- ✅ 64 个单元测试，100% 通过
+  - settings.test.ts: 20个测试
+  - check-service.test.ts: 13个测试
+  - notification-integration.test.ts: 6个测试
+  - update.test.ts: 5个新增测试
+
+**技术亮点**:
+- 时间注入模式（Time Injection Pattern）
+  - 解决测试时间不稳定性
+  - 支持固定时间测试
+- 防重复提醒机制
+  - unique 约束防止重复发送
+  - 发送失败时不创建记录（可重试）
+- 同步等待通知发送
+  - Promise.allSettled 处理多渠道
+  - 所有渠道失败时抛出异常
+
+**遇到的问题和解决方案**:
+1. 时间计算不一致 → 依赖注入getCurrentTime
+2. 通知发送失败仍创建记录 → 等待发送完成并检查结果
+3. TypeScript类型错误 → 添加null检查和类型断言
+
+**文档**:
+- [SPRINT_7_TODOLIST.md](./SPRINT_7_TODOLIST.md)
+- [SPRINT_7_SUMMARY.md](./SPRINT_7_SUMMARY.md)
+- [API_ENDPOINTS_SPRINT7.md](./API_ENDPOINTS_SPRINT7.md)
+
+---
+
+### Sprint 8 - Cron Job定时任务系统 📋
+
+**周期**: (待开始)
+**目标**: 实现定时任务系统和自动化运维
+
+**规划功能**:
+- [ ] Cron Runner执行器
+- [ ] 到期检查定时任务（每日09:00）
+- [ ] 数据同步定时任务（每小时）
+- [ ] 清理任务（每日00:00）
+- [ ] 任务执行日志和监控
+
+**预计测试**: 28 个单元测试
+
+**技术重点**:
+- node-cron任务调度
+- 并发控制和分布式锁
+- 任务失败重试和告警
+
+**文档**:
+- [SPRINT_8_TODOLIST.md](./SPRINT_8_TODOLIST.md) - 规划文档
 
 **待创建**:
-- ⏳ SPRINT_6_SUMMARY.md (Sprint 结束后)
-- ⏳ API_ENDPOINTS_SPRINT6.md (Sprint 结束后)
+- ⏳ SPRINT_8_SUMMARY.md (Sprint 结束后)
+- ⏳ CRON_JOBS_GUIDE.md (部署指南)
 
 ---
 
@@ -195,16 +262,16 @@
 ### 总体数据
 
 ```
-总 Sprint 数: 6 个
-已完成:      5 个 (83.3%)
-进行中:      1 个 (16.7%)
+总 Sprint 数: 8 个
+已完成:      7 个 (87.5%)
+待开始:      1 个 (12.5%)
 
-总测试数:    250 个
-通过:        242 个 (96.8%)
-跳过:          8 个 (3.2%)
+总测试数:    364 个
+通过:        364 个 (100%)
+跳过:          0 个 (0%)
 失败:          0 个 (0%)
 
-测试覆盖率:  > 80% (目标达成)
+测试覆盖率:  > 85% (目标达成)
 ```
 
 ### 功能完成度
@@ -216,8 +283,10 @@
 | 密钥管理 | 5 | 48 | 100% | ✅ |
 | 统计数据 | 2 | 20 | 95% | ✅ |
 | 账户设置 | 7 | 42 | 100% | ✅ |
-| 通知系统 | 0 | 0 | - | 🚧 |
-| **总计** | **17** | **147** | **98%** | **🚧** |
+| 通知系统 | 2 | 46 | 100% | ✅ |
+| 到期提醒 | 2 | 64 | 100% | ✅ |
+| 定时任务 | 0 | 0 | - | 📋 |
+| **总计** | **21** | **257** | **99%** | **🚀** |
 
 ---
 
@@ -232,16 +301,18 @@
 | Sprint 3 | ⚠️ | ✅ | ✅ | 67% |
 | Sprint 4 | ✅ | ✅ | ⚠️ | 67% |
 | Sprint 5 | ✅ | ✅ | ✅ | 100% |
-| Sprint 6 | ✅ | ⏳ | ⏳ | 33% |
+| Sprint 6 | ✅ | ✅ | ✅ | 100% |
+| Sprint 7 | ✅ | ✅ | ✅ | 100% |
+| Sprint 8 | ✅ | ⏳ | ⏳ | 33% |
 
-**平均完整率**: 69.5% (目标: 95%)
+**平均完整率**: 77.1% (目标: 95%)
 
 ### 待补齐文档清单
 
 - [ ] SPRINT_3_TODOLIST.md - 安装指导规划文档
 - [ ] API_ENDPOINTS_SPRINT4.md - 密钥管理 API 规范
-- [ ] SPRINT_6_SUMMARY.md - 通知系统总结（Sprint 6 结束后）
-- [ ] API_ENDPOINTS_SPRINT6.md - 通知系统 API 规范（Sprint 6 结束后）
+- [ ] SPRINT_8_SUMMARY.md - 定时任务总结（Sprint 8 结束后）
+- [ ] CRON_JOBS_GUIDE.md - 定时任务部署指南（Sprint 8 结束后）
 
 ---
 
@@ -262,30 +333,40 @@
 
 ## 🔄 下一步计划
 
-### Sprint 6 - 通知系统
+### Sprint 8 - Cron Job定时任务系统
 
-**预计工期**: 5-6 天
-**开发分支**: `feature/notification-system`
-**状态**: 🚧 进行中
+**预计工期**: 3-4 天
+**开发分支**: `feature/cron-jobs`
+**状态**: 📋 待开始
 
 **关键里程碑**:
-1. 🔴 RED: 编写 45 个测试用例
-2. 🟢 GREEN: 实现通知配置和发送逻辑
-3. 🔵 REFACTOR: 优化邮件模板和性能
-4. 📝 创建完整的 API 文档
+1. 🔴 RED: 编写 28 个测试用例
+2. 🟢 GREEN: 实现定时任务执行器和任务
+3. 🔵 REFACTOR: 优化并发控制和监控
+4. 📝 创建部署文档和运维指南
 
-### Sprint 7 - 数据可视化优化 (计划中)
+### Sprint 9 候选功能
 
-**预计功能**:
-- 使用趋势图表优化
-- 实时数据更新
-- 导出功能
+**数据导出系统**:
+- 导出密钥列表（CSV/Excel）
+- 导出使用统计报告
+- 导出审计日志
+
+**高级搜索和过滤**:
+- 多条件组合搜索
+- 保存搜索条件
+- 搜索历史记录
+
+**API限流和配额管理**:
+- 用户级别限流
+- 密钥级别配额
+- 超限告警
 
 ---
 
 **索引维护者**: Claude
 **最后更新**: 2025-10-04
-**下次更新**: Sprint 6 结束时
+**下次更新**: Sprint 8 结束时
 
 ---
 
