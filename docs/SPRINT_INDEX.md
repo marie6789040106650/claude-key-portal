@@ -21,7 +21,7 @@
 | Sprint 9 | 监控告警系统 | [TODOLIST](./SPRINT_9_TODOLIST.md) | [SUMMARY](./SPRINT_9_SUMMARY.md) | ⏳ 待创建 | ✅ |
 | Sprint 10 | 监控仪表板前端 | [TODOLIST](./SPRINT_10_TODOLIST.md) | [SUMMARY](./SPRINT_10_SUMMARY.md) | - | ✅ |
 | Sprint 11 | 用户认证和仪表板 | [TODOLIST](./SPRINT_11_TODOLIST.md) | [SUMMARY](./SPRINT_11_SUMMARY.md) | - | ✅ |
-| Sprint 12 | 测试修复和密钥管理 | [TODOLIST](./SPRINT_12_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 🚧 进行中 |
+| Sprint 12 | 密钥管理UI完整实现 | [TODOLIST](./SPRINT_12_TODOLIST.md) | [SUMMARY](./SPRINT_12_SUMMARY.md) | - | ✅ |
 
 **图例**:
 ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始
@@ -428,56 +428,63 @@
 
 ## 🔄 下一步计划
 
-### Sprint 12 - 测试修复和密钥管理页面
+### Sprint 12 - 密钥管理UI完整实现 ✅
 
-**预计工期**: 3-4 天
+**周期**: 2025-10-03 ~ 2025-10-04
 **开发分支**: `feature/key-management-ui`
-**状态**: 🚧 进行中
-**开始时间**: 2025-10-04
+**状态**: ✅ 已完成
+**总耗时**: 约 12 小时
 
-**高优先级任务**:
-1. **修复 UserInfoCard 测试** (121 个失败测试)
-   - 解决 React.memo 导致的测试查询问题
-   - 更新测试策略（testid 优先）
-   - 确保所有组件测试通过
+**主要成果**:
+- ✅ 完成密钥管理 UI 全栈开发（9个Phase）
+- ✅ 实现完整的 CRUD 功能
+- ✅ 前后端完全集成
+- ✅ 107 个测试全部通过（组件测试 89个 + API测试 18个）
+- ✅ UI/UX 优化（Toast、动画、缓存）
 
-2. **TypeScript 错误清理**
-   - 修复 Sprint 4-7 的类型错误
-   - 更新 Prisma schema 字段匹配
-   - 完成类型定义补充
+**技术亮点**:
+- 密钥展示对话框（安全最佳实践）
+- React Query 缓存优化
+- 简单 Toast 通知系统
+- 对话框动画效果
 
-3. **密钥管理页面** (`/dashboard/keys`)
-   - 密钥列表展示（表格 + 卡片视图）
-   - 密钥创建/编辑/删除功能
-   - 密钥搜索和过滤
-   - 集成 Sprint 4 密钥管理 API
+**文档**:
+- [SPRINT_12_TODOLIST.md](./SPRINT_12_TODOLIST.md)
+- [SPRINT_12_SUMMARY.md](./SPRINT_12_SUMMARY.md)
 
-**中优先级任务**:
-4. **监控页面集成** - 将 Sprint 10 监控页面集成到新布局
-5. **统计页面** - 实现 `/dashboard/stats` 功能
-6. **安装指导页面** - 实现 `/dashboard/install` 功能
+---
 
-**低优先级任务**:
-7. **图片优化** - 使用 Next.js `<Image />` 组件
-8. **Token 刷新机制** - 实现 refresh token
-9. **路由组重构** - 统一路由组织结构
+### Sprint 13 - 密钥使用统计和可视化 📋
 
-### Sprint 13 候选功能
+**预计工期**: 2 天
+**开发分支**: `feature/usage-stats`
+**状态**: 📋 待开始
 
-**数据导出系统**:
-- 导出密钥列表（CSV/Excel）
-- 导出使用统计报告
-- 导出审计日志
+**主要任务**:
+1. **统计页面** (`/dashboard/stats`)
+   - 总体使用统计展示
+   - 时间趋势图表（Recharts）
+   - 密钥使用排行
+   - 时间范围和密钥筛选
+   - CSV 导出功能
 
-**高级搜索和过滤**:
-- 多条件组合搜索
-- 保存搜索条件
-- 搜索历史记录
+2. **密钥详情页** (`/dashboard/keys/[id]`)
+   - 单个密钥详细统计
+   - 使用趋势可视化
+   - 最近请求列表
 
-**API限流和配额管理**:
-- 用户级别限流
-- 密钥级别配额
-- 超限告警
+3. **测试覆盖**
+   - 45+ 单元测试
+   - 组件测试 + 页面测试
+   - 测试覆盖率 > 80%
+
+**技术栈**:
+- Recharts (复用 Sprint 10)
+- React Query
+- papaparse (CSV 导出)
+
+**文档**:
+- [SPRINT_13_TODOLIST.md](./SPRINT_13_TODOLIST.md)
 
 ---
 
