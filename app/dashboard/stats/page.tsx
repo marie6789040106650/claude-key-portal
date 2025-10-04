@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
@@ -10,6 +9,9 @@ import { StatsTable } from '@/components/stats/StatsTable'
 import { DateRangePicker } from '@/components/stats/DateRangePicker'
 import { KeyFilter } from '@/components/stats/KeyFilter'
 import { ExportDialog } from '@/components/stats/ExportDialog'
+import { useUsageStats } from '@/hooks/use-stats'
+import { generateMockTimeSeriesData } from '@/lib/date-utils'
+import { formatNumber } from '@/lib/ui-utils'
 import type { DateRangePreset, KeyStats, TimeSeriesDataPoint } from '@/types/stats'
 
 export default function UsageStatsPage() {
@@ -23,69 +25,12 @@ export default function UsageStatsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
 
-  // 计算查询参数
-  const queryParams = useMemo(() => {
-    const params = new URLSearchParams()
-
-    // 时间范围
-    if (dateRange === 'custom' && customStartDate && customEndDate) {
-      params.append('startDate', customStartDate.toISOString().split('T')[0])
-      params.append('endDate', customEndDate.toISOString().split('T')[0])
-    } else if (dateRange !== 'custom') {
-      // 根据预设计算日期
-      const end = new Date()
-      const start = new Date()
-
-      switch (dateRange) {
-        case 'today':
-          start.setHours(0, 0, 0, 0)
-          break
-        case 'yesterday':
-          start.setDate(start.getDate() - 1)
-          start.setHours(0, 0, 0, 0)
-          end.setDate(end.getDate() - 1)
-          end.setHours(23, 59, 59, 999)
-          break
-        case 'last7days':
-          start.setDate(start.getDate() - 7)
-          break
-        case 'last30days':
-          start.setDate(start.getDate() - 30)
-          break
-        case 'thisMonth':
-          start.setDate(1)
-          start.setHours(0, 0, 0, 0)
-          break
-        case 'lastMonth':
-          start.setMonth(start.getMonth() - 1)
-          start.setDate(1)
-          start.setHours(0, 0, 0, 0)
-          end.setMonth(end.getMonth() - 1)
-          end.setDate(0) // 上月最后一天
-          end.setHours(23, 59, 59, 999)
-          break
-      }
-
-      params.append('startDate', start.toISOString().split('T')[0])
-      params.append('endDate', end.toISOString().split('T')[0])
-    }
-
-    return params.toString()
-  }, [dateRange, customStartDate, customEndDate])
-
-  // 数据获取
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['usage-stats', queryParams],
-    queryFn: async () => {
-      const response = await fetch(`/api/stats/usage?${queryParams}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch stats')
-      }
-      return response.json()
-    },
-    staleTime: 5 * 60 * 1000, // 5分钟
-    cacheTime: 10 * 60 * 1000, // 10分钟
-  })
+  // 数据获取 - 使用自定义 hook
+  const { data, isLoading, error, refetch } = useUsageStats(
+    dateRange,
+    customStartDate,
+    customEndDate
+  )
 
   // 数据处理和筛选
   const filteredKeys = useMemo(() => {
@@ -131,26 +76,9 @@ export default function UsageStatsPage() {
   const timeSeriesData = useMemo<TimeSeriesDataPoint[]>(() => {
     if (!data?.keys) return []
 
-    // 简化版：将密钥数据按日期聚合
-    // 实际应该从后端获取已聚合的时间序列数据
-    const keys = selectedKeys.length > 0
-      ? (data.keys as KeyStats[]).filter((k) => selectedKeys.includes(k.id))
-      : data.keys as KeyStats[]
-
-    // 生成最近7天的数据点（模拟）
-    const points: TimeSeriesDataPoint[] = []
-    const end = new Date()
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(end)
-      date.setDate(date.getDate() - i)
-      points.push({
-        timestamp: date.toISOString().split('T')[0],
-        requests: Math.floor(Math.random() * 1000), // TODO: 替换为真实数据
-        tokens: Math.floor(Math.random() * 20000),
-      })
-    }
-
-    return points
+    // TODO: 从后端获取已聚合的时间序列数据
+    // 当前使用模拟数据
+    return generateMockTimeSeriesData(7)
   }, [data?.keys, selectedKeys])
 
 
@@ -247,7 +175,7 @@ export default function UsageStatsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {summary.totalRequests.toLocaleString()}
+              {formatNumber(summary.totalRequests)}
             </div>
           </CardContent>
         </Card>
@@ -260,7 +188,7 @@ export default function UsageStatsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {summary.totalTokens.toLocaleString()}
+              {formatNumber(summary.totalTokens)}
             </div>
           </CardContent>
         </Card>
