@@ -44,6 +44,7 @@ export class NotificationService {
 
     // 发送到所有渠道
     const notifications = []
+    const sendPromises = []
 
     for (const channel of targetChannels) {
       const notification = await prisma.notification.create({
@@ -58,12 +59,20 @@ export class NotificationService {
         },
       })
 
-      // 异步发送
-      this.sendToChannel(notification, config, channel).catch((error) => {
-        console.error(`发送通知失败 (${channel}):`, error)
-      })
+      // 收集发送 Promise
+      const sendPromise = this.sendToChannel(notification, config, channel)
+      sendPromises.push(sendPromise)
 
       notifications.push(notification)
+    }
+
+    // 等待所有发送完成
+    const results = await Promise.allSettled(sendPromises)
+
+    // 检查是否所有渠道都失败
+    const allFailed = results.every(result => result.status === 'rejected')
+    if (allFailed && results.length > 0) {
+      throw new Error('所有通知渠道发送失败')
     }
 
     return notifications
@@ -103,6 +112,8 @@ export class NotificationService {
           error: error.message,
         },
       })
+      // 重新抛出错误，让调用者知道发送失败
+      throw error
     }
   }
 

@@ -8,9 +8,14 @@ import { NotificationService } from './notification-service'
 
 export class ExpirationCheckService {
   private notificationService: NotificationService
+  private getCurrentTime: () => Date
 
-  constructor(notificationService?: NotificationService) {
+  constructor(
+    notificationService?: NotificationService,
+    getCurrentTime?: () => Date
+  ) {
     this.notificationService = notificationService || new NotificationService()
+    this.getCurrentTime = getCurrentTime || (() => new Date())
   }
 
   /**
@@ -19,11 +24,12 @@ export class ExpirationCheckService {
   async checkExpirations(): Promise<void> {
     try {
       // 1. 查询所有有到期时间的密钥
+      const now = this.getCurrentTime()
       const keys = await prisma.apiKey.findMany({
         where: {
           expiresAt: {
             not: null,
-            gte: new Date(), // 只查询未过期的
+            gte: now, // 只查询未过期的
           },
         },
         select: {
@@ -50,12 +56,13 @@ export class ExpirationCheckService {
   async checkUserExpirations(userId: string): Promise<void> {
     try {
       // 1. 查询该用户有到期时间的密钥
+      const now = this.getCurrentTime()
       const keys = await prisma.apiKey.findMany({
         where: {
           userId,
           expiresAt: {
             not: null,
-            gte: new Date(),
+            gte: now,
           },
         },
         select: {
@@ -102,7 +109,7 @@ export class ExpirationCheckService {
       if (!enabled) return
 
       // 2. 计算剩余天数
-      const now = new Date()
+      const now = this.getCurrentTime()
       const daysRemaining = Math.floor(
         (key.expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
       )

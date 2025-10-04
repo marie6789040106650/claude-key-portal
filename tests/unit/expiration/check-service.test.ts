@@ -33,18 +33,23 @@ import { NotificationService } from '@/lib/services/notification-service'
 describe('ExpirationCheckService', () => {
   let service: ExpirationCheckService
   let mockNotificationService: any
+  let fixedNow: Date
 
   beforeEach(() => {
     jest.clearAllMocks()
+    // 使用固定时间避免时间差异
+    fixedNow = new Date('2025-10-04T00:00:00.000Z')
     mockNotificationService = new NotificationService()
-    service = new ExpirationCheckService(mockNotificationService)
+    service = new ExpirationCheckService(
+      mockNotificationService,
+      () => fixedNow
+    )
   })
 
   describe('checkExpirations() - 检查所有到期密钥', () => {
     it('应该检查即将到期的密钥并发送提醒', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const expiresIn3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const expiresIn3Days = new Date(fixedNow.getTime() + 3 * 24 * 60 * 60 * 1000)
 
       // Mock 密钥数据
       const mockKeys = [
@@ -122,8 +127,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该跳过已禁用提醒配置的用户', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -153,8 +158,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该跳过不在提醒天数范围内的密钥', async () => {
-      const now = new Date()
-      const expiresIn5Days = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn5Days = new Date(fixedNow.getTime() + 5 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -183,8 +188,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该跳过已发送过该阶段提醒的密钥', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -224,9 +229,9 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该正确计算剩余天数', async () => {
-      const now = new Date()
+      // const now = fixedNow
       // 7.5 天后到期（应该向下取整为7天）
-      const expiresIn7Point5Days = new Date(now.getTime() + 7.5 * 24 * 60 * 60 * 1000)
+      const expiresIn7Point5Days = new Date(fixedNow.getTime() + 7.5 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -257,9 +262,9 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该为同一用户的多个到期密钥分别发送提醒', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const expiresIn3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const expiresIn3Days = new Date(fixedNow.getTime() + 3 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -331,8 +336,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该处理没有提醒配置的用户（使用默认配置）', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -358,8 +363,8 @@ describe('ExpirationCheckService', () => {
 
   describe('checkUserExpirations() - 检查单个用户的到期密钥', () => {
     it('应该检查指定用户的到期密钥', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -402,8 +407,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该只检查指定用户的密钥，不影响其他用户', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       // 只返回 user-1 的密钥
       const mockKeys = [
@@ -449,8 +454,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该处理通知发送失败', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -484,8 +489,8 @@ describe('ExpirationCheckService', () => {
     })
 
     it('应该继续处理其他密钥，即使某个失败', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {

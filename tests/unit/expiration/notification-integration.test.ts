@@ -45,17 +45,19 @@ import { sendWebhook } from '@/lib/webhook/client'
 describe('ExpirationCheckService + NotificationService 集成测试', () => {
   let expirationService: ExpirationCheckService
   let notificationService: NotificationService
+  let fixedNow: Date
 
   beforeEach(() => {
     jest.clearAllMocks()
-    expirationService = new ExpirationCheckService()
+    // 使用固定时间避免时间差异
+    fixedNow = new Date('2025-10-04T00:00:00.000Z')
+    expirationService = new ExpirationCheckService(undefined, () => fixedNow)
     notificationService = new NotificationService()
   })
 
   describe('完整流程：检查到期 -> 发送通知 -> 记录提醒', () => {
     it('应该完整执行：发现到期密钥 -> 发送多渠道通知 -> 创建提醒记录', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       // 1. Mock 到期密钥
       const mockKeys = [
@@ -205,8 +207,8 @@ describe('ExpirationCheckService + NotificationService 集成测试', () => {
     })
 
     it('应该在通知配置禁用时使用默认渠道', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -262,9 +264,8 @@ describe('ExpirationCheckService + NotificationService 集成测试', () => {
     })
 
     it('应该在多个密钥到期时批量发送通知', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const expiresIn3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const expiresIn3Days = new Date(fixedNow.getTime() + 3 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -338,8 +339,8 @@ describe('ExpirationCheckService + NotificationService 集成测试', () => {
 
   describe('通知内容验证', () => {
     it('应该生成包含完整信息的通知消息', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -406,8 +407,8 @@ describe('ExpirationCheckService + NotificationService 集成测试', () => {
     })
 
     it('应该根据剩余天数调整通知紧急程度', async () => {
-      const now = new Date()
-      const expiresIn1Day = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn1Day = new Date(fixedNow.getTime() + 1 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
@@ -468,8 +469,8 @@ describe('ExpirationCheckService + NotificationService 集成测试', () => {
 
   describe('错误场景处理', () => {
     it('应该在通知发送失败时不创建提醒记录', async () => {
-      const now = new Date()
-      const expiresIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // const now = fixedNow
+      const expiresIn7Days = new Date(fixedNow.getTime() + 7 * 24 * 60 * 60 * 1000)
 
       const mockKeys = [
         {
