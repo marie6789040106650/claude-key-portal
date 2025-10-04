@@ -94,13 +94,17 @@ export function generateTokens(userId: string, email: string | null) {
 export async function createSession(
   userId: string,
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
+  ip: string = '0.0.0.0',
+  userAgent: string = 'Unknown'
 ) {
   const session = await prisma.session.create({
     data: {
       userId,
       accessToken,
       refreshToken,
+      ip, // Required field
+      userAgent, // Required field
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     },
   })

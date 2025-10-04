@@ -46,7 +46,6 @@ describe('CRS Integration Tests', () => {
     const result = await crsClient.createKey({
       name: `integration_test_${Date.now()}`,
       description: 'Integration test key - safe to delete',
-      monthlyLimit: 1000,
     })
 
     expect(result).toHaveProperty('id')

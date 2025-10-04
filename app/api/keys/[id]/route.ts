@@ -17,11 +17,31 @@ import { z } from 'zod'
 const updateKeySchema = z.object({
   name: z.string().max(100, '密钥名称不能超过100个字符').optional(),
   description: z.string().optional(),
-  monthlyLimit: z.number().int().positive('月限额必须为正数').optional(),
-  status: z.enum(['ACTIVE', 'PAUSED'], {
-    errorMap: () => ({ message: '状态值必须是ACTIVE或PAUSED' }),
+  status: z.enum(['ACTIVE', 'INACTIVE'], {
+    errorMap: () => ({ message: '状态值必须是ACTIVE或INACTIVE' }),
   }).optional(),
   tags: z.array(z.string(), { invalid_type_error: '标签必须是数组' }).optional(),
+  expiresAt: z
+    .string()
+    .datetime({ message: '无效的日期格式' })
+    .nullable()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value) return true // null 或 undefined 允许
+        const date = new Date(value)
+        return !isNaN(date.getTime()) // 验证日期有效性
+      },
+      { message: '无效的日期格式' }
+    )
+    .refine(
+      (value) => {
+        if (!value) return true // null 或 undefined 允许
+        const date = new Date(value)
+        return date > new Date() // 不能是过去的日期
+      },
+      { message: '到期时间不能设置为过去' }
+    ),
 })
 
 /**
@@ -134,9 +154,9 @@ export async function PATCH(
     }
 
     // 7. 分离CRS字段和本地字段
-    const { tags, ...crsFields } = validatedData
+    const { tags, expiresAt, ...crsFields } = validatedData
     const hasCrsUpdate = Object.keys(crsFields).length > 0
-    const hasLocalUpdate = tags !== undefined
+    const hasLocalUpdate = tags !== undefined || expiresAt !== undefined
 
     // 8. 更新CRS（如果有CRS字段更新）
     if (hasCrsUpdate) {
@@ -155,7 +175,12 @@ export async function PATCH(
     }
 
     if (hasLocalUpdate) {
-      updateData.tags = tags
+      if (tags !== undefined) {
+        updateData.tags = tags
+      }
+      if (expiresAt !== undefined) {
+        updateData.expiresAt = expiresAt ? new Date(expiresAt) : null
+      }
     }
 
     try {
@@ -166,23 +191,34 @@ export async function PATCH(
           id: true,
           userId: true,
           crsKeyId: true,
+          crsKey: true,
           name: true,
-          keyPrefix: true,
-          keyMasked: true,
-          keyValue: false, // 不返回完整密钥
           description: true,
           status: true,
           tags: true,
-          monthlyLimit: true,
-          monthlyUsage: true,
           totalTokens: true,
-          totalRequests: true,
+          totalCalls: true,
           createdAt: true,
           lastUsedAt: true,
+          expiresAt: true,
         },
       })
 
-      return NextResponse.json({ key: updatedKey })
+      // 生成掩码用于响应
+      const keyMasked = updatedKey.crsKey.length >= 8
+        ? `${updatedKey.crsKey.match(/^(sk-[a-z]+-)/i)?.[1] || 'sk-'}***${updatedKey.crsKey.slice(-4)}`
+        : updatedKey.crsKey
+      const keyPrefix = updatedKey.crsKey.match(/^(sk-[a-z]+-)/i)?.[1] || 'sk-'
+
+      return NextResponse.json({
+        key: {
+          ...updatedKey,
+          keyPrefix,
+          keyMasked,
+          totalTokens: Number(updatedKey.totalTokens),
+          totalRequests: Number(updatedKey.totalCalls),
+        }
+      })
     } catch (error) {
       console.error('Local key update failed:', error)
       return NextResponse.json(
@@ -290,7 +326,6 @@ export async function DELETE(
           where: { id: params.id },
           data: {
             status: 'DELETED',
-            deletedAt: new Date(),
           },
         })
       }

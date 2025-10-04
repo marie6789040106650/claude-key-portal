@@ -50,21 +50,11 @@ async function testCrsStats() {
     console.log('2️⃣  测试 Dashboard 数据获取...')
     const dashboard = await crsClient.getDashboard()
     console.log('✅ Dashboard 数据获取成功!')
-    console.log('   Overview:')
-    console.log(`     总密钥数: ${dashboard.overview?.totalApiKeys || 0}`)
-    console.log(`     活跃密钥: ${dashboard.overview?.activeApiKeys || 0}`)
-    console.log(`     总Token使用: ${dashboard.overview?.totalTokensUsed || 0}`)
-    console.log(`     总请求数: ${dashboard.overview?.totalRequestsUsed || 0}`)
-    console.log('   Recent Activity:')
-    console.log(
-      `     今日创建密钥: ${dashboard.recentActivity?.apiKeysCreatedToday || 0}`
-    )
-    console.log(
-      `     今日请求数: ${dashboard.recentActivity?.requestsToday || 0}`
-    )
-    console.log(
-      `     今日Token数: ${dashboard.recentActivity?.tokensToday || 0}\n`
-    )
+    console.log('   Dashboard Statistics:')
+    console.log(`     总密钥数: ${dashboard.totalKeys || 0}`)
+    console.log(`     活跃密钥: ${dashboard.activeKeys || 0}`)
+    console.log(`     总Token使用: ${dashboard.totalTokens || 0}`)
+    console.log(`     总请求数: ${dashboard.totalRequests || 0}\n`)
 
     // ============================================
     // 测试 3: 创建测试密钥 (用于 Stats 测试)
@@ -72,7 +62,6 @@ async function testCrsStats() {
     console.log('3️⃣  创建测试密钥...')
     const testKey = await crsClient.createKey({
       name: `stats_test_${Date.now()}`,
-      isActive: true,
     })
     testKeyId = testKey.id
     testApiKey = testKey.key

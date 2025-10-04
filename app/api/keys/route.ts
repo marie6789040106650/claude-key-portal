@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     }
 
     // 4. 验证状态参数
-    const validStatuses = ['ACTIVE', 'PAUSED', 'DELETED', 'EXPIRED']
+    const validStatuses = ['ACTIVE', 'INACTIVE', 'DELETED', 'EXPIRED', 'RATE_LIMITED']
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json(
         { error: '状态参数不正确' },
@@ -80,19 +80,16 @@ export async function GET(request: Request) {
           id: true,
           userId: true,
           crsKeyId: true,
+          crsKey: true, // 完整密钥值
           name: true,
-          keyPrefix: true,
-          keyMasked: true,
-          keyValue: false, // 不返回完整密钥
           description: true,
           status: true,
           tags: true,
-          monthlyLimit: true,
-          monthlyUsage: true,
           totalTokens: true,
-          totalRequests: true,
+          totalCalls: true, // 替代 totalRequests
           createdAt: true,
           lastUsedAt: true,
+          expiresAt: true,
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -101,16 +98,39 @@ export async function GET(request: Request) {
       prisma.apiKey.count({ where }),
     ])
 
-    // 7. 构建响应
+    // 7. 转换数据并计算掩码
+    const keysWithMask = keys.map(key => {
+      const keyMasked = generateKeyMask(key.crsKey)
+      const keyPrefix = key.crsKey.match(/^(sk-[a-z]+-)/i)?.[1] || 'sk-'
+
+      return {
+        id: key.id,
+        userId: key.userId,
+        crsKeyId: key.crsKeyId,
+        name: key.name,
+        keyPrefix,
+        keyMasked,
+        description: key.description,
+        status: key.status,
+        tags: key.tags,
+        totalTokens: Number(key.totalTokens), // BigInt -> Number
+        totalRequests: Number(key.totalCalls), // 映射字段名
+        createdAt: key.createdAt,
+        lastUsedAt: key.lastUsedAt,
+        expiresAt: key.expiresAt,
+      }
+    })
+
+    // 8. 构建响应
     const response: any = {
-      keys,
+      keys: keysWithMask,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     }
 
-    // 8. CRS同步（可选）
+    // 9. CRS同步（可选）
     if (sync) {
       try {
         const crsKeys = await crsClient.listKeys(userId)
@@ -118,7 +138,7 @@ export async function GET(request: Request) {
 
         // 检查数据一致性
         const syncIssues: any[] = []
-        for (const localKey of keys) {
+        for (const localKey of keysWithMask) {
           const crsKey = crsKeys.find(
             (k: any) => k.id === localKey.crsKeyId
           )
@@ -160,11 +180,6 @@ const createKeySchema = z.object({
     .min(1, '密钥名称不能为空')
     .max(100, '密钥名称不能超过100个字符'),
   description: z.string().optional(),
-  monthlyLimit: z
-    .number()
-    .int()
-    .positive('月限额必须为正数')
-    .optional(),
   tags: z.array(z.string(), { invalid_type_error: '标签必须是数组' }).optional(),
 })
 
@@ -248,7 +263,6 @@ export async function POST(request: Request) {
       crsKey = await crsClient.createKey({
         name: validatedData.name,
         description: validatedData.description,
-        monthlyLimit: validatedData.monthlyLimit,
       })
     } catch (error: any) {
       return handleCrsError(error)
@@ -256,45 +270,47 @@ export async function POST(request: Request) {
 
     // 6. 创建本地映射
     try {
-      const keyPrefix = crsKey.key.match(/^(sk-[a-z]+-)/i)?.[1] || 'sk-'
-      const keyMasked = generateKeyMask(crsKey.key)
-
       const localKey = await prisma.apiKey.create({
         data: {
           userId,
           crsKeyId: crsKey.id,
+          crsKey: crsKey.key, // 存储完整密钥
           name: validatedData.name,
-          keyPrefix,
-          keyMasked,
-          keyValue: crsKey.key,
           description: validatedData.description,
           status: crsKey.status || 'ACTIVE',
           tags: validatedData.tags || [],
-          monthlyLimit: validatedData.monthlyLimit,
-          monthlyUsage: 0,
           totalTokens: 0,
-          totalRequests: 0,
+          totalCalls: 0,
         },
         select: {
           id: true,
           userId: true,
           crsKeyId: true,
+          crsKey: true, // 创建时返回完整密钥
           name: true,
-          keyPrefix: true,
-          keyMasked: true,
-          keyValue: true, // 创建时返回完整密钥
           description: true,
           status: true,
           tags: true,
-          monthlyLimit: true,
-          monthlyUsage: true,
+          totalTokens: true,
+          totalCalls: true,
           createdAt: true,
         },
       })
 
+      // 计算掩码用于响应
+      const keyMasked = generateKeyMask(localKey.crsKey)
+      const keyPrefix = localKey.crsKey.match(/^(sk-[a-z]+-)/i)?.[1] || 'sk-'
+
       return NextResponse.json(
         {
-          key: localKey,
+          key: {
+            ...localKey,
+            keyPrefix,
+            keyMasked,
+            keyValue: localKey.crsKey, // 创建时返回完整密钥
+            totalTokens: Number(localKey.totalTokens),
+            totalRequests: Number(localKey.totalCalls),
+          },
           warning:
             '请妥善保管密钥，此密钥只会显示一次！',
         },
