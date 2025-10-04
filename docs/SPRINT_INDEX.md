@@ -17,7 +17,8 @@
 | Sprint 5 | 账户设置 | [TODOLIST](./SPRINT_5_TODOLIST.md) | [SUMMARY](./SPRINT_5_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT5.md) | ✅ |
 | Sprint 6 | 通知系统 | [TODOLIST](./SPRINT_6_TODOLIST.md) | [SUMMARY](./SPRINT_6_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT6.md) | ✅ |
 | Sprint 7 | API Key到期提醒 | [TODOLIST](./SPRINT_7_TODOLIST.md) | [SUMMARY](./SPRINT_7_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT7.md) | ✅ |
-| Sprint 8 | Cron Job定时任务 | [TODOLIST](./SPRINT_8_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 📋 待开始 |
+| Sprint 8 | Cron Job定时任务 | [TODOLIST](./SPRINT_8_TODOLIST.md) | [SUMMARY](./SPRINT_8_SUMMARY.md) | - | ✅ |
+| Sprint 9 | 监控告警系统 | [TODOLIST](./SPRINT_9_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 📋 待开始 |
 
 **图例**:
 ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始

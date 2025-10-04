@@ -23,7 +23,8 @@
     "cron": "tsx scripts/cron.ts",
     "cron:check": "tsx scripts/cron.ts check",
     "cron:sync": "tsx scripts/cron.ts sync",
-    "cron:cleanup": "tsx scripts/cron.ts cleanup"
+    "cron:cleanup": "tsx scripts/cron.ts cleanup",
+    "cron:monitor": "tsx scripts/cron.ts monitor"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

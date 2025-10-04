@@ -532,3 +532,117 @@ enum CronJobStatus {
   SUCCESS
   FAILED
 }
+
+// ============================================
+// 监控告警系统
+// ============================================
+
+// 监控指标表
+model MonitorMetric {
+  id   String     @id @default(uuid())
+  type MetricType
+
+  // 指标信息
+  name  String
+  value Float
+  unit  String?
+  tags  Json?
+
+  // 时间
+  timestamp DateTime @default(now())
+
+  @@index([type])
+  @@index([name])
+  @@index([timestamp])
+  @@map("monitor_metrics")
+}
+
+enum MetricType {
+  RESPONSE_TIME
+  QPS
+  CPU_USAGE
+  MEMORY_USAGE
+  DATABASE_QUERY
+  API_SUCCESS_RATE
+}
+
+// 告警规则表
+model AlertRule {
+  id   String         @id @default(uuid())
+  name String
+
+  // 规则配置
+  metric    MetricType
+  condition AlertCondition
+  threshold Float
+  duration  Int // 持续时间（秒）
+  severity  AlertSeverity
+  enabled   Boolean        @default(true)
+  channels  String[] // 通知渠道：email, webhook, system
+
+  // 时间
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关系
+  alerts AlertRecord[]
+
+  @@index([metric])
+  @@index([enabled])
+  @@map("alert_rules")
+}
+
+enum AlertCondition {
+  GREATER_THAN
+  LESS_THAN
+  EQUAL_TO
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+// 告警记录表
+model AlertRecord {
+  id     String @id @default(uuid())
+  ruleId String
+
+  // 告警信息
+  status      AlertStatus @default(FIRING)
+  message     String      @db.Text
+  value       Float
+  triggeredAt DateTime    @default(now())
+  resolvedAt  DateTime?
+
+  // 关系
+  rule AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@index([status])
+  @@index([triggeredAt])
+  @@map("alert_records")
+}
+
+enum AlertStatus {
+  FIRING
+  RESOLVED
+  SILENCED
+}
+
+// 系统健康状态表
+model SystemHealth {
+  id   String @id @default(uuid())
+
+  // 健康状态
+  status   String // healthy, degraded, unhealthy
+  services Json // 各服务健康状态
+
+  // 时间
+  timestamp DateTime @default(now())
+
+  @@index([timestamp])
+  @@map("system_health")
+}
