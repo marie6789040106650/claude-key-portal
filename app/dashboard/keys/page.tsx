@@ -20,7 +20,7 @@ export default function KeysPage() {
 
   // 获取密钥列表
   const {
-    data: keys = [],
+    data,
     isLoading,
     error: queryError,
     refetch,
@@ -34,6 +34,12 @@ export default function KeysPage() {
       return response.json()
     },
   })
+
+  // 解构API响应
+  const keys = data?.keys || []
+  const total = data?.total || 0
+  const page = data?.page || 1
+  const limit = data?.limit || 10
 
   // 将错误转换为中文
   const error = queryError ? new Error(

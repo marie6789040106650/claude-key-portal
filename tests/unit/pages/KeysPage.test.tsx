@@ -70,6 +70,15 @@ describe('KeysPage', () => {
     },
   ]
 
+  // API响应格式
+  const mockApiResponse = {
+    keys: mockKeys,
+    total: mockKeys.length,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
     ;(global.fetch as jest.Mock).mockReset()
@@ -79,7 +88,7 @@ describe('KeysPage', () => {
     it('应该渲染页面标题', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -90,7 +99,7 @@ describe('KeysPage', () => {
     it('应该渲染搜索框', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -104,7 +113,7 @@ describe('KeysPage', () => {
     it('应该渲染创建密钥按钮', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -117,7 +126,7 @@ describe('KeysPage', () => {
     it('应该渲染状态过滤器', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -128,7 +137,7 @@ describe('KeysPage', () => {
     it('应该渲染密钥表格', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -153,7 +162,7 @@ describe('KeysPage', () => {
     it('加载成功应该显示密钥列表', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -182,7 +191,7 @@ describe('KeysPage', () => {
     it('应该调用正确的 API 端点', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -197,7 +206,7 @@ describe('KeysPage', () => {
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => mockKeys,
+          json: async () => mockApiResponse,
         })
 
       renderWithClient(<KeysPage />)
@@ -219,7 +228,7 @@ describe('KeysPage', () => {
     it('点击创建按钮应该打开表单对话框', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -249,7 +258,7 @@ describe('KeysPage', () => {
       // 初始加载
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -266,16 +275,22 @@ describe('KeysPage', () => {
       const nameInput = screen.getByLabelText('密钥名称')
       await user.type(nameInput, 'New Test Key')
 
-      // 提交创建请求
+      // 提交创建请求（API返回 { key: {...}, warning }）
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => newKey,
+        json: async () => ({ key: newKey, warning: '请妥善保管密钥' }),
       })
 
       // 刷新列表
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => [...mockKeys, newKey],
+        json: async () => ({
+          keys: [...mockKeys, newKey],
+          total: 3,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        }),
       })
 
       const submitButton = screen.getByTestId('submit-button')
@@ -290,7 +305,7 @@ describe('KeysPage', () => {
       const user = userEvent.setup()
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -324,7 +339,7 @@ describe('KeysPage', () => {
       const user = userEvent.setup()
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -355,7 +370,7 @@ describe('KeysPage', () => {
     it('点击编辑按钮应该打开表单对话框', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -376,7 +391,7 @@ describe('KeysPage', () => {
     it('编辑对话框应该预填充数据', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -398,7 +413,7 @@ describe('KeysPage', () => {
       const user = userEvent.setup()
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -414,20 +429,30 @@ describe('KeysPage', () => {
       await user.clear(nameInput)
       await user.type(nameInput, 'Updated Production Key')
 
+      // PATCH响应（API返回 { key: {...} }）
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          ...mockKeys[0],
-          name: 'Updated Production Key',
+          key: {
+            ...mockKeys[0],
+            name: 'Updated Production Key',
+          },
         }),
       })
 
+      // 刷新列表
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => [
-          { ...mockKeys[0], name: 'Updated Production Key' },
-          mockKeys[1],
-        ],
+        json: async () => ({
+          keys: [
+            { ...mockKeys[0], name: 'Updated Production Key' },
+            mockKeys[1],
+          ],
+          total: 2,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        }),
       })
 
       const submitButton = screen.getByTestId('submit-button')
@@ -443,7 +468,7 @@ describe('KeysPage', () => {
     it('点击删除按钮应该显示确认对话框', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -466,7 +491,7 @@ describe('KeysPage', () => {
     it('确认删除应该调用 API', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -478,14 +503,22 @@ describe('KeysPage', () => {
       const deleteButton = screen.getByTestId('delete-button-key-1')
       fireEvent.click(deleteButton)
 
+      // DELETE响应
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
       })
 
+      // 刷新列表
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => [mockKeys[1]],
+        json: async () => ({
+          keys: [mockKeys[1]],
+          total: 1,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        }),
       })
 
       const confirmButton = screen.getByTestId('confirm-delete-button')
@@ -504,7 +537,7 @@ describe('KeysPage', () => {
     it('删除成功应该从列表移除密钥', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -516,14 +549,22 @@ describe('KeysPage', () => {
       const deleteButton = screen.getByTestId('delete-button-key-1')
       fireEvent.click(deleteButton)
 
+      // DELETE响应
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
       })
 
+      // 刷新列表
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => [mockKeys[1]],
+        json: async () => ({
+          keys: [mockKeys[1]],
+          total: 1,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        }),
       })
 
       const confirmButton = screen.getByTestId('confirm-delete-button')
@@ -540,7 +581,7 @@ describe('KeysPage', () => {
     it('取消删除应该关闭对话框', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -572,7 +613,7 @@ describe('KeysPage', () => {
     it('删除失败应该显示错误提示', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -603,7 +644,7 @@ describe('KeysPage', () => {
       const user = userEvent.setup()
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -627,7 +668,7 @@ describe('KeysPage', () => {
     it('状态过滤应该正确工作', async () => {
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)
@@ -650,7 +691,7 @@ describe('KeysPage', () => {
       const user = userEvent.setup()
       ;(global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockKeys,
+        json: async () => mockApiResponse,
       })
 
       renderWithClient(<KeysPage />)

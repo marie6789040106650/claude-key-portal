@@ -7,7 +7,7 @@
 /**
  * API 密钥状态枚举
  */
-export type ApiKeyStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
+export type ApiKeyStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED' | 'DELETED' | 'RATE_LIMITED'
 
 /**
  * API 密钥对象
@@ -179,7 +179,7 @@ export interface KeysListResponse {
   page: number
 
   /** 每页数量 */
-  pageSize: number
+  limit: number
 
   /** 总页数 */
   totalPages: number

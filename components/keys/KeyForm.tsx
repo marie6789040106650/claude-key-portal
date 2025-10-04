@@ -96,7 +96,7 @@ function KeyFormComponent({
 
       // 确定 API 端点和方法
       const url = mode === 'edit' ? `/api/keys/${initialData?.id}` : '/api/keys'
-      const method = mode === 'edit' ? 'PUT' : 'POST'
+      const method = mode === 'edit' ? 'PATCH' : 'POST'
 
       const response = await fetch(url, {
         method,

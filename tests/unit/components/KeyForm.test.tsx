@@ -395,7 +395,7 @@ describe('KeyForm', () => {
         expect(global.fetch).toHaveBeenCalledWith(
           '/api/keys/key-1',
           expect.objectContaining({
-            method: 'PUT',
+            method: 'PATCH',
           })
         )
       })
