@@ -12,9 +12,12 @@ import type { ApiKey } from '@/types/keys'
 export default function KeysPage() {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [isKeyDisplayOpen, setIsKeyDisplayOpen] = useState(false)
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null)
   const [deletingKey, setDeletingKey] = useState<ApiKey | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [newKeyData, setNewKeyData] = useState<{ name: string; key: string } | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -33,6 +36,10 @@ export default function KeysPage() {
       }
       return response.json()
     },
+    staleTime: 30 * 1000, // 30秒内认为数据是新鲜的
+    gcTime: 5 * 60 * 1000, // 缓存5分钟
+    refetchOnWindowFocus: true, // 窗口获得焦点时刷新
+    refetchOnReconnect: true, // 网络重连时刷新
   })
 
   // 解构API响应
@@ -104,18 +111,34 @@ export default function KeysPage() {
 
   // 复制密钥
   const handleCopy = useCallback(async (keyId: string) => {
-    // 这里应该复制实际的密钥值
-    // 但由于我们只存储了 keyMasked，所以这里只是一个占位符
-    console.log('Copy key:', keyId)
-  }, [])
+    const key = keys.find((k) => k.id === keyId)
+    if (!key) return
+
+    try {
+      await navigator.clipboard.writeText(key.keyMasked)
+      // TODO: 使用 toast 替代 alert
+      alert(`已复制掩码密钥: ${key.keyMasked}`)
+    } catch (error) {
+      alert('复制失败，请手动复制')
+    }
+  }, [keys])
 
   // 表单提交成功
-  const handleFormSuccess = useCallback(async () => {
+  const handleFormSuccess = useCallback(async (result: any) => {
     // 刷新列表
     await refetch()
-    // 关闭对话框
+    // 关闭表单对话框
     setIsFormDialogOpen(false)
     setEditingKey(null)
+
+    // 如果是创建操作且返回了完整密钥，显示密钥对话框
+    if (result?.key?.keyValue) {
+      setNewKeyData({
+        name: result.key.name,
+        key: result.key.keyValue,
+      })
+      setIsKeyDisplayOpen(true)
+    }
   }, [refetch])
 
   // 取消表单
@@ -172,11 +195,11 @@ export default function KeysPage() {
       {isConfirmDialogOpen && (
         <div
           data-testid="confirm-dialog"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-200"
           onClick={handleCancelDelete}
         >
           <div
-            className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full"
+            className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">确认删除</h2>
@@ -204,6 +227,79 @@ export default function KeysPage() {
                 onClick={handleConfirmDelete}
               >
                 确认删除
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 显示新创建的完整密钥对话框 */}
+      {isKeyDisplayOpen && newKeyData && (
+        <div
+          data-testid="key-display-dialog"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsKeyDisplayOpen(false)
+              setNewKeyData(null)
+              setCopied(false)
+            }
+          }}
+        >
+          <div
+            className="bg-background p-6 rounded-lg shadow-lg max-w-2xl w-full mx-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold mb-4">✅ 密钥创建成功</h2>
+
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-4 mb-4">
+              <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                ⚠️ 重要提示
+              </p>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                请妥善保管此密钥，它只会显示一次！离开此页面后将无法再次查看完整密钥。
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">密钥名称</label>
+                <p className="text-lg font-semibold">{newKeyData.name}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">完整密钥</label>
+                <div className="flex gap-2 mt-1">
+                  <code className="flex-1 bg-muted px-4 py-3 rounded font-mono text-sm break-all">
+                    {newKeyData.key}
+                  </code>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(newKeyData.key)
+                        setCopied(true)
+                        setTimeout(() => setCopied(false), 2000)
+                      } catch (error) {
+                        alert('复制失败，请手动复制')
+                      }
+                    }}
+                    variant={copied ? "default" : "outline"}
+                  >
+                    {copied ? '✓ 已复制' : '复制'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <Button
+                onClick={() => {
+                  setIsKeyDisplayOpen(false)
+                  setNewKeyData(null)
+                  setCopied(false)
+                }}
+              >
+                我已保存，关闭
               </Button>
             </div>
           </div>
