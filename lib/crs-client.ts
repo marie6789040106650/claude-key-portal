@@ -316,6 +316,14 @@ class CrsClient {
   }> {
     return this.request('/dashboard')
   }
+
+  /**
+   * 健康检查
+   */
+  async healthCheck(): Promise<{ status: string }> {
+    // 简单的ping检查,验证CRS服务可用
+    return this.request('/health')
+  }
 }
 
 // 导出单例

@@ -222,7 +222,8 @@ describe('NotificationService', () => {
         message: '测试',
       }
 
-      await service.send(input)
+      // 所有渠道都失败时，应该抛出错误
+      await expect(service.send(input)).rejects.toThrow('所有通知渠道发送失败')
 
       // 等待异步错误处理完成
       await new Promise((resolve) => setTimeout(resolve, 100))
