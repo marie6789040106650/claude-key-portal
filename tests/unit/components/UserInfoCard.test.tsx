@@ -35,8 +35,10 @@ describe('UserInfoCard', () => {
     it('应该渲染用户基本信息', () => {
       render(<UserInfoCard user={mockUser} />)
 
-      expect(screen.getByText('Test User')).toBeInTheDocument()
-      expect(screen.getByText('test@example.com')).toBeInTheDocument()
+      const nickname = screen.getByTestId('user-nickname')
+      const email = screen.getByTestId('user-email')
+      expect(nickname).toHaveTextContent('Test User')
+      expect(email).toHaveTextContent('test@example.com')
     })
 
     it('应该显示用户头像', () => {
@@ -49,22 +51,28 @@ describe('UserInfoCard', () => {
     it('应该显示注册时间', () => {
       render(<UserInfoCard user={mockUser} />)
 
-      expect(screen.getByText(/注册于/)).toBeInTheDocument()
-      expect(screen.getByText(/2025-01-01/)).toBeInTheDocument()
+      const registerDate = screen.getByTestId('user-register-date')
+      expect(registerDate).toBeInTheDocument()
+      expect(registerDate).toHaveTextContent('注册于')
+      expect(registerDate.textContent).toMatch(/2025-01-01/)
     })
 
     it('应该显示密钥数量', () => {
       render(<UserInfoCard user={mockUser} />)
 
-      expect(screen.getByText('5')).toBeInTheDocument()
-      expect(screen.getByText('个密钥')).toBeInTheDocument()
+      const keyCount = screen.getByTestId('user-api-key-count')
+      expect(keyCount).toBeInTheDocument()
+      expect(keyCount).toHaveTextContent('5')
+      expect(keyCount).toHaveTextContent('个密钥')
     })
 
     it('应该显示请求总数', () => {
       render(<UserInfoCard user={mockUser} />)
 
-      expect(screen.getByText('12,345')).toBeInTheDocument()
-      expect(screen.getByText('次请求')).toBeInTheDocument()
+      const totalRequests = screen.getByTestId('user-total-requests')
+      expect(totalRequests).toBeInTheDocument()
+      expect(totalRequests).toHaveTextContent('12,345')
+      expect(totalRequests).toHaveTextContent('次请求')
     })
   })
 
@@ -193,13 +201,15 @@ describe('UserInfoCard', () => {
     it('应该显示编辑按钮', () => {
       render(<UserInfoCard user={mockUser} editable />)
 
-      expect(screen.getByText('编辑资料')).toBeInTheDocument()
+      const editButton = screen.getByTestId('edit-profile-button')
+      expect(editButton).toBeInTheDocument()
+      expect(editButton).toHaveTextContent('编辑资料')
     })
 
     it('点击编辑按钮应该打开编辑表单', async () => {
       render(<UserInfoCard user={mockUser} editable />)
 
-      const editButton = screen.getByText('编辑资料')
+      const editButton = screen.getByTestId('edit-profile-button')
       fireEvent.click(editButton)
 
       await waitFor(() => {
@@ -212,7 +222,7 @@ describe('UserInfoCard', () => {
       const mockUpdate = jest.fn()
       render(<UserInfoCard user={mockUser} editable onUpdate={mockUpdate} />)
 
-      const editButton = screen.getByText('编辑资料')
+      const editButton = screen.getByTestId('edit-profile-button')
       fireEvent.click(editButton)
 
       const nicknameInput = screen.getByLabelText('昵称')
@@ -231,13 +241,15 @@ describe('UserInfoCard', () => {
     it('应该显示修改密码按钮', () => {
       render(<UserInfoCard user={mockUser} editable />)
 
-      expect(screen.getByText('修改密码')).toBeInTheDocument()
+      const changePasswordButton = screen.getByTestId('change-password-button')
+      expect(changePasswordButton).toBeInTheDocument()
+      expect(changePasswordButton).toHaveTextContent('修改密码')
     })
 
     it('点击修改密码应该打开密码表单', async () => {
       render(<UserInfoCard user={mockUser} editable />)
 
-      const changePasswordButton = screen.getByText('修改密码')
+      const changePasswordButton = screen.getByTestId('change-password-button')
       fireEvent.click(changePasswordButton)
 
       await waitFor(() => {
@@ -265,7 +277,8 @@ describe('UserInfoCard', () => {
       rerender(<UserInfoCard user={mockUser} loading={false} />)
 
       expect(screen.queryByTestId('skeleton-avatar')).not.toBeInTheDocument()
-      expect(screen.getByText('Test User')).toBeInTheDocument()
+      const nickname = screen.getByTestId('user-nickname')
+      expect(nickname).toHaveTextContent('Test User')
     })
   })
 
@@ -298,7 +311,7 @@ describe('UserInfoCard', () => {
 
       render(<UserInfoCard user={mockUser} editable />)
 
-      const editButton = screen.getByText('编辑资料')
+      const editButton = screen.getByTestId('edit-profile-button')
       fireEvent.click(editButton)
 
       const nicknameInput = screen.getByLabelText('昵称')
@@ -387,7 +400,8 @@ describe('UserInfoCard', () => {
 
       render(<UserInfoCard user={incompleteUser as any} />)
 
-      expect(screen.getByText('test@example.com')).toBeInTheDocument()
+      const email = screen.getByTestId('user-email')
+      expect(email).toHaveTextContent('test@example.com')
     })
 
     it('应该处理超长邮箱', () => {
@@ -398,7 +412,8 @@ describe('UserInfoCard', () => {
 
       render(<UserInfoCard user={longEmailUser} />)
 
-      const email = screen.getByText(longEmailUser.email)
+      const email = screen.getByTestId('user-email')
+      expect(email).toHaveTextContent(longEmailUser.email)
       expect(email).toHaveClass('truncate')
     })
 
@@ -410,7 +425,8 @@ describe('UserInfoCard', () => {
 
       render(<UserInfoCard user={longNameUser} />)
 
-      const nickname = screen.getByText(longNameUser.nickname)
+      const nickname = screen.getByTestId('user-nickname')
+      expect(nickname).toHaveTextContent(longNameUser.nickname)
       expect(nickname).toHaveClass('truncate')
     })
 
@@ -422,8 +438,9 @@ describe('UserInfoCard', () => {
 
       render(<UserInfoCard user={noKeysUser} />)
 
-      expect(screen.getByText('0')).toBeInTheDocument()
-      expect(screen.getByText('个密钥')).toBeInTheDocument()
+      const keyCount = screen.getByTestId('user-api-key-count')
+      expect(keyCount).toHaveTextContent('0')
+      expect(keyCount).toHaveTextContent('个密钥')
     })
 
     it('应该处理超大数字格式化', () => {
@@ -434,7 +451,8 @@ describe('UserInfoCard', () => {
 
       render(<UserInfoCard user={highUsageUser} />)
 
-      expect(screen.getByText('1,234,567,890')).toBeInTheDocument()
+      const totalRequests = screen.getByTestId('user-total-requests')
+      expect(totalRequests).toHaveTextContent('1,234,567,890')
     })
   })
 

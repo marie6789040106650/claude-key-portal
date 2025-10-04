@@ -40,8 +40,7 @@ export async function GET(request: Request) {
         id: true,
         status: true,
         totalTokens: true,
-        totalRequests: true,
-        monthlyUsage: true,
+        totalCalls: true,
       },
     })
 
@@ -49,10 +48,9 @@ export async function GET(request: Request) {
     const overview = {
       totalKeys,
       activeKeys: keys.filter((k) => k.status === 'ACTIVE').length,
-      pausedKeys: keys.filter((k) => k.status === 'PAUSED').length,
-      totalTokensUsed: keys.reduce((sum, k) => sum + (k.totalTokens || 0), 0),
-      totalRequests: keys.reduce((sum, k) => sum + (k.totalRequests || 0), 0),
-      monthlyUsage: keys.reduce((sum, k) => sum + (k.monthlyUsage || 0), 0),
+      inactiveKeys: keys.filter((k) => k.status === 'INACTIVE').length,
+      totalTokensUsed: keys.reduce((sum, k) => sum + Number(k.totalTokens || 0), 0),
+      totalRequests: keys.reduce((sum, k) => sum + Number(k.totalCalls || 0), 0),
     }
 
     // 6. 获取最近使用的密钥
@@ -62,7 +60,7 @@ export async function GET(request: Request) {
         id: true,
         name: true,
         lastUsedAt: true,
-        totalRequests: true,
+        totalCalls: true,
       },
       orderBy: { lastUsedAt: 'desc' },
       take: 5,
@@ -78,7 +76,7 @@ export async function GET(request: Request) {
     if (includeCrsStats) {
       try {
         const crsData = await crsClient.getDashboard()
-        response.crsStats = crsData.overview
+        response.crsStats = crsData
       } catch (error) {
         response.crsStatsError = 'CRS统计数据暂时不可用'
       }

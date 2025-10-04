@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest) {
     // 10. 更新密码
     await prisma.user.update({
       where: { id: decoded.userId },
-      data: { password: hashedNewPassword },
+      data: { passwordHash: hashedNewPassword },
     })
 
     // 11. 返回成功

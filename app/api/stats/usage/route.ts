@@ -68,11 +68,10 @@ async function getSingleKeyStats(
       id: true,
       userId: true,
       name: true,
-      keyValue: true,
+      crsKey: true, // 完整密钥值
       status: true,
       totalTokens: true,
-      totalRequests: true,
-      monthlyUsage: true,
+      totalCalls: true, // 替代 totalRequests
       createdAt: true,
       lastUsedAt: true,
     },
@@ -94,18 +93,17 @@ async function getSingleKeyStats(
       id: key.id,
       name: key.name,
       status: key.status,
-      totalTokens: key.totalTokens,
-      totalRequests: key.totalRequests,
-      monthlyUsage: key.monthlyUsage,
+      totalTokens: Number(key.totalTokens), // BigInt -> Number
+      totalRequests: Number(key.totalCalls), // 映射字段名
       createdAt: key.createdAt,
       lastUsedAt: key.lastUsedAt,
     },
   }
 
   // 5. 可选：从CRS获取实时统计
-  if (realtime && key.keyValue) {
+  if (realtime && key.crsKey) {
     try {
-      const realtimeStats = await crsClient.getKeyStats(key.keyValue)
+      const realtimeStats = await crsClient.getKeyStats(key.crsKey)
       response.key.realtimeStats = realtimeStats
     } catch (error) {
       response.crsWarning = '实时统计暂时不可用，显示缓存数据'
@@ -163,16 +161,15 @@ async function getAllKeysStats(
       name: true,
       status: true,
       totalTokens: true,
-      totalRequests: true,
-      monthlyUsage: true,
+      totalCalls: true, // 替代 totalRequests
       createdAt: true,
       lastUsedAt: true,
     },
   })
 
-  // 4. 聚合统计
-  const totalTokens = keys.reduce((sum, k) => sum + (k.totalTokens || 0), 0)
-  const totalRequests = keys.reduce((sum, k) => sum + (k.totalRequests || 0), 0)
+  // 4. 聚合统计（转换 BigInt）
+  const totalTokens = keys.reduce((sum, k) => sum + Number(k.totalTokens || BigInt(0)), 0)
+  const totalRequests = keys.reduce((sum, k) => sum + Number(k.totalCalls || BigInt(0)), 0)
 
   const summary = {
     totalTokens,
@@ -182,8 +179,15 @@ async function getAllKeysStats(
     keyCount: keys.length,
   }
 
+  // 5. 转换响应中的 BigInt
+  const keysResponse = keys.map(k => ({
+    ...k,
+    totalTokens: Number(k.totalTokens),
+    totalRequests: Number(k.totalCalls),
+  }))
+
   return NextResponse.json({
     summary,
-    keys,
+    keys: keysResponse,
   })
 }

@@ -21,6 +21,7 @@
 | Sprint 9 | 监控告警系统 | [TODOLIST](./SPRINT_9_TODOLIST.md) | [SUMMARY](./SPRINT_9_SUMMARY.md) | ⏳ 待创建 | ✅ |
 | Sprint 10 | 监控仪表板前端 | [TODOLIST](./SPRINT_10_TODOLIST.md) | [SUMMARY](./SPRINT_10_SUMMARY.md) | - | ✅ |
 | Sprint 11 | 用户认证和仪表板 | [TODOLIST](./SPRINT_11_TODOLIST.md) | [SUMMARY](./SPRINT_11_SUMMARY.md) | - | ✅ |
+| Sprint 12 | 测试修复和密钥管理 | [TODOLIST](./SPRINT_12_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 🚧 进行中 |
 
 **图例**:
 ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始
@@ -431,8 +432,8 @@
 
 **预计工期**: 3-4 天
 **开发分支**: `feature/key-management-ui`
-**状态**: 📋 待开始
-**计划开始时间**: 2025-10-05
+**状态**: 🚧 进行中
+**开始时间**: 2025-10-04
 
 **高优先级任务**:
 1. **修复 UserInfoCard 测试** (121 个失败测试)
