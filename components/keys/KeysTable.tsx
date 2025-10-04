@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import {
   Table,
   TableBody,
@@ -14,18 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ArrowUp, ArrowDown, Edit, Trash2, Copy, Plus } from 'lucide-react'
-
-interface ApiKey {
-  id: string
-  name: string
-  keyPrefix: string
-  keyMasked: string
-  status: 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
-  createdAt: string
-  totalRequests: number
-  totalTokens: number
-  lastUsedAt: string
-}
+import { getStatusBadgeVariant } from '@/lib/utils/keys'
+import type { ApiKey } from '@/types/keys'
 
 interface KeysTableProps {
   keys: ApiKey[]
@@ -45,7 +35,7 @@ interface KeysTableProps {
 type SortField = 'name' | 'createdAt' | null
 type SortOrder = 'asc' | 'desc'
 
-export function KeysTable({
+function KeysTableComponent({
   keys,
   onEdit,
   onDelete,
@@ -68,14 +58,17 @@ export function KeysTable({
   const [showCopyToast, setShowCopyToast] = useState(false)
 
   // 排序逻辑
-  const handleSort = (field: 'name' | 'createdAt') => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortOrder('asc')
-    }
-  }
+  const handleSort = useCallback((field: 'name' | 'createdAt') => {
+    setSortField((prevField) => {
+      if (prevField === field) {
+        setSortOrder((prev) => prev === 'asc' ? 'desc' : 'asc')
+        return field
+      } else {
+        setSortOrder('asc')
+        return field
+      }
+    })
+  }, [])
 
   // 过滤和排序后的数据
   const filteredAndSortedKeys = useMemo(() => {
@@ -118,38 +111,30 @@ export function KeysTable({
   )
 
   // 复制处理
-  const handleCopy = (keyId: string) => {
+  const handleCopy = useCallback((keyId: string) => {
     onCopy(keyId)
     setShowCopyToast(true)
     setTimeout(() => setShowCopyToast(false), 2000)
-  }
+  }, [onCopy])
 
   // 清除过滤
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setStatusFilter('ALL')
     setSearchQuery('')
-  }
+  }, [])
 
   // 选中处理
-  const handleToggleSelect = (keyId: string) => {
-    const newSelected = new Set(selectedKeys)
-    if (newSelected.has(keyId)) {
-      newSelected.delete(keyId)
-    } else {
-      newSelected.add(keyId)
-    }
-    setSelectedKeys(newSelected)
-  }
-
-  // 状态映射
-  const getStatusBadge = (status: string) => {
-    const statusMap = {
-      ACTIVE: { label: '激活', variant: 'default' as const },
-      INACTIVE: { label: '未激活', variant: 'secondary' as const },
-      EXPIRED: { label: '已过期', variant: 'destructive' as const },
-    }
-    return statusMap[status as keyof typeof statusMap] || statusMap.ACTIVE
-  }
+  const handleToggleSelect = useCallback((keyId: string) => {
+    setSelectedKeys((prev) => {
+      const newSelected = new Set(prev)
+      if (newSelected.has(keyId)) {
+        newSelected.delete(keyId)
+      } else {
+        newSelected.add(keyId)
+      }
+      return newSelected
+    })
+  }, [])
 
   return (
     <div data-testid="keys-table" className="space-y-4">
@@ -288,7 +273,7 @@ export function KeysTable({
         </TableHeader>
         <TableBody>
           {paginatedKeys.map((key) => {
-            const statusInfo = getStatusBadge(key.status)
+            const statusInfo = getStatusBadgeVariant(key.status)
             return (
               <TableRow key={key.id} data-testid={`key-row-${key.id}`}>
                 {selectable && (
@@ -385,3 +370,5 @@ export function KeysTable({
     </div>
   )
 }
+
+export const KeysTable = React.memo(KeysTableComponent)

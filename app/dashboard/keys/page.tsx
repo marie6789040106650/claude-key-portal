@@ -1,26 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeysTable } from '@/components/keys/KeysTable'
 import { KeyForm } from '@/components/keys/KeyForm'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
-
-interface ApiKey {
-  id: string
-  name: string
-  keyPrefix: string
-  keyMasked: string
-  status: 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
-  createdAt: string
-  totalRequests: number
-  totalTokens: number
-  lastUsedAt?: string
-  description?: string
-  rateLimit?: number
-}
+import type { ApiKey } from '@/types/keys'
 
 export default function KeysPage() {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
@@ -56,26 +43,26 @@ export default function KeysPage() {
   ) : null
 
   // 处理创建密钥
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     setEditingKey(null)
     setIsFormDialogOpen(true)
-  }
+  }, [])
 
   // 处理编辑密钥
-  const handleEdit = (key: ApiKey) => {
+  const handleEdit = useCallback((key: ApiKey) => {
     setEditingKey(key)
     setIsFormDialogOpen(true)
-  }
+  }, [])
 
   // 处理删除密钥
-  const handleDelete = (key: ApiKey) => {
+  const handleDelete = useCallback((key: ApiKey) => {
     setDeletingKey(key)
     setDeleteError(null)
     setIsConfirmDialogOpen(true)
-  }
+  }, [])
 
   // 确认删除
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deletingKey) return
 
     setDeleteError(null)
@@ -100,36 +87,36 @@ export default function KeysPage() {
     } catch (error) {
       setDeleteError('删除失败')
     }
-  }
+  }, [deletingKey, refetch])
 
   // 取消删除
-  const handleCancelDelete = () => {
+  const handleCancelDelete = useCallback(() => {
     setIsConfirmDialogOpen(false)
     setDeletingKey(null)
     setDeleteError(null)
-  }
+  }, [])
 
   // 复制密钥
-  const handleCopy = async (keyId: string) => {
+  const handleCopy = useCallback(async (keyId: string) => {
     // 这里应该复制实际的密钥值
     // 但由于我们只存储了 keyMasked，所以这里只是一个占位符
     console.log('Copy key:', keyId)
-  }
+  }, [])
 
   // 表单提交成功
-  const handleFormSuccess = async () => {
+  const handleFormSuccess = useCallback(async () => {
     // 刷新列表
     await refetch()
     // 关闭对话框
     setIsFormDialogOpen(false)
     setEditingKey(null)
-  }
+  }, [refetch])
 
   // 取消表单
-  const handleFormCancel = () => {
+  const handleFormCancel = useCallback(() => {
     setIsFormDialogOpen(false)
     setEditingKey(null)
-  }
+  }, [])
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -158,6 +145,14 @@ export default function KeysPage() {
       {/* 创建/编辑表单对话框 */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent data-testid="key-form-dialog" className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="sr-only">
+              密钥管理表单
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {editingKey ? '编辑现有密钥的信息' : '创建一个新的 API 密钥'}
+            </DialogDescription>
+          </DialogHeader>
           <KeyForm
             mode={editingKey ? 'edit' : 'create'}
             initialData={editingKey || undefined}

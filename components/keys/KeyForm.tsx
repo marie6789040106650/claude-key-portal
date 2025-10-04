@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -50,7 +50,7 @@ interface KeyFormProps {
   resetOnSuccess?: boolean
 }
 
-export function KeyForm({
+function KeyFormComponent({
   mode = 'create',
   initialData,
   onSuccess,
@@ -81,7 +81,7 @@ export function KeyForm({
 
   const isLoading = externalLoading || internalLoading || isSubmitting
 
-  const onSubmit = async (data: KeyFormData) => {
+  const onSubmit = useCallback(async (data: KeyFormData) => {
     setApiError(null)
     setInternalLoading(true)
 
@@ -134,7 +134,7 @@ export function KeyForm({
         setApiError('未知错误')
       }
     }
-  }
+  }, [mode, initialData?.id, resetOnSuccess, reset, onSuccess])
 
   const title = mode === 'create' ? '创建新密钥' : '编辑密钥'
   const submitButtonText = mode === 'create' ? '创建密钥' : '保存修改'
@@ -240,3 +240,5 @@ export function KeyForm({
     </form>
   )
 }
+
+export const KeyForm = React.memo(KeyFormComponent)
