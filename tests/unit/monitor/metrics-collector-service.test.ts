@@ -35,7 +35,7 @@ describe('MetricsCollectorService', () => {
     it('应该记录API响应时间', async () => {
       const mockMetric = {
         id: 'metric-1',
-        type: 'RESPONSE_TIME',
+        type: MetricType.RESPONSE_TIME,
         name: '/api/keys',
         value: 150,
         unit: 'ms',
@@ -49,7 +49,7 @@ describe('MetricsCollectorService', () => {
       expect(result).toEqual(mockMetric)
       expect(prisma.monitorMetric.create).toHaveBeenCalledWith({
         data: {
-          type: 'RESPONSE_TIME',
+          type: MetricType.RESPONSE_TIME,
           name: '/api/keys',
           value: 150,
           unit: 'ms',
@@ -86,7 +86,7 @@ describe('MetricsCollectorService', () => {
       expect(result).toBe(2) // 120 requests / 60 seconds = 2 QPS
       expect(prisma.monitorMetric.count).toHaveBeenCalledWith({
         where: {
-          type: 'RESPONSE_TIME',
+          type: MetricType.RESPONSE_TIME,
           timestamp: {
             gte: expect.any(Date),
             lte: now,
@@ -142,11 +142,15 @@ describe('MetricsCollectorService', () => {
 
       ;(prisma.monitorMetric.findMany as jest.Mock).mockResolvedValue([])
 
-      await service.getMetricsByTimeRange('RESPONSE_TIME', oneDayAgo, now)
+      await service.getMetricsByTimeRange(
+        MetricType.RESPONSE_TIME,
+        oneDayAgo,
+        now
+      )
 
       expect(prisma.monitorMetric.findMany).toHaveBeenCalledWith({
         where: {
-          type: 'RESPONSE_TIME',
+          type: MetricType.RESPONSE_TIME,
           timestamp: {
             gte: oneDayAgo,
             lte: now,
@@ -159,32 +163,46 @@ describe('MetricsCollectorService', () => {
 
   describe('内存使用统计', () => {
     it('应该记录内存使用量', async () => {
-      const memoryUsage = process.memoryUsage()
+      const mockMetric = {
+        id: 'metric-1',
+        type: MetricType.MEMORY_USAGE,
+        name: 'heapUsed',
+        value: expect.any(Number), // 动态值
+        unit: 'bytes',
+        timestamp: expect.any(Date),
+        tags: expect.objectContaining({
+          heapTotal: expect.any(Number),
+          rss: expect.any(Number),
+          external: expect.any(Number),
+        }),
+      }
 
-      ;(prisma.monitorMetric.create as jest.Mock).mockResolvedValue({})
+      ;(prisma.monitorMetric.create as jest.Mock).mockResolvedValue(mockMetric)
 
       await service.recordMemoryUsage()
 
       expect(prisma.monitorMetric.create).toHaveBeenCalledWith({
         data: {
-          type: 'MEMORY_USAGE',
+          type: MetricType.MEMORY_USAGE,
           name: 'heapUsed',
-          value: memoryUsage.heapUsed,
+          value: expect.any(Number),
           unit: 'bytes',
           timestamp: expect.any(Date),
           tags: expect.objectContaining({
-            heapTotal: memoryUsage.heapTotal,
-            rss: memoryUsage.rss,
+            heapTotal: expect.any(Number),
+            rss: expect.any(Number),
+            external: expect.any(Number),
           }),
         },
       })
     })
 
     it('应该计算内存使用趋势', async () => {
+      // Mock数据按时间降序（最新在前）
       const mockMetrics = [
-        { value: 100_000_000, timestamp: new Date('2025-10-04T09:00:00') },
+        { value: 150_000_000, timestamp: new Date('2025-10-04T10:00:00') }, // 最新
         { value: 120_000_000, timestamp: new Date('2025-10-04T09:30:00') },
-        { value: 150_000_000, timestamp: new Date('2025-10-04T10:00:00') },
+        { value: 100_000_000, timestamp: new Date('2025-10-04T09:00:00') }, // 最早
       ]
 
       ;(prisma.monitorMetric.findMany as jest.Mock).mockResolvedValue(
@@ -226,11 +244,14 @@ describe('MetricsCollectorService', () => {
     })
 
     it('应该处理异常值', async () => {
+      // IQR方法需要足够的数据点才能有效过滤
       const mockMetrics = [
         { value: 100 },
-        { value: 150 },
-        { value: 10000 }, // 异常值
+        { value: 105 },
+        { value: 110 },
+        { value: 115 },
         { value: 120 },
+        { value: 10000 }, // 异常值
       ]
 
       ;(prisma.monitorMetric.findMany as jest.Mock).mockResolvedValue(
@@ -241,8 +262,9 @@ describe('MetricsCollectorService', () => {
         excludeOutliers: true,
       })
 
-      // 应该排除异常值后计算
-      expect(result).toBeLessThan(200)
+      // 应该排除异常值后计算（平均值应该在100-130之间）
+      expect(result).toBeLessThan(130)
+      expect(result).toBeGreaterThan(100)
     })
   })
 })

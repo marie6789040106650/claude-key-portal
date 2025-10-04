@@ -12,7 +12,23 @@
 import { AlertRuleEngine } from '@/lib/services/alert-rule-engine'
 import { prisma } from '@/lib/prisma'
 import { NotificationService } from '@/lib/services/notification-service'
-import { AlertCondition, AlertSeverity, AlertStatus } from '@prisma/client'
+import {
+  AlertCondition,
+  AlertSeverity,
+  AlertStatus,
+  MetricType,
+} from '@prisma/client'
+
+// Mock email service
+jest.mock('@/lib/email/mailer', () => ({
+  sendEmail: jest.fn(),
+  generateEmailHtml: jest.fn(),
+}))
+
+// Mock webhook client
+jest.mock('@/lib/webhook/client', () => ({
+  sendWebhook: jest.fn(),
+}))
 
 // Mock dependencies
 jest.mock('@/lib/prisma', () => ({
@@ -47,13 +63,15 @@ describe('AlertRuleEngine', () => {
         {
           id: 'rule-1',
           name: 'High Response Time',
-          metric: 'RESPONSE_TIME',
-          condition: 'GREATER_THAN',
+          metric: MetricType.RESPONSE_TIME,
+          condition: AlertCondition.GREATER_THAN,
           threshold: 1000,
           duration: 60,
-          severity: 'WARNING',
+          severity: AlertSeverity.WARNING,
           enabled: true,
           channels: ['email', 'webhook'],
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ]
 
@@ -81,10 +99,10 @@ describe('AlertRuleEngine', () => {
     it('应该在值超过阈值时触发告警', async () => {
       const rule = {
         id: 'rule-1',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
-        severity: 'WARNING' as AlertSeverity,
+        severity: AlertSeverity.WARNING as AlertSeverity,
       }
 
       const shouldAlert = await engine.evaluateRule(rule, 1500)
@@ -95,10 +113,10 @@ describe('AlertRuleEngine', () => {
     it('应该在值低于阈值时不触发告警', async () => {
       const rule = {
         id: 'rule-1',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
-        severity: 'WARNING' as AlertSeverity,
+        severity: AlertSeverity.WARNING as AlertSeverity,
       }
 
       const shouldAlert = await engine.evaluateRule(rule, 500)
@@ -110,7 +128,7 @@ describe('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-2',
         metric: 'API_SUCCESS_RATE',
-        condition: 'LESS_THAN' as AlertCondition,
+        condition: AlertCondition.LESS_THAN as AlertCondition,
         threshold: 95,
         severity: 'ERROR' as AlertSeverity,
       }
@@ -126,7 +144,7 @@ describe('AlertRuleEngine', () => {
         metric: 'CUSTOM_METRIC',
         condition: 'EQUAL_TO' as AlertCondition,
         threshold: 0,
-        severity: 'CRITICAL' as AlertSeverity,
+        severity: AlertSeverity.CRITICAL as AlertSeverity,
       }
 
       const shouldAlert = await engine.evaluateRule(rule, 0)
@@ -140,10 +158,10 @@ describe('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-1',
         name: 'High Response Time',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
-        severity: 'WARNING' as AlertSeverity,
+        severity: AlertSeverity.WARNING as AlertSeverity,
         channels: ['email'],
       }
 
@@ -151,7 +169,7 @@ describe('AlertRuleEngine', () => {
       ;(prisma.alertRecord.create as jest.Mock).mockResolvedValue({
         id: 'alert-1',
         ruleId: 'rule-1',
-        status: 'FIRING',
+        status: AlertStatus.FIRING,
       })
 
       mockNotificationService.send = jest.fn().mockResolvedValue(undefined)
@@ -161,7 +179,7 @@ describe('AlertRuleEngine', () => {
       expect(prisma.alertRecord.create).toHaveBeenCalledWith({
         data: {
           ruleId: 'rule-1',
-          status: 'FIRING',
+          status: AlertStatus.FIRING,
           message: expect.stringContaining('High Response Time'),
           value: 1500,
           triggeredAt: expect.any(Date),
@@ -176,9 +194,9 @@ describe('AlertRuleEngine', () => {
         id: 'rule-1',
         name: 'Critical Error',
         metric: 'ERROR_RATE',
-        condition: 'GREATER_THAN' as AlertCondition,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 10,
-        severity: 'CRITICAL' as AlertSeverity,
+        severity: AlertSeverity.CRITICAL as AlertSeverity,
         channels: ['email', 'webhook'],
       }
 
@@ -196,7 +214,7 @@ describe('AlertRuleEngine', () => {
           type: 'ALERT',
           channels: ['email', 'webhook'],
           data: expect.objectContaining({
-            severity: 'CRITICAL',
+            severity: AlertSeverity.CRITICAL,
           }),
         })
       )
@@ -208,17 +226,17 @@ describe('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-1',
         name: 'High Response Time',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
-        severity: 'WARNING' as AlertSeverity,
+        severity: AlertSeverity.WARNING as AlertSeverity,
         channels: ['email'],
       }
 
       ;(prisma.alertRecord.findFirst as jest.Mock).mockResolvedValue({
         id: 'alert-1',
         ruleId: 'rule-1',
-        status: 'FIRING',
+        status: AlertStatus.FIRING,
         triggeredAt: new Date(),
       })
 
@@ -234,19 +252,15 @@ describe('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-1',
         name: 'High Response Time',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
-        severity: 'WARNING' as AlertSeverity,
+        severity: AlertSeverity.WARNING as AlertSeverity,
         channels: ['email'],
       }
 
-      ;(prisma.alertRecord.findFirst as jest.Mock).mockResolvedValue({
-        id: 'alert-1',
-        ruleId: 'rule-1',
-        status: 'RESOLVED',
-        resolvedAt: new Date(),
-      })
+      // 返回null表示没有FIRING状态的告警（已恢复的不算）
+      ;(prisma.alertRecord.findFirst as jest.Mock).mockResolvedValue(null)
 
       ;(prisma.alertRecord.create as jest.Mock).mockResolvedValue({
         id: 'alert-2',
@@ -265,20 +279,20 @@ describe('AlertRuleEngine', () => {
     it('应该在值恢复正常后解决告警', async () => {
       const rule = {
         id: 'rule-1',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
       }
 
       ;(prisma.alertRecord.findFirst as jest.Mock).mockResolvedValue({
         id: 'alert-1',
         ruleId: 'rule-1',
-        status: 'FIRING',
+        status: AlertStatus.FIRING,
       })
 
       ;(prisma.alertRecord.update as jest.Mock).mockResolvedValue({
         id: 'alert-1',
-        status: 'RESOLVED',
+        status: AlertStatus.RESOLVED,
       })
 
       await engine.resolveAlert(rule, 500)
@@ -286,7 +300,7 @@ describe('AlertRuleEngine', () => {
       expect(prisma.alertRecord.update).toHaveBeenCalledWith({
         where: { id: 'alert-1' },
         data: {
-          status: 'RESOLVED',
+          status: AlertStatus.RESOLVED,
           resolvedAt: expect.any(Date),
         },
       })
@@ -296,8 +310,8 @@ describe('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-1',
         name: 'High Response Time',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
         channels: ['email'],
       }
@@ -305,12 +319,12 @@ describe('AlertRuleEngine', () => {
       ;(prisma.alertRecord.findFirst as jest.Mock).mockResolvedValue({
         id: 'alert-1',
         ruleId: 'rule-1',
-        status: 'FIRING',
+        status: AlertStatus.FIRING,
       })
 
       ;(prisma.alertRecord.update as jest.Mock).mockResolvedValue({
         id: 'alert-1',
-        status: 'RESOLVED',
+        status: AlertStatus.RESOLVED,
       })
 
       mockNotificationService.send = jest.fn().mockResolvedValue(undefined)
@@ -338,10 +352,10 @@ describe('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-1',
         name: 'Test Rule',
-        metric: 'RESPONSE_TIME',
-        condition: 'GREATER_THAN' as AlertCondition,
+        metric: MetricType.RESPONSE_TIME,
+        condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
-        severity: 'WARNING' as AlertSeverity,
+        severity: AlertSeverity.WARNING as AlertSeverity,
         channels: ['email'],
       }
 

@@ -17,6 +17,9 @@ import { crsClient } from '@/lib/crs-client'
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     $queryRaw: jest.fn(),
+    systemHealth: {
+      create: jest.fn(),
+    },
   },
 }))
 
