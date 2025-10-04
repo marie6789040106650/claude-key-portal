@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,23 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/dashboard'
+
+  // 自动跳转：已登录用户直接跳转到 dashboard
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/user/profile', {
+          credentials: 'include',
+        })
+        if (response.ok) {
+          router.push(redirectTo)
+        }
+      } catch (error) {
+        // 未登录，继续显示登录页
+      }
+    }
+    checkAuth()
+  }, [router, redirectTo])
 
   const [formData, setFormData] = useState({
     email: '',

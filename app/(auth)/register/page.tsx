@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,23 @@ import { Card } from '@/components/ui/card'
 
 export default function RegisterPage() {
   const router = useRouter()
+
+  // 自动跳转：已登录用户直接跳转到 dashboard
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/user/profile', {
+          credentials: 'include',
+        })
+        if (response.ok) {
+          router.push('/dashboard')
+        }
+      } catch (error) {
+        // 未登录，继续显示注册页
+      }
+    }
+    checkAuth()
+  }, [router])
 
   const [formData, setFormData] = useState({
     nickname: '',

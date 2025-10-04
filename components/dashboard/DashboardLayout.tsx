@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { TopNav } from './TopNav'
 import { Sidebar } from './Sidebar'
 
@@ -41,15 +41,15 @@ export function DashboardLayout({ children, user, className = '' }: DashboardLay
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const handleMenuToggle = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
+  const handleMenuToggle = useCallback(() => {
+    setSidebarOpen(prev => !prev)
+  }, [])
 
-  const handleSidebarClose = () => {
+  const handleSidebarClose = useCallback(() => {
     if (isMobile) {
       setSidebarOpen(false)
     }
-  }
+  }, [isMobile])
 
   return (
     <div

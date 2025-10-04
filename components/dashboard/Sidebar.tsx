@@ -11,6 +11,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useCallback, memo } from 'react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -73,7 +74,7 @@ const ICONS: Record<string, JSX.Element> = {
   ),
 }
 
-export function Sidebar({
+function SidebarComponent({
   isOpen,
   keyCount = 0,
   unreadNotifications = 0,
@@ -82,12 +83,12 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname()
 
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     if (href === '/dashboard') {
       return pathname === '/dashboard'
     }
     return pathname.startsWith(href)
-  }
+  }, [pathname])
 
   return (
     <>
@@ -168,3 +169,6 @@ export function Sidebar({
     </>
   )
 }
+
+// 使用 memo 优化性能，避免不必要的重新渲染
+export const Sidebar = memo(SidebarComponent)

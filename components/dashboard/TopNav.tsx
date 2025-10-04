@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
@@ -22,7 +22,7 @@ interface TopNavProps {
   className?: string
 }
 
-export function TopNav({
+function TopNavComponent({
   onMenuToggle,
   user,
   unreadNotifications = 0,
@@ -53,23 +53,23 @@ export function TopNav({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
       router.push('/login')
     } catch (error) {
       console.error('Logout failed:', error)
     }
-  }
+  }, [router])
 
-  const getUserInitials = (nickname: string) => {
+  const getUserInitials = useCallback((nickname: string) => {
     return nickname
       .split(' ')
       .map(word => word[0])
       .join('')
       .toUpperCase()
       .slice(0, 2)
-  }
+  }, [])
 
   if (loading) {
     return (
@@ -201,3 +201,6 @@ export function TopNav({
     </nav>
   )
 }
+
+// 使用 memo 优化性能，避免不必要的重新渲染
+export const TopNav = memo(TopNavComponent)
