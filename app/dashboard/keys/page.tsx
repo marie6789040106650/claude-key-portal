@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeysTable } from '@/components/keys/KeysTable'
 import { KeyForm } from '@/components/keys/KeyForm'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { ToastContainer, toast } from '@/components/ui/toast-simple'
 import { Plus } from 'lucide-react'
 import type { ApiKey } from '@/types/keys'
 
@@ -43,7 +44,7 @@ export default function KeysPage() {
   })
 
   // 解构API响应
-  const keys = data?.keys || []
+  const keys = useMemo(() => data?.keys || [], [data?.keys])
   const total = data?.total || 0
   const page = data?.page || 1
   const limit = data?.limit || 10
@@ -116,10 +117,9 @@ export default function KeysPage() {
 
     try {
       await navigator.clipboard.writeText(key.keyMasked)
-      // TODO: 使用 toast 替代 alert
-      alert(`已复制掩码密钥: ${key.keyMasked}`)
+      toast(`已复制: ${key.keyMasked}`, 'success', 2000)
     } catch (error) {
-      alert('复制失败，请手动复制')
+      toast('复制失败，请手动复制', 'error')
     }
   }, [keys])
 
@@ -149,6 +149,7 @@ export default function KeysPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
+      <ToastContainer />
       {/* 页面标题和操作栏 */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">密钥管理</h1>
@@ -280,7 +281,7 @@ export default function KeysPage() {
                         setCopied(true)
                         setTimeout(() => setCopied(false), 2000)
                       } catch (error) {
-                        alert('复制失败，请手动复制')
+                        toast('复制失败，请手动复制', 'error')
                       }
                     }}
                     variant={copied ? "default" : "outline"}
