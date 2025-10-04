@@ -221,12 +221,13 @@ export class NotificationService {
       where: { userId },
     })
 
-    if (!config) {
+    if (!config || !config.rules) {
       return true // 没有配置，默认发送
     }
 
     // 查找对应规则
-    const rule = config.rules.find((r: any) => r.type === type)
+    const rules = config.rules as any[]
+    const rule = rules.find((r: any) => r.type === type)
 
     if (!rule) {
       return true // 没有规则，默认发送
