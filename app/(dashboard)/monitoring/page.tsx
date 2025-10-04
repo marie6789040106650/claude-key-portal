@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MetricType } from '@prisma/client'
 import { SystemHealthCard } from '@/components/monitor/SystemHealthCard'
@@ -23,11 +23,11 @@ import {
 } from '@/components/ui/dialog'
 
 interface HealthCheckData {
-  overall: string
+  overall: 'healthy' | 'degraded' | 'unhealthy'
   services: {
-    database: { status: string; responseTime: number; error?: string }
-    redis: { status: string; responseTime: number; error?: string }
-    crs: { status: string; responseTime: number; error?: string }
+    database: { status: 'healthy' | 'unhealthy'; responseTime: number; error?: string }
+    redis: { status: 'healthy' | 'unhealthy'; responseTime: number; error?: string }
+    crs: { status: 'healthy' | 'unhealthy'; responseTime: number; error?: string }
   }
   timestamp: string
 }
@@ -160,6 +160,64 @@ export default function MonitoringPage() {
     },
   })
 
+  // 优化：使用 useCallback 缓存回调函数
+  const handleMetricChange = useCallback((type: MetricType) => {
+    setSelectedMetric(type)
+  }, [])
+
+  const handleTimeRangeChange = useCallback((range: string) => {
+    console.log('Time range changed:', range)
+  }, [])
+
+  const handleHealthRetry = useCallback(() => {
+    refetchHealth()
+  }, [refetchHealth])
+
+  const handleMetricsRetry = useCallback(() => {
+    refetchMetrics()
+  }, [refetchMetrics])
+
+  const handleFilterChange = useCallback((filters: { status: string | null; severity: string | null }) => {
+    setAlertsFilters(filters)
+    setAlertsPage(1)
+  }, [])
+
+  const handlePageChange = useCallback((page: number) => {
+    setAlertsPage(page)
+  }, [])
+
+  const handleSortChange = useCallback((sort: { field: string; order: 'asc' | 'desc' }) => {
+    console.log('Sort changed:', sort)
+  }, [])
+
+  const handleSilenceAlert = useCallback((alertId: string) => {
+    silenceAlertMutation.mutate(alertId)
+  }, [silenceAlertMutation])
+
+  const handleCreateRule = useCallback(async (data: any) => {
+    await createRuleMutation.mutateAsync(data)
+  }, [createRuleMutation])
+
+  const handleCancelRule = useCallback(() => {
+    setShowRuleForm(false)
+  }, [])
+
+  // 优化：使用 useMemo 缓存计算值
+  const avgResponseTime = useMemo(() => {
+    if (!metricsData || metricsData.length === 0) return 0
+    return Math.round(
+      metricsData.reduce((sum, d) => sum + d.value, 0) / metricsData.length
+    )
+  }, [metricsData])
+
+  const activeAlertsCount = useMemo(() => {
+    return alertsData?.alerts.filter((a) => a.status === 'FIRING').length || 0
+  }, [alertsData?.alerts])
+
+  const paginationData = useMemo(() => {
+    return alertsData?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 }
+  }, [alertsData?.pagination])
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* 页面标题 */}
@@ -181,7 +239,7 @@ export default function MonitoringPage() {
             data={healthData}
             isLoading={healthLoading}
             error={healthError?.message}
-            onRetry={() => refetchHealth()}
+            onRetry={handleHealthRetry}
           />
         </div>
 
@@ -190,14 +248,7 @@ export default function MonitoringPage() {
           <div className="bg-white rounded-lg border p-4">
             <h3 className="text-sm font-medium text-gray-600">平均响应时间</h3>
             <div className="mt-2 flex items-baseline">
-              <span className="text-2xl font-semibold">
-                {metricsData && metricsData.length > 0
-                  ? Math.round(
-                      metricsData.reduce((sum, d) => sum + d.value, 0) /
-                        metricsData.length
-                    )
-                  : 0}
-              </span>
+              <span className="text-2xl font-semibold">{avgResponseTime}</span>
               <span className="ml-2 text-sm text-gray-500">ms</span>
             </div>
           </div>
@@ -206,7 +257,7 @@ export default function MonitoringPage() {
             <h3 className="text-sm font-medium text-gray-600">活跃告警</h3>
             <div className="mt-2 flex items-baseline">
               <span className="text-2xl font-semibold text-red-600">
-                {alertsData?.alerts.filter((a) => a.status === 'FIRING').length || 0}
+                {activeAlertsCount}
               </span>
               <span className="ml-2 text-sm text-gray-500">个</span>
             </div>
@@ -241,37 +292,21 @@ export default function MonitoringPage() {
         metricType={selectedMetric}
         isLoading={metricsLoading}
         error={metricsError?.message}
-        onMetricChange={(type) => setSelectedMetric(type)}
-        onTimeRangeChange={(range) => {
-          // TODO: 实现时间范围变化逻辑
-          console.log('Time range changed:', range)
-        }}
-        onRetry={() => refetchMetrics()}
+        onMetricChange={handleMetricChange}
+        onTimeRangeChange={handleTimeRangeChange}
+        onRetry={handleMetricsRetry}
         showTimeRangeSelector
       />
 
       {/* 告警记录表格 */}
       <AlertsTable
         alerts={alertsData?.alerts || []}
-        pagination={
-          alertsData?.pagination || {
-            page: 1,
-            limit: 10,
-            total: 0,
-            totalPages: 0,
-          }
-        }
+        pagination={paginationData}
         isLoading={alertsLoading}
-        onFilterChange={(filters) => {
-          setAlertsFilters(filters)
-          setAlertsPage(1) // 重置到第一页
-        }}
-        onPageChange={(page) => setAlertsPage(page)}
-        onSortChange={(sort) => {
-          // TODO: 实现排序逻辑
-          console.log('Sort changed:', sort)
-        }}
-        onSilence={(alertId) => silenceAlertMutation.mutate(alertId)}
+        onFilterChange={handleFilterChange}
+        onPageChange={handlePageChange}
+        onSortChange={handleSortChange}
+        onSilence={handleSilenceAlert}
       />
 
       {/* 告警规则配置对话框 */}
@@ -282,10 +317,8 @@ export default function MonitoringPage() {
           </DialogHeader>
           <AlertRuleForm
             mode="create"
-            onSubmit={async (data) => {
-              await createRuleMutation.mutateAsync(data)
-            }}
-            onCancel={() => setShowRuleForm(false)}
+            onSubmit={handleCreateRule}
+            onCancel={handleCancelRule}
           />
         </DialogContent>
       </Dialog>
