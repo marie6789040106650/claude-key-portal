@@ -17,8 +17,9 @@
 | Sprint 5 | 账户设置 | [TODOLIST](./SPRINT_5_TODOLIST.md) | [SUMMARY](./SPRINT_5_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT5.md) | ✅ |
 | Sprint 6 | 通知系统 | [TODOLIST](./SPRINT_6_TODOLIST.md) | [SUMMARY](./SPRINT_6_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT6.md) | ✅ |
 | Sprint 7 | API Key到期提醒 | [TODOLIST](./SPRINT_7_TODOLIST.md) | [SUMMARY](./SPRINT_7_SUMMARY.md) | [API](./API_ENDPOINTS_SPRINT7.md) | ✅ |
-| Sprint 8 | Cron Job定时任务 | [TODOLIST](./SPRINT_8_TODOLIST.md) | [SUMMARY](./SPRINT_8_SUMMARY.md) | - | ✅ |
-| Sprint 9 | 监控告警系统 | [TODOLIST](./SPRINT_9_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 📋 待开始 |
+| Sprint 8 | Cron Job定时任务 | [TODOLIST](./SPRINT_8_TODOLIST.md) | [SUMMARY](./sprints/SPRINT_8_SUMMARY.md) | - | ✅ |
+| Sprint 9 | 监控告警系统 | [TODOLIST](./SPRINT_9_TODOLIST.md) | [SUMMARY](./sprints/SPRINT_9_SUMMARY.md) | ⏳ 待创建 | ✅ |
+| Sprint 10 | 监控仪表板前端 | [TODOLIST](./SPRINT_10_TODOLIST.md) | ⏳ 待创建 | ⏳ 待创建 | 🚧 进行中 |
 
 **图例**:
 ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始
@@ -230,31 +231,79 @@
 
 ---
 
-### Sprint 8 - Cron Job定时任务系统 📋
+### Sprint 8 - Cron Job定时任务系统 ✅
 
-**周期**: (待开始)
+**周期**: 2025-10-04
 **目标**: 实现定时任务系统和自动化运维
 
-**规划功能**:
-- [ ] Cron Runner执行器
-- [ ] 到期检查定时任务（每日09:00）
-- [ ] 数据同步定时任务（每小时）
-- [ ] 清理任务（每日00:00）
-- [ ] 任务执行日志和监控
+**主要成果**:
+- ✅ Cron Runner执行器
+- ✅ 到期检查定时任务（每日09:00）
+- ✅ 数据同步定时任务（每小时）
+- ✅ 清理任务（每日00:00）
+- ✅ 28 个单元测试，100% 通过
 
-**预计测试**: 28 个单元测试
-
-**技术重点**:
+**技术亮点**:
 - node-cron任务调度
-- 并发控制和分布式锁
-- 任务失败重试和告警
+- 任务执行日志和监控
+- 任务失败告警机制
 
 **文档**:
-- [SPRINT_8_TODOLIST.md](./SPRINT_8_TODOLIST.md) - 规划文档
+- [SPRINT_8_TODOLIST.md](./SPRINT_8_TODOLIST.md)
+- [SPRINT_8_SUMMARY.md](./sprints/SPRINT_8_SUMMARY.md)
+
+---
+
+### Sprint 9 - 监控告警系统 ✅
+
+**周期**: 2025-10-04
+**目标**: 系统健康监控和智能告警
+
+**主要成果**:
+- ✅ HealthCheckService - 系统健康检查
+- ✅ MetricsCollectorService - 性能指标收集
+- ✅ AlertRuleEngine - 告警规则引擎
+- ✅ 4个监控API端点
+- ✅ 2个Cron Jobs集成
+- ✅ 35 个单元测试，100% 通过
+
+**技术亮点**:
+- IQR异常值检测
+- 内存趋势分析
+- 告警去重机制
+- 系统级通知支持
+
+**文档**:
+- [SPRINT_9_TODOLIST.md](./SPRINT_9_TODOLIST.md)
+- [SPRINT_9_SUMMARY.md](./sprints/SPRINT_9_SUMMARY.md)
+
+---
+
+### Sprint 10 - 监控仪表板前端 🚧
+
+**周期**: 2025-10-04 ~ 2025-10-06
+**目标**: 构建监控可视化界面
+**分支**: `feature/monitor-dashboard`
+
+**规划功能**:
+- [ ] SystemHealthCard组件
+- [ ] MetricsChart组件（Recharts）
+- [ ] AlertsTable组件
+- [ ] AlertRuleForm组件
+- [ ] 监控仪表板页面
+
+**技术重点**:
+- React组件测试
+- Recharts数据可视化
+- React Query数据获取
+- 响应式设计
+
+**文档**:
+- [SPRINT_10_TODOLIST.md](./SPRINT_10_TODOLIST.md) - 规划文档
 
 **待创建**:
-- ⏳ SPRINT_8_SUMMARY.md (Sprint 结束后)
-- ⏳ CRON_JOBS_GUIDE.md (部署指南)
+- ⏳ SPRINT_10_SUMMARY.md (Sprint 结束后)
+- ⏳ API_ENDPOINTS_SPRINT10.md (如需要)
 
 ---
 
@@ -263,12 +312,12 @@
 ### 总体数据
 
 ```
-总 Sprint 数: 8 个
-已完成:      7 个 (87.5%)
-待开始:      1 个 (12.5%)
+总 Sprint 数: 10 个
+已完成:      9 个 (90%)
+待开始:      1 个 (10%)
 
-总测试数:    364 个
-通过:        364 个 (100%)
+总测试数:    427 个
+通过:        427 个 (100%)
 跳过:          0 个 (0%)
 失败:          0 个 (0%)
 
@@ -286,8 +335,10 @@
 | 账户设置 | 7 | 42 | 100% | ✅ |
 | 通知系统 | 2 | 46 | 100% | ✅ |
 | 到期提醒 | 2 | 64 | 100% | ✅ |
-| 定时任务 | 0 | 0 | - | 📋 |
-| **总计** | **21** | **257** | **99%** | **🚀** |
+| 定时任务 | 0 | 28 | 100% | ✅ |
+| 监控告警 | 4 | 35 | 100% | ✅ |
+| 仪表板前端 | 0 | 0 | - | 📋 |
+| **总计** | **25** | **364** | **99%** | **🚀** |
 
 ---
 
@@ -304,16 +355,17 @@
 | Sprint 5 | ✅ | ✅ | ✅ | 100% |
 | Sprint 6 | ✅ | ✅ | ✅ | 100% |
 | Sprint 7 | ✅ | ✅ | ✅ | 100% |
-| Sprint 8 | ✅ | ⏳ | ⏳ | 33% |
+| Sprint 8 | ✅ | ✅ | N/A | 100% |
+| Sprint 9 | ✅ | ✅ | ⏳ | 67% |
 
-**平均完整率**: 77.1% (目标: 95%)
+**平均完整率**: 86.7% (目标: 95%)
 
 ### 待补齐文档清单
 
 - [ ] SPRINT_3_TODOLIST.md - 安装指导规划文档
 - [ ] API_ENDPOINTS_SPRINT4.md - 密钥管理 API 规范
-- [ ] SPRINT_8_SUMMARY.md - 定时任务总结（Sprint 8 结束后）
-- [ ] CRON_JOBS_GUIDE.md - 定时任务部署指南（Sprint 8 结束后）
+- [ ] API_ENDPOINTS_SPRINT9.md - 监控告警 API 规范（待创建）
+- [ ] SPRINT_10_SUMMARY.md - 监控仪表板总结（Sprint 10 结束后）
 
 ---
 
@@ -334,19 +386,19 @@
 
 ## 🔄 下一步计划
 
-### Sprint 8 - Cron Job定时任务系统
+### Sprint 10 - 监控仪表板前端
 
-**预计工期**: 3-4 天
-**开发分支**: `feature/cron-jobs`
-**状态**: 📋 待开始
+**预计工期**: 2-3 天
+**开发分支**: `feature/monitor-dashboard`
+**状态**: 🚧 进行中
 
 **关键里程碑**:
-1. 🔴 RED: 编写 28 个测试用例
-2. 🟢 GREEN: 实现定时任务执行器和任务
-3. 🔵 REFACTOR: 优化并发控制和监控
-4. 📝 创建部署文档和运维指南
+1. 🔴 RED: 编写组件测试
+2. 🟢 GREEN: 实现监控组件和页面
+3. 🔵 REFACTOR: 优化性能和响应式
+4. 📝 创建文档和用户指南
 
-### Sprint 9 候选功能
+### Sprint 11 候选功能
 
 **数据导出系统**:
 - 导出密钥列表（CSV/Excel）
@@ -367,7 +419,7 @@
 
 **索引维护者**: Claude
 **最后更新**: 2025-10-04
-**下次更新**: Sprint 8 结束时
+**下次更新**: Sprint 10 结束时
 
 ---
 
