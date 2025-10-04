@@ -4,11 +4,12 @@ import React, { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Download, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { StatsChart } from '@/components/stats/StatsChart'
 import { StatsTable } from '@/components/stats/StatsTable'
 import { DateRangePicker } from '@/components/stats/DateRangePicker'
 import { KeyFilter } from '@/components/stats/KeyFilter'
+import { ExportDialog } from '@/components/stats/ExportDialog'
 import type { DateRangePreset, KeyStats, TimeSeriesDataPoint } from '@/types/stats'
 
 export default function UsageStatsPage() {
@@ -152,37 +153,6 @@ export default function UsageStatsPage() {
     return points
   }, [data?.keys, selectedKeys])
 
-  // 导出功能
-  const handleExport = () => {
-    if (!filteredKeys.length) {
-      alert('暂无数据可导出')
-      return
-    }
-
-    // 生成CSV
-    const headers = ['密钥名称', '状态', '请求数', 'Token数', '最后使用时间']
-    const rows = filteredKeys.map((key) => [
-      key.name,
-      key.status,
-      key.totalRequests.toString(),
-      key.totalTokens.toString(),
-      key.lastUsedAt || '从未使用',
-    ])
-
-    const csv = [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
-    ].join('\n')
-
-    // 下载
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `usage-stats-${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-  }
 
   // 时间范围变化
   const handleDateRangeChange = (
@@ -264,10 +234,7 @@ export default function UsageStatsPage() {
       {/* 标题和操作 */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">使用统计</h1>
-        <Button onClick={handleExport} data-testid="export-button">
-          <Download className="w-4 h-4 mr-2" />
-          导出 CSV
-        </Button>
+        <ExportDialog data={filteredKeys} />
       </div>
 
       {/* 概览卡片 */}
