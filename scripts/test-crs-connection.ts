@@ -50,7 +50,6 @@ async function testCrsConnection() {
     const testKey = await crsClient.createKey({
       name: `integration_test_${Date.now()}`,
       description: 'Integration test key - safe to delete',
-      monthlyLimit: 1000,
     })
     console.log('✅ 密钥创建成功!')
     console.log('   密钥ID:', testKey.id)

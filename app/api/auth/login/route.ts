@@ -69,13 +69,19 @@ export async function POST(request: Request) {
     // 7. 生成 JWT Token
     const { accessToken, refreshToken } = generateTokens(user.id, user.email)
 
-    // 8. 创建 Session
-    await createSession(user.id, accessToken, refreshToken)
+    // 8. 获取请求元信息
+    const ip = request.headers.get('x-forwarded-for') ||
+               request.headers.get('x-real-ip') ||
+               '0.0.0.0'
+    const userAgent = request.headers.get('user-agent') || 'Unknown'
 
-    // 9. 更新最后登录时间
+    // 9. 创建 Session
+    await createSession(user.id, accessToken, refreshToken, ip, userAgent)
+
+    // 10. 更新最后登录时间
     await updateLastLogin(user.id)
 
-    // 10. 返回成功响应（不包含密码哈希）
+    // 11. 返回成功响应（不包含密码哈希）
     return NextResponse.json({
       accessToken,
       refreshToken,

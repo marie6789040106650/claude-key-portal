@@ -83,7 +83,9 @@ class CrsClient {
         throw new Error('CRS login response invalid')
       }
 
-      this.token = result.token
+      // 确保 token 不为 null
+      const token: string = result.token
+      this.token = token
       // 提前1分钟刷新token，避免在请求时过期
       const expiresIn = result.expiresIn || 86400000 // 默认24小时
       this.tokenExpiry = Date.now() + expiresIn - 60000
@@ -173,13 +175,11 @@ class CrsClient {
   async createKey(data: {
     name: string
     description?: string
-    monthlyLimit?: number
   }): Promise<{
     id: string
     key: string
     name: string
     description?: string
-    monthlyLimit?: number
     status: string
     createdAt: Date
   }> {
@@ -194,8 +194,7 @@ class CrsClient {
       key: response.apiKey, // CRS返回apiKey字段，映射到key
       name: response.name,
       description: response.description,
-      monthlyLimit: response.monthlyLimit,
-      status: response.isActive ? 'ACTIVE' : 'PAUSED',
+      status: response.isActive ? 'ACTIVE' : 'INACTIVE',
       createdAt: response.createdAt,
     }
   }
@@ -208,7 +207,6 @@ class CrsClient {
     data: {
       name?: string
       description?: string
-      monthlyLimit?: number
       status?: string
     }
   ): Promise<{ success: boolean }> {
@@ -236,7 +234,6 @@ class CrsClient {
   async getKeyStats(apiKey: string): Promise<{
     totalTokens: number
     totalRequests: number
-    monthlyUsage: number
     inputTokens: number
     outputTokens: number
     cacheCreateTokens: number
@@ -269,7 +266,6 @@ class CrsClient {
       return {
         totalTokens: usage.allTokens || 0,
         totalRequests: usage.requests || 0,
-        monthlyUsage: usage.allTokens || 0, // CRS没有单独的月度统计，使用总量
         inputTokens: usage.inputTokens || 0,
         outputTokens: usage.outputTokens || 0,
         cacheCreateTokens: usage.cacheCreateTokens || 0,

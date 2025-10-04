@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     const script = generateScript({
       platform,
       environment,
-      keyValue: apiKey.keyValue,
+      keyValue: apiKey.crsKey, // 使用 crsKey 字段
       baseUrl: 'https://claude.just-play.fun/api',
     })
 
