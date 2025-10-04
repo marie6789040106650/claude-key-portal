@@ -22,6 +22,7 @@
 | Sprint 10 | 监控仪表板前端 | [TODOLIST](./SPRINT_10_TODOLIST.md) | [SUMMARY](./SPRINT_10_SUMMARY.md) | - | ✅ |
 | Sprint 11 | 用户认证和仪表板 | [TODOLIST](./SPRINT_11_TODOLIST.md) | [SUMMARY](./SPRINT_11_SUMMARY.md) | - | ✅ |
 | Sprint 12 | 密钥管理UI完整实现 | [TODOLIST](./SPRINT_12_TODOLIST.md) | [SUMMARY](./SPRINT_12_SUMMARY.md) | - | ✅ |
+| Sprint 13 | 密钥使用统计和可视化 | [TODOLIST](./SPRINT_13_TODOLIST.md) | [SUMMARY](./SPRINT_13_SUMMARY.md) | - | ✅ |
 
 **图例**:
 ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始
@@ -454,43 +455,71 @@
 
 ---
 
-### Sprint 13 - 密钥使用统计和可视化 📋
+### Sprint 13 - 密钥使用统计和可视化 ✅
 
+**周期**: 2025-10-04
 **预计工期**: 2 天
+**实际工期**: 1 天（高效完成）
 **开发分支**: `feature/usage-stats`
-**状态**: 📋 待开始
+**状态**: ✅ 已完成
 
-**主要任务**:
-1. **统计页面** (`/dashboard/stats`)
-   - 总体使用统计展示
-   - 时间趋势图表（Recharts）
-   - 密钥使用排行
-   - 时间范围和密钥筛选
-   - CSV 导出功能
+**主要成果**:
+- ✅ **统计页面** (`/dashboard/stats`)
+  - 总体使用统计展示（卡片+图表）
+  - 时间趋势图表（Recharts，双线图）
+  - 统计表格（响应式，支持排序分页）
+  - 7种时间范围预设 + 自定义范围
+  - 密钥筛选功能（全选/取消全选）
+  - CSV/JSON多格式导出
 
-2. **密钥详情页** (`/dashboard/keys/[id]`)
-   - 单个密钥详细统计
-   - 使用趋势可视化
-   - 最近请求列表
+- ✅ **密钥详情统计页** (`/dashboard/keys/[id]/stats`)
+  - 单个密钥详细统计
+  - 使用趋势可视化
+  - 时间范围筛选支持
+  - 导出单个密钥数据
 
-3. **测试覆盖**
-   - 45+ 单元测试
-   - 组件测试 + 页面测试
-   - 测试覆盖率 > 80%
+- ✅ **5个统计组件**
+  - `StatsChart.tsx` - 时间序列图表
+  - `StatsTable.tsx` - 统计表格（桌面表格/移动卡片）
+  - `DateRangePicker.tsx` - 时间范围选择器
+  - `KeyFilter.tsx` - 密钥筛选器
+  - `ExportDialog.tsx` - 导出对话框
+
+- ✅ **工具函数和Hooks**
+  - `lib/date-utils.ts` - 日期处理工具
+  - `lib/export.ts` - 导出功能
+  - `lib/ui-utils.ts` - UI格式化工具
+  - `hooks/use-stats.ts` - 统计数据获取
+
+- ✅ **测试覆盖**
+  - 79个单元测试（3个测试文件）
+  - 测试覆盖率 > 80%
+  - 完整TDD流程（🔴 RED → 🟢 GREEN → 🔵 REFACTOR）
 
 **技术栈**:
-- Recharts (复用 Sprint 10)
-- React Query
-- papaparse (CSV 导出)
+- Recharts（复用 Sprint 10）
+- React Query（缓存策略：staleTime 5min, cacheTime 10min）
+- Next.js 14 App Router
+- TypeScript
+- Shadcn/ui + Tailwind CSS
+
+**技术亮点**:
+- 响应式设计（桌面表格视图，移动卡片视图）
+- 代码复用和模块化（工具函数+自定义Hooks）
+- 性能优化（useMemo、React Query缓存）
+- 良好的错误处理和加载状态
+- Mock数据生成用于开发和测试
 
 **文档**:
 - [SPRINT_13_TODOLIST.md](./SPRINT_13_TODOLIST.md)
+- [SPRINT_13_SUMMARY.md](./SPRINT_13_SUMMARY.md)
+- [SPRINT_13_PHASE_1_SUMMARY.md](./SPRINT_13_PHASE_1_SUMMARY.md)
 
 ---
 
 **索引维护者**: Claude
-**最后更新**: 2025-10-04
-**下次更新**: Sprint 12 结束时
+**最后更新**: 2025-10-05
+**下次更新**: Sprint 14 开始时
 
 ---
 
