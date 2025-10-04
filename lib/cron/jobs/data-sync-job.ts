@@ -13,6 +13,10 @@ export class DataSyncJob implements CronJob {
   schedule = '0 * * * *' // 每小时
   description = '同步外部API使用统计和额度信息'
 
+  handler = async (): Promise<CronJobResult> => {
+    return this.execute()
+  }
+
   async execute(): Promise<CronJobResult> {
     const startTime = Date.now()
 
@@ -64,15 +68,11 @@ export class DataSyncJob implements CronJob {
             keysSynced++
             totalUsage += data.usage || 0
 
-            // 更新Key信息
+            // 更新Key的最后使用时间
             await prisma.apiKey.update({
               where: { id: key.id },
               data: {
-                currentUsage: data.usage,
-                usageLimit: data.limit,
-                lastSyncAt: new Date(),
-                syncFailures: 0,
-                lastError: null,
+                lastUsedAt: new Date(),
               },
             })
 
@@ -81,9 +81,15 @@ export class DataSyncJob implements CronJob {
               await prisma.usageRecord.create({
                 data: {
                   apiKeyId: key.id,
-                  usage: data.usage,
-                  requests: data.requests || 0,
-                  recordedAt: new Date(),
+                  model: data.model || 'unknown',
+                  endpoint: '/api/chat/completions',
+                  method: 'POST',
+                  promptTokens: data.promptTokens || 0,
+                  completionTokens: data.completionTokens || 0,
+                  totalTokens: data.usage,
+                  duration: data.duration || 0,
+                  status: 200,
+                  timestamp: new Date(),
                 },
               })
             }
@@ -91,33 +97,7 @@ export class DataSyncJob implements CronJob {
             failed++
             errors.push(`${key.id}: ${result.reason.message}`)
 
-            // 更新失败计数
-            const updatedKey = await prisma.apiKey.findUnique({
-              where: { id: key.id },
-              select: { syncFailures: true },
-            })
-
-            const failCount = (updatedKey?.syncFailures || 0) + 1
-
-            // 连续3次失败标记为ERROR
-            if (failCount >= 3) {
-              await prisma.apiKey.update({
-                where: { id: key.id },
-                data: {
-                  status: 'ERROR',
-                  syncFailures: failCount,
-                  lastError: result.reason.message,
-                },
-              })
-            } else {
-              await prisma.apiKey.update({
-                where: { id: key.id },
-                data: {
-                  syncFailures: failCount,
-                  lastError: result.reason.message,
-                },
-              })
-            }
+            // 同步失败不影响现有功能，仅记录错误
           }
         }
       }

@@ -20,6 +20,10 @@ export class ExpirationCheckJob implements CronJob {
     this.service = new ExpirationCheckService()
   }
 
+  handler = async (): Promise<CronJobResult> => {
+    return this.execute()
+  }
+
   async execute(): Promise<CronJobResult> {
     const startTime = Date.now()
 
