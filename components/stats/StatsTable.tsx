@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ArrowUp, ArrowDown, Eye } from 'lucide-react'
+import { useIsSmallScreen } from '@/hooks/use-media-query'
 import type { KeyStats } from '@/types/stats'
 
 interface StatsTableProps {
@@ -141,8 +142,8 @@ export function StatsTable({
   // 计算总页数
   const totalPages = total && pageSize ? Math.ceil(total / pageSize) : 1
 
-  // 响应式检测（简化版）
-  const [isSmallScreen] = useState(false) // 实际应该用 useMediaQuery
+  // 响应式检测
+  const isSmallScreen = useIsSmallScreen()
 
   if (isSmallScreen) {
     // 移动端卡片视图

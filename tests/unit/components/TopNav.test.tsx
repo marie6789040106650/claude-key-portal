@@ -146,7 +146,7 @@ describe('TopNav', () => {
       })
 
       // 点击外部区域
-      fireEvent.click(document.body)
+      fireEvent.mouseDown(document.body)
 
       await waitFor(() => {
         expect(screen.queryByText('退出登录')).not.toBeInTheDocument()

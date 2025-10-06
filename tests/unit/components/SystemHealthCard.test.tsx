@@ -5,249 +5,206 @@
  * - 健康状态渲染
  * - 降级状态渲染
  * - 不健康状态渲染
- * - 响应时间显示
+ * - 服务状态显示
  * - 加载状态
  * - 错误状态
  */
 
 import { render, screen } from '@testing-library/react'
 import { SystemHealthCard } from '@/components/monitor/SystemHealthCard'
+import type { SystemHealthCheck } from '@/lib/services/health-check-service'
+
+// Mock date-fns 避免时间相关测试不稳定
+jest.mock('date-fns', () => ({
+  formatDistanceToNow: jest.fn(() => '2分钟前'),
+}))
 
 describe('SystemHealthCard', () => {
-  describe('健康状态渲染', () => {
-    it('应该渲染健康状态', () => {
-      render(
-        <SystemHealthCard
-          service="Database"
-          status="healthy"
-          responseTime={50}
-        />
-      )
+  const mockHealthyData: SystemHealthCheck = {
+    overall: 'healthy',
+    services: {
+      database: { status: 'healthy', responseTime: 50 },
+      redis: { status: 'healthy', responseTime: 30 },
+      crs: { status: 'healthy', responseTime: 100 },
+    },
+    timestamp: '2025-10-05T10:00:00Z',
+  }
 
-      expect(screen.getByText('Database')).toBeInTheDocument()
-      expect(screen.getByText('Healthy')).toBeInTheDocument()
-      expect(screen.getByText('50ms')).toBeInTheDocument()
+  const mockDegradedData: SystemHealthCheck = {
+    overall: 'degraded',
+    services: {
+      database: { status: 'healthy', responseTime: 50 },
+      redis: { status: 'healthy', responseTime: 30 },
+      crs: { status: 'degraded', responseTime: 500 },
+    },
+    timestamp: '2025-10-05T10:00:00Z',
+  }
+
+  const mockUnhealthyData: SystemHealthCheck = {
+    overall: 'unhealthy',
+    services: {
+      database: {
+        status: 'unhealthy',
+        responseTime: 0,
+        error: 'Connection timeout',
+      },
+      redis: { status: 'healthy', responseTime: 30 },
+      crs: { status: 'healthy', responseTime: 100 },
+    },
+    timestamp: '2025-10-05T10:00:00Z',
+  }
+
+  describe('健康状态渲染', () => {
+    it('应该渲染系统健康状态', () => {
+      render(<SystemHealthCard data={mockHealthyData} />)
+
+      expect(screen.getByText('系统健康状态')).toBeInTheDocument()
+      expect(screen.getByText('正常')).toBeInTheDocument()
     })
 
-    it('应该显示绿色指示器', () => {
-      const { container } = render(
-        <SystemHealthCard
-          service="Redis"
-          status="healthy"
-          responseTime={30}
-        />
-      )
+    it('应该渲染所有服务状态', () => {
+      render(<SystemHealthCard data={mockHealthyData} />)
 
-      const indicator = container.querySelector('[data-testid="status-indicator"]')
-      expect(indicator).toHaveClass('bg-green-500')
+      expect(screen.getByText('Database')).toBeInTheDocument()
+      expect(screen.getByText('Redis')).toBeInTheDocument()
+      expect(screen.getByText('CRS')).toBeInTheDocument()
+    })
+
+    it('应该显示服务响应时间', () => {
+      render(<SystemHealthCard data={mockHealthyData} />)
+
+      expect(screen.getByText('50ms')).toBeInTheDocument()
+      expect(screen.getByText('30ms')).toBeInTheDocument()
+      expect(screen.getByText('100ms')).toBeInTheDocument()
+    })
+
+    it('应该显示绿色状态指示器', () => {
+      const { container } = render(<SystemHealthCard data={mockHealthyData} />)
+
+      const indicator = container.querySelector('[data-testid="status-indicator-healthy"]')
+      expect(indicator).toBeInTheDocument()
+      expect(indicator).toHaveClass('bg-green-100')
+    })
+
+    it('应该显示最后检查时间', () => {
+      render(<SystemHealthCard data={mockHealthyData} />)
+
+      expect(screen.getByText(/最后检查时间:/)).toBeInTheDocument()
+      expect(screen.getByTestId('check-timestamp')).toHaveTextContent('2分钟前')
     })
   })
 
   describe('降级状态渲染', () => {
     it('应该渲染降级状态', () => {
-      render(
-        <SystemHealthCard
-          service="CRS"
-          status="degraded"
-          responseTime={500}
-        />
-      )
+      render(<SystemHealthCard data={mockDegradedData} />)
 
-      expect(screen.getByText('CRS')).toBeInTheDocument()
-      expect(screen.getByText('Degraded')).toBeInTheDocument()
-      expect(screen.getByText('500ms')).toBeInTheDocument()
+      expect(screen.getByText('降级')).toBeInTheDocument()
     })
 
-    it('应该显示黄色指示器', () => {
-      const { container } = render(
-        <SystemHealthCard
-          service="CRS"
-          status="degraded"
-          responseTime={500}
-        />
-      )
+    it('应该显示黄色状态指示器', () => {
+      const { container } = render(<SystemHealthCard data={mockDegradedData} />)
 
-      const indicator = container.querySelector('[data-testid="status-indicator"]')
-      expect(indicator).toHaveClass('bg-yellow-500')
+      const indicator = container.querySelector('[data-testid="status-indicator-degraded"]')
+      expect(indicator).toBeInTheDocument()
+      expect(indicator).toHaveClass('bg-amber-100')
+    })
+
+    it('应该显示降级服务的响应时间', () => {
+      render(<SystemHealthCard data={mockDegradedData} />)
+
+      expect(screen.getByText('500ms')).toBeInTheDocument()
     })
   })
 
   describe('不健康状态渲染', () => {
     it('应该渲染不健康状态', () => {
-      render(
-        <SystemHealthCard
-          service="Database"
-          status="unhealthy"
-          responseTime={0}
-          error="Connection timeout"
-        />
-      )
+      render(<SystemHealthCard data={mockUnhealthyData} />)
 
-      expect(screen.getByText('Database')).toBeInTheDocument()
-      expect(screen.getByText('Unhealthy')).toBeInTheDocument()
+      expect(screen.getByText('异常')).toBeInTheDocument()
+    })
+
+    it('应该显示红色状态指示器', () => {
+      const { container } = render(<SystemHealthCard data={mockUnhealthyData} />)
+
+      const indicator = container.querySelector('[data-testid="status-indicator-unhealthy"]')
+      expect(indicator).toBeInTheDocument()
+      expect(indicator).toHaveClass('bg-red-100')
+    })
+
+    it('应该显示服务错误信息', () => {
+      render(<SystemHealthCard data={mockUnhealthyData} />)
+
       expect(screen.getByText('Connection timeout')).toBeInTheDocument()
     })
 
-    it('应该显示红色指示器', () => {
-      const { container } = render(
-        <SystemHealthCard
-          service="Database"
-          status="unhealthy"
-          responseTime={0}
-          error="Connection failed"
-        />
-      )
+    it('应该显示不健康服务的状态图标', () => {
+      const { container } = render(<SystemHealthCard data={mockUnhealthyData} />)
 
-      const indicator = container.querySelector('[data-testid="status-indicator"]')
-      expect(indicator).toHaveClass('bg-red-500')
-    })
-
-    it('应该隐藏响应时间（错误时）', () => {
-      render(
-        <SystemHealthCard
-          service="Redis"
-          status="unhealthy"
-          responseTime={0}
-          error="Redis unavailable"
-        />
-      )
-
-      expect(screen.queryByText('0ms')).not.toBeInTheDocument()
+      // 检查是否有错误状态的服务
+      const errorService = container.querySelector('[data-testid="service-status-unhealthy"]')
+      expect(errorService).toBeInTheDocument()
     })
   })
 
   describe('加载状态', () => {
     it('应该显示加载中状态', () => {
-      render(
-        <SystemHealthCard
-          service="Database"
-          status="healthy"
-          responseTime={0}
-          loading={true}
-        />
-      )
+      render(<SystemHealthCard isLoading={true} />)
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument()
+      expect(screen.getByText('加载中...')).toBeInTheDocument()
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
     })
 
-    it('加载中时应该禁用交互', () => {
-      const { container } = render(
-        <SystemHealthCard
-          service="Database"
-          status="healthy"
-          responseTime={0}
-          loading={true}
-        />
-      )
+    it('加载中时不应该显示健康数据', () => {
+      render(<SystemHealthCard data={mockHealthyData} isLoading={true} />)
 
-      const card = container.firstChild
-      expect(card).toHaveClass('opacity-50', 'pointer-events-none')
+      expect(screen.queryByText('Database')).not.toBeInTheDocument()
+      expect(screen.queryByText('正常')).not.toBeInTheDocument()
     })
   })
 
-  describe('响应时间格式化', () => {
-    it('应该显示毫秒格式（<1000ms）', () => {
-      render(
-        <SystemHealthCard
-          service="Redis"
-          status="healthy"
-          responseTime={150}
-        />
-      )
+  describe('错误状态', () => {
+    it('应该显示错误信息', () => {
+      render(<SystemHealthCard error="Failed to fetch health status" />)
 
-      expect(screen.getByText('150ms')).toBeInTheDocument()
+      expect(screen.getByText('加载失败')).toBeInTheDocument()
+      expect(screen.getByText('Failed to fetch health status')).toBeInTheDocument()
     })
 
-    it('应该显示秒格式（>=1000ms）', () => {
-      render(
-        <SystemHealthCard
-          service="CRS"
-          status="degraded"
-          responseTime={1500}
-        />
-      )
+    it('应该显示重试按钮', () => {
+      const onRetry = jest.fn()
+      render(<SystemHealthCard error="Network error" onRetry={onRetry} />)
 
-      expect(screen.getByText('1.5s')).toBeInTheDocument()
+      expect(screen.getByText('重试')).toBeInTheDocument()
     })
 
-    it('应该显示分钟格式（>=60000ms）', () => {
-      render(
-        <SystemHealthCard
-          service="Database"
-          status="degraded"
-          responseTime={75000}
-        />
-      )
+    it('错误时不应该显示健康数据', () => {
+      render(<SystemHealthCard data={mockHealthyData} error="Error occurred" />)
 
-      expect(screen.getByText('1.25m')).toBeInTheDocument()
+      expect(screen.queryByText('Database')).not.toBeInTheDocument()
+      expect(screen.queryByText('正常')).not.toBeInTheDocument()
+    })
+
+    it('没有onRetry时不应该显示重试按钮', () => {
+      render(<SystemHealthCard error="Network error" />)
+
+      expect(screen.queryByText('重试')).not.toBeInTheDocument()
     })
   })
 
-  describe('可选属性', () => {
-    it('应该支持自定义className', () => {
-      const { container } = render(
-        <SystemHealthCard
-          service="Database"
-          status="healthy"
-          responseTime={50}
-          className="custom-card"
-        />
-      )
+  describe('空数据处理', () => {
+    it('没有数据且无加载无错误时不应该渲染', () => {
+      const { container } = render(<SystemHealthCard />)
 
-      expect(container.firstChild).toHaveClass('custom-card')
-    })
-
-    it('应该支持lastChecked时间戳', () => {
-      const lastChecked = new Date('2025-10-04T10:00:00Z')
-      render(
-        <SystemHealthCard
-          service="Database"
-          status="healthy"
-          responseTime={50}
-          lastChecked={lastChecked}
-        />
-      )
-
-      expect(screen.getByText(/Last checked:/)).toBeInTheDocument()
+      expect(container.firstChild).toBeNull()
     })
   })
 
-  describe('边界条件', () => {
-    it('应该处理0毫秒响应时间', () => {
-      render(
-        <SystemHealthCard
-          service="Redis"
-          status="healthy"
-          responseTime={0}
-        />
-      )
+  describe('可访问性', () => {
+    it('状态指示器应该有正确的aria-label', () => {
+      const { container } = render(<SystemHealthCard data={mockHealthyData} />)
 
-      expect(screen.getByText('0ms')).toBeInTheDocument()
-    })
-
-    it('应该处理超大响应时间', () => {
-      render(
-        <SystemHealthCard
-          service="Database"
-          status="unhealthy"
-          responseTime={999999}
-        />
-      )
-
-      expect(screen.getByText('16.67m')).toBeInTheDocument()
-    })
-
-    it('应该处理缺失error属性（unhealthy状态）', () => {
-      render(
-        <SystemHealthCard
-          service="CRS"
-          status="unhealthy"
-          responseTime={0}
-        />
-      )
-
-      expect(screen.getByText('Service unavailable')).toBeInTheDocument()
+      const indicator = container.querySelector('[role="status"]')
+      expect(indicator).toHaveAttribute('aria-label', '系统状态：正常')
     })
   })
 })
