@@ -80,7 +80,7 @@ describe('UserRepository', () => {
 
       // Assert
       expect(result.isSuccess).toBe(false)
-      expect(result.error?.message).toContain('User not found')
+      expect(result.error?.message).toContain('用户不存在')
     })
 
     it('当数据库错误时应该返回失败', async () => {

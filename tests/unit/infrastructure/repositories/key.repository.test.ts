@@ -77,7 +77,7 @@ describe('KeyRepository', () => {
 
       // Assert
       expect(result.isSuccess).toBe(false)
-      expect(result.error?.message).toContain('Key not found')
+      expect(result.error?.message).toContain('密钥不存在')
     })
   })
 
