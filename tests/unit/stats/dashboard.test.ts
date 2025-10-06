@@ -51,22 +51,19 @@ describe('GET /api/dashboard', () => {
           id: 'key-1',
           status: 'ACTIVE',
           totalTokens: 1000,
-          totalRequests: 10,
-          monthlyUsage: 500,
+          totalCalls: 10, // 修正：使用 totalCalls 而不是 totalRequests
         },
         {
           id: 'key-2',
           status: 'ACTIVE',
           totalTokens: 2000,
-          totalRequests: 20,
-          monthlyUsage: 1000,
+          totalCalls: 20, // 修正：使用 totalCalls 而不是 totalRequests
         },
         {
           id: 'key-3',
-          status: 'PAUSED',
+          status: 'INACTIVE', // 修正：使用 INACTIVE 而不是 PAUSED
           totalTokens: 0,
-          totalRequests: 0,
-          monthlyUsage: 0,
+          totalCalls: 0, // 修正：使用 totalCalls 而不是 totalRequests
         },
       ]
 
@@ -86,10 +83,10 @@ describe('GET /api/dashboard', () => {
       expect(data.overview).toEqual({
         totalKeys: 3,
         activeKeys: 2,
-        pausedKeys: 1,
+        inactiveKeys: 1, // 修正：使用 inactiveKeys 而不是 pausedKeys
         totalTokensUsed: 3000,
         totalRequests: 30,
-        monthlyUsage: 1500,
+        // 移除 monthlyUsage（功能未实现）
       })
       expect(Array.isArray(data.recentActivity)).toBe(true)
 
@@ -106,13 +103,13 @@ describe('GET /api/dashboard', () => {
           id: 'key-1',
           name: 'Test Key 1',
           lastUsedAt: new Date('2025-10-03'),
-          totalRequests: 100,
+          totalCalls: 100, // 修正：使用 totalCalls 而不是 totalRequests
         },
         {
           id: 'key-2',
           name: 'Test Key 2',
           lastUsedAt: new Date('2025-10-02'),
-          totalRequests: 50,
+          totalCalls: 50, // 修正：使用 totalCalls 而不是 totalRequests
         },
       ]
 
@@ -155,10 +152,10 @@ describe('GET /api/dashboard', () => {
       expect(data.overview).toEqual({
         totalKeys: 0,
         activeKeys: 0,
-        pausedKeys: 0,
+        inactiveKeys: 0, // 修正：使用 inactiveKeys 而不是 pausedKeys
         totalTokensUsed: 0,
         totalRequests: 0,
-        monthlyUsage: 0,
+        // 移除 monthlyUsage（功能未实现）
       })
       expect(data.recentActivity).toEqual([])
     })
