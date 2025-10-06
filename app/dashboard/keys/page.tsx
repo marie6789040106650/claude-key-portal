@@ -25,7 +25,7 @@ export default function KeysPage() {
   // 获取密钥列表
   const {
     data,
-    isLoading,
+    isPending,
     error: queryError,
     refetch,
   } = useQuery({
@@ -166,7 +166,7 @@ export default function KeysPage() {
         onDelete={handleDelete}
         onCopy={handleCopy}
         onRetry={refetch}
-        loading={isLoading}
+        loading={isPending}
         error={error as Error | null}
         filterable
         searchable
