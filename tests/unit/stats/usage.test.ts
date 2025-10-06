@@ -49,18 +49,20 @@ describe('GET /api/stats/usage', () => {
         {
           id: 'key-1',
           name: 'Test Key 1',
-          keyValue: 'cr_test_key_1',
           status: 'ACTIVE',
           totalTokens: 1000,
-          totalRequests: 10,
+          totalCalls: 10, // 修正：使用 totalCalls 而不是 totalRequests
+          createdAt: new Date('2025-10-01'),
+          lastUsedAt: new Date('2025-10-03'),
         },
         {
           id: 'key-2',
           name: 'Test Key 2',
-          keyValue: 'cr_test_key_2',
           status: 'ACTIVE',
           totalTokens: 2000,
-          totalRequests: 20,
+          totalCalls: 20, // 修正：使用 totalCalls 而不是 totalRequests
+          createdAt: new Date('2025-10-01'),
+          lastUsedAt: new Date('2025-10-03'),
         },
       ]
 
@@ -125,9 +127,12 @@ describe('GET /api/stats/usage', () => {
         id: 'key-1',
         userId: mockUserId,
         name: 'Test Key',
-        keyValue: 'cr_test_key',
+        crsKey: 'sk-ant-api03-test123', // 修正：使用 crsKey 而不是 keyValue
+        status: 'ACTIVE',
         totalTokens: 1000,
-        totalRequests: 10,
+        totalCalls: 10, // 修正：使用 totalCalls 而不是 totalRequests
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
       }
 
       ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(mockKey)
@@ -208,9 +213,12 @@ describe('GET /api/stats/usage', () => {
         id: 'key-1',
         userId: mockUserId,
         name: 'Test Key',
-        keyValue: 'cr_test_key',
+        crsKey: 'sk-ant-api03-test123', // 修正：使用 crsKey 而不是 keyValue
+        status: 'ACTIVE',
         totalTokens: 1000,
-        totalRequests: 10,
+        totalCalls: 10, // 修正：使用 totalCalls 而不是 totalRequests
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
       }
 
       const mockCrsStats = {
@@ -241,7 +249,7 @@ describe('GET /api/stats/usage', () => {
       // Assert
       expect(response.status).toBe(200)
       expect(data.key.realtimeStats).toEqual(mockCrsStats)
-      expect(crsClient.getKeyStats).toHaveBeenCalledWith('cr_test_key')
+      expect(crsClient.getKeyStats).toHaveBeenCalledWith('sk-ant-api03-test123') // 修正：使用实际的 crsKey
     })
 
     it('CRS不可用时应该返回本地缓存数据', async () => {
@@ -249,8 +257,13 @@ describe('GET /api/stats/usage', () => {
       const mockKey = {
         id: 'key-1',
         userId: mockUserId,
-        keyValue: 'cr_test_key',
+        name: 'Test Key',
+        crsKey: 'sk-ant-api03-test123', // 修正：使用 crsKey 而不是 keyValue
+        status: 'ACTIVE',
         totalTokens: 1000,
+        totalCalls: 10, // 添加必需字段
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
       }
 
       ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(mockKey)
