@@ -56,6 +56,9 @@ export function StatsTable({
   highlightTop = false,
   showRank = false,
 }: StatsTableProps) {
+  // 响应式检测 (必须在所有提前return之前调用)
+  const isSmallScreen = useIsSmallScreen()
+
   // 加载状态
   if (loading) {
     return (
@@ -141,9 +144,6 @@ export function StatsTable({
 
   // 计算总页数
   const totalPages = total && pageSize ? Math.ceil(total / pageSize) : 1
-
-  // 响应式检测
-  const isSmallScreen = useIsSmallScreen()
 
   if (isSmallScreen) {
     // 移动端卡片视图

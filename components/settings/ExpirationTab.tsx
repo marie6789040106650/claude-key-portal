@@ -120,7 +120,7 @@ export function ExpirationTab() {
     setErrors(newErrors)
   }
 
-  const handleChannelToggle = (channel: string, checked: boolean) => {
+  const handleChannelToggle = (channel: 'email' | 'webhook' | 'system', checked: boolean) => {
     const newChannels = checked
       ? [...localSettings.notifyChannels, channel]
       : localSettings.notifyChannels.filter((c) => c !== channel)

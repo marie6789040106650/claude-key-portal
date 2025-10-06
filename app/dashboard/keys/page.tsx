@@ -112,7 +112,7 @@ export default function KeysPage() {
 
   // 复制密钥
   const handleCopy = useCallback(async (keyId: string) => {
-    const key = keys.find((k) => k.id === keyId)
+    const key = keys.find((k: ApiKey) => k.id === keyId)
     if (!key) return
 
     try {

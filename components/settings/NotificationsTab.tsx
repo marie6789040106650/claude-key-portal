@@ -118,7 +118,7 @@ export function NotificationsTab() {
       types: {
         [typeKey]: value,
       },
-    })
+    } as unknown as Partial<NotificationConfig>)
   }
 
   const handleChannelToggle = (channelKey: string, value: boolean) => {
@@ -136,7 +136,7 @@ export function NotificationsTab() {
       channels: {
         [channelKey]: value,
       },
-    })
+    } as unknown as Partial<NotificationConfig>)
   }
 
   return (

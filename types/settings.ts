@@ -8,18 +8,9 @@
  * 通知渠道配置
  */
 export interface NotificationChannels {
-  email: {
-    enabled: boolean
-    address: string
-  }
-  webhook: {
-    enabled: boolean
-    url: string
-    secret: string
-  }
-  system: {
-    enabled: boolean
-  }
+  email: boolean
+  webhook: boolean
+  system: boolean
 }
 
 /**
