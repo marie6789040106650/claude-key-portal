@@ -71,7 +71,7 @@ describe('SecurityTab', () => {
       render(<SecurityTab />)
 
       expect(screen.getByLabelText(/当前密码/)).toBeInTheDocument()
-      expect(screen.getByLabelText(/新密码/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/^新密码$/)).toBeInTheDocument()
       expect(screen.getByLabelText(/确认新密码/)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /更新密码/i })).toBeInTheDocument()
     })
@@ -88,7 +88,7 @@ describe('SecurityTab', () => {
       const user = userEvent.setup()
       render(<SecurityTab />)
 
-      const newPasswordInput = screen.getByLabelText(/新密码/)
+      const newPasswordInput = screen.getByLabelText(/^新密码$/)
 
       // 输入弱密码
       await user.type(newPasswordInput, '12345678')
@@ -112,7 +112,7 @@ describe('SecurityTab', () => {
       const user = userEvent.setup()
       render(<SecurityTab />)
 
-      const newPasswordInput = screen.getByLabelText(/新密码/)
+      const newPasswordInput = screen.getByLabelText(/^新密码$/)
 
       // 输入弱密码（少于8字符）
       await user.type(newPasswordInput, '1234')
@@ -127,7 +127,7 @@ describe('SecurityTab', () => {
       const user = userEvent.setup()
       render(<SecurityTab />)
 
-      const newPasswordInput = screen.getByLabelText(/新密码/)
+      const newPasswordInput = screen.getByLabelText(/^新密码$/)
 
       // 输入只有数字的密码
       await user.type(newPasswordInput, '12345678')
@@ -142,7 +142,7 @@ describe('SecurityTab', () => {
       const user = userEvent.setup()
       render(<SecurityTab />)
 
-      const newPasswordInput = screen.getByLabelText(/新密码/)
+      const newPasswordInput = screen.getByLabelText(/^新密码$/)
       const confirmPasswordInput = screen.getByLabelText(/确认新密码/)
 
       // 输入不匹配的密码
@@ -167,7 +167,7 @@ describe('SecurityTab', () => {
       render(<SecurityTab />)
 
       const oldPasswordInput = screen.getByLabelText(/当前密码/)
-      const newPasswordInput = screen.getByLabelText(/新密码/)
+      const newPasswordInput = screen.getByLabelText(/^新密码$/)
       const confirmPasswordInput = screen.getByLabelText(/确认新密码/)
       const submitButton = screen.getByRole('button', { name: /更新密码/i })
 
