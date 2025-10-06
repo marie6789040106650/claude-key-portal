@@ -97,7 +97,7 @@ describe('POST /api/keys', () => {
       expect(data.key).toHaveProperty('id', 'local_key_123')
       expect(data.key).toHaveProperty('name', 'Production Key')
       expect(data.key).toHaveProperty('status', 'ACTIVE')
-      expect(data.key).toHaveProperty('keyMasked', 'sk-ant-***xyz')
+      expect(data.key).toHaveProperty('keyMasked', 'sk-ant-***3xyz')
       expect(data.key).toHaveProperty('tags')
       expect(data.key.tags).toEqual(['production', 'important'])
 
