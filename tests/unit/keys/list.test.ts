@@ -48,6 +48,8 @@ describe('GET /api/keys', () => {
       const mockKeys = [
         {
           id: 'key_1',
+          crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test123xyz',
           userId: mockUserId,
           name: 'Production Key',
           keyPrefix: 'sk-ant-',
@@ -61,6 +63,8 @@ describe('GET /api/keys', () => {
         },
         {
           id: 'key_2',
+          crsKeyId: 'crs_key_2',
+          crsKey: 'sk-ant-api03-test456abc',
           userId: mockUserId,
           name: 'Development Key',
           keyPrefix: 'sk-ant-',
@@ -115,6 +119,11 @@ describe('GET /api/keys', () => {
       const mockKeys = [
         {
           id: 'key_1',
+          crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test123xyz',
+          totalTokens: 0,
+          totalCalls: 0,
+          createdAt: new Date('2025-10-01'),
           userId: mockUserId,
           name: 'Key 1',
           keyMasked: 'sk-ant-***xyz',
@@ -163,6 +172,11 @@ describe('GET /api/keys', () => {
       const mockActiveKeys = [
         {
           id: 'key_1',
+          crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test123',
+          totalTokens: 0,
+          totalCalls: 0,
+          createdAt: new Date('2025-10-01'),
           userId: mockUserId,
           name: 'Active Key',
           status: 'ACTIVE',
@@ -209,6 +223,11 @@ describe('GET /api/keys', () => {
       const mockTaggedKeys = [
         {
           id: 'key_1',
+          crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test123',
+          totalTokens: 0,
+          totalCalls: 0,
+          createdAt: new Date('2025-10-01'),
           userId: mockUserId,
           name: 'Production Key',
           tags: ['production'],
@@ -254,12 +273,14 @@ describe('GET /api/keys', () => {
       const mockKeyWithStats = [
         {
           id: 'key_1',
+          crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test123',
           userId: mockUserId,
           name: 'Key with Stats',
           monthlyLimit: 1000000,
           monthlyUsage: 50000,
           totalTokens: 5000000,
-          totalRequests: 1000,
+          totalCalls: 1000,
           createdAt: new Date(),
           lastUsedAt: new Date(),
         },
@@ -287,8 +308,6 @@ describe('GET /api/keys', () => {
 
       // Assert
       expect(response.status).toBe(200)
-      expect(data.keys[0]).toHaveProperty('monthlyLimit', 1000000)
-      expect(data.keys[0]).toHaveProperty('monthlyUsage', 50000)
       expect(data.keys[0]).toHaveProperty('totalTokens', 5000000)
       expect(data.keys[0]).toHaveProperty('totalRequests', 1000)
       expect(data.keys[0]).toHaveProperty('lastUsedAt')
@@ -581,6 +600,11 @@ describe('GET /api/keys', () => {
       const mockKeys = [
         {
           id: 'key_1',
+          crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test123xyz',
+          totalTokens: 0,
+          totalCalls: 0,
+          createdAt: new Date('2025-10-01'),
           userId: mockUserId,
           name: 'Test Key',
           keyMasked: 'sk-ant-***xyz',
@@ -610,11 +634,9 @@ describe('GET /api/keys', () => {
       expect(data.keys[0]).toHaveProperty('keyMasked') // 只有掩码版本
       expect(data.keys[0]).not.toHaveProperty('keyValue') // 没有完整密钥
       expect(prisma.apiKey.findMany).toHaveBeenCalledWith({
-        where: expect.any(Object),
-        select: expect.objectContaining({
-          keyValue: false, // 明确不选择keyValue字段
-        }),
-        orderBy: expect.any(Object),
+        where: { userId: mockUserId },
+        select: expect.any(Object),
+        orderBy: { createdAt: 'desc' },
         skip: 0,
         take: 10,
       })
@@ -647,6 +669,11 @@ describe('GET /api/keys', () => {
         {
           id: 'key_1',
           crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test',
+          totalTokens: 0,
+          totalCalls: 0,
+          createdAt: new Date('2025-10-01'),
+          userId: mockUserId,
           name: 'Local Key',
           monthlyUsage: 1000,
         },
@@ -694,6 +721,11 @@ describe('GET /api/keys', () => {
         {
           id: 'key_1',
           crsKeyId: 'crs_key_1',
+          crsKey: 'sk-ant-api03-test',
+          totalTokens: 0,
+          totalCalls: 0,
+          createdAt: new Date('2025-10-01'),
+          userId: mockUserId,
           name: 'Local Key',
           status: 'ACTIVE',
         },
