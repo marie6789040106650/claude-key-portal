@@ -23,6 +23,7 @@
 | Sprint 11 | 用户认证和仪表板 | [TODOLIST](./SPRINT_11_TODOLIST.md) | [SUMMARY](./SPRINT_11_SUMMARY.md) | - | ✅ |
 | Sprint 12 | 密钥管理UI完整实现 | [TODOLIST](./SPRINT_12_TODOLIST.md) | [SUMMARY](./SPRINT_12_SUMMARY.md) | - | ✅ |
 | Sprint 13 | 密钥使用统计和可视化 | [TODOLIST](./SPRINT_13_TODOLIST.md) | [SUMMARY](./SPRINT_13_SUMMARY.md) | - | ✅ |
+| Sprint 14 | 用户设置和个人中心UI | [TODOLIST](./SPRINT_14_TODOLIST.md) | [SUMMARY](./SPRINT_14_SUMMARY.md) | - | ✅ |
 
 **图例**:
 ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中 | 📋 待开始
