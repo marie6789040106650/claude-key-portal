@@ -28,6 +28,11 @@ describe('POST /api/auth/register', () => {
     jest.clearAllMocks()
   })
 
+  afterAll(() => {
+    // 清理所有定时器和异步操作
+    jest.clearAllTimers()
+  })
+
   describe('✅ 成功场景', () => {
     it('应该成功注册使用邮箱的新用户', async () => {
       // Arrange
