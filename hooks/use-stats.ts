@@ -31,7 +31,7 @@ export function useUsageStats(
 ): UseQueryResult<UsageStatsResponse, Error> {
   const params = buildDateRangeParams(dateRange, customStartDate, customEndDate)
 
-  return useQuery({
+  return useQuery<UsageStatsResponse>({
     queryKey: ['usage-stats', params],
     queryFn: async () => {
       const response = await fetch(`/api/stats/usage?${params}`)
@@ -41,7 +41,7 @@ export function useUsageStats(
       return response.json()
     },
     staleTime: 5 * 60 * 1000, // 5分钟
-    cacheTime: 10 * 60 * 1000, // 10分钟
+    gcTime: 10 * 60 * 1000, // 10分钟
   })
 }
 
@@ -51,7 +51,7 @@ export function useUsageStats(
 export function useKeyDetails(
   keyId: string
 ): UseQueryResult<KeyStats, Error> {
-  return useQuery({
+  return useQuery<KeyStats>({
     queryKey: ['key-details', keyId],
     queryFn: async () => {
       const response = await fetch(`/api/keys/${keyId}`)
@@ -61,7 +61,7 @@ export function useKeyDetails(
       return response.json()
     },
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   })
 }
 
@@ -76,7 +76,7 @@ export function useKeyStats(
 ): UseQueryResult<any, Error> {
   const params = buildDateRangeParams(dateRange, customStartDate, customEndDate)
 
-  return useQuery({
+  return useQuery<any>({
     queryKey: ['key-stats', keyId, params],
     queryFn: async () => {
       const response = await fetch(`/api/keys/${keyId}/stats?${params}`)
@@ -86,6 +86,6 @@ export function useKeyStats(
       return response.json()
     },
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   })
 }
