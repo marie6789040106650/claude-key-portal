@@ -97,7 +97,7 @@ describe('POST /api/keys', () => {
       expect(data.key).toHaveProperty('id', 'local_key_123')
       expect(data.key).toHaveProperty('name', 'Production Key')
       expect(data.key).toHaveProperty('status', 'ACTIVE')
-      expect(data.key).toHaveProperty('keyMasked', 'sk-ant-***xyz')
+      expect(data.key).toHaveProperty('keyMasked', 'sk-ant-***3xyz')
       expect(data.key).toHaveProperty('tags')
       expect(data.key.tags).toEqual(['production', 'important'])
 
@@ -886,10 +886,16 @@ describe('POST /api/keys', () => {
       // Assert
       expect(data.key).toHaveProperty('keyMasked')
       expect(data.key.keyMasked).toMatch(/^sk-ant-\*\*\*[a-z0-9]{4}$/)
+      expect(data.key).toHaveProperty('keyPrefix', 'sk-ant-')
+
+      // keyMasked 和 keyPrefix 是计算字段，不存储在数据库中
       expect(prisma.apiKey.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          keyPrefix: 'sk-ant-',
-          keyMasked: expect.stringMatching(/^sk-ant-\*\*\*/),
+          userId: mockUserId,
+          crsKeyId: mockCRSKey.id,
+          crsKey: mockCRSKey.key,
+          name: 'Masked Key',
+          status: 'ACTIVE',
         }),
         select: expect.any(Object),
       })
