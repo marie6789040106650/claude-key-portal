@@ -23,6 +23,8 @@ export const STATUS_LABELS: Record<ApiKeyStatus | 'ALL', string> = {
   ACTIVE: '激活',
   INACTIVE: '未激活',
   EXPIRED: '已过期',
+  DELETED: '已删除',
+  RATE_LIMITED: '已限流',
 }
 
 /**
