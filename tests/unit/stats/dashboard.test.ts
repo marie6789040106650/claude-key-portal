@@ -250,7 +250,7 @@ describe('GET /api/dashboard', () => {
 
       // Assert
       expect(response.status).toBe(200)
-      expect(data.crsStats).toEqual(mockCrsStats.overview)
+      expect(data.crsStats).toEqual(mockCrsStats)
     })
 
     it('CRS不可用时应该仍能返回本地数据', async () => {

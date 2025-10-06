@@ -15,7 +15,12 @@ export function verifyToken(authHeader: string | null): {
     throw new Error('未登录或Token缺失')
   }
 
-  const token = authHeader.substring(7)
+  const token = authHeader.substring(7).trim()
+
+  // 检查提取的token是否为空
+  if (!token) {
+    throw new Error('未登录或Token缺失')
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any

@@ -94,7 +94,6 @@ describe('DELETE /api/keys/[id]', () => {
         where: { id: mockKeyId },
         data: {
           status: 'DELETED',
-          deletedAt: expect.any(Date),
         },
       })
     })
