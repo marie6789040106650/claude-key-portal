@@ -56,17 +56,13 @@ describe('POST /api/keys', () => {
         id: 'local_key_123',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
+        crsKey: mockCRSKey.key, // 使用 crsKey 而不是 keyValue
         name: mockCRSKey.name,
-        keyPrefix: 'sk-ant-',
-        keyMasked: 'sk-ant-***xyz',
-        keyValue: mockCRSKey.key,
         description: mockCRSKey.description,
         status: 'ACTIVE',
         tags: ['production', 'important'],
-        monthlyLimit: mockCRSKey.monthlyLimit,
-        monthlyUsage: 0,
-        totalTokens: 0,
-        totalRequests: 0,
+        totalTokens: 0, // Prisma 返回的 BigInt 在这里用数字模拟
+        totalCalls: 0,
         createdAt: new Date(),
       }
 
@@ -139,9 +135,11 @@ describe('POST /api/keys', () => {
         id: 'local_key_456',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
+        crsKey: mockCRSKey.key,
         name: mockCRSKey.name,
-        keyMasked: 'sk-ant-***456',
         status: 'ACTIVE',
+        totalTokens: 0,
+        totalCalls: 0,
         createdAt: new Date(),
       }
 
@@ -188,9 +186,13 @@ describe('POST /api/keys', () => {
         id: 'local_key_789',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
+        crsKey: mockCRSKey.key,
         name: mockCRSKey.name,
         tags: ['development', 'test', 'staging'],
         status: 'ACTIVE',
+        totalTokens: 0,
+        totalCalls: 0,
+        createdAt: new Date(),
       }
 
       ;(jwt.verify as jest.Mock).mockReturnValue({
@@ -241,10 +243,12 @@ describe('POST /api/keys', () => {
         id: 'local_key_limit',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
+        crsKey: mockCRSKey.key,
         name: mockCRSKey.name,
-        monthlyLimit: 500000,
-        monthlyUsage: 0,
         status: 'ACTIVE',
+        totalTokens: 0,
+        totalCalls: 0,
+        createdAt: new Date(),
       }
 
       ;(jwt.verify as jest.Mock).mockReturnValue({
@@ -292,10 +296,12 @@ describe('POST /api/keys', () => {
         id: 'local_key_full',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
+        crsKey: mockCRSKey.key,
         name: mockCRSKey.name,
-        keyValue: mockCRSKey.key,
-        keyMasked: 'sk-ant-***789',
         status: 'ACTIVE',
+        totalTokens: 0,
+        totalCalls: 0,
+        createdAt: new Date(),
       }
 
       ;(jwt.verify as jest.Mock).mockReturnValue({
@@ -748,6 +754,12 @@ describe('POST /api/keys', () => {
         id: 'local_key_secure',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
+        crsKey: mockCRSKey.key,
+        name: mockCRSKey.name,
+        status: 'ACTIVE',
+        totalTokens: 0,
+        totalCalls: 0,
+        createdAt: new Date(),
       })
 
       const request = new Request('http://localhost:3000/api/keys', {
@@ -841,9 +853,12 @@ describe('POST /api/keys', () => {
         id: 'local_key_mask',
         userId: mockUserId,
         crsKeyId: mockCRSKey.id,
-        keyValue: mockCRSKey.key,
-        keyPrefix: 'sk-ant-',
-        keyMasked: 'sk-ant-***cdef', // 显示前缀和后4位
+        crsKey: mockCRSKey.key,
+        name: mockCRSKey.name,
+        status: 'ACTIVE',
+        totalTokens: 0,
+        totalCalls: 0,
+        createdAt: new Date(),
       }
 
       ;(jwt.verify as jest.Mock).mockReturnValue({
