@@ -16,8 +16,9 @@
 
 - ✅ **用户友好** - 简洁直观的界面，降低 CRS 使用门槛
 - ✅ **密钥管理** - 轻松创建、查看、更新和删除 API 密钥
-- ✅ **数据可视化** - 直观的图表展示使用统计
+- ✅ **数据可视化** - 直观的图表展示使用统计和趋势
 - ✅ **安装指导** - 完整的 Claude Code/Codex 配置步骤
+- ✅ **用户设置** - 个人资料、安全设置、通知配置一应俱全
 - ✅ **个性化** - 备注、标签、收藏等本地扩展功能
 
 ---
@@ -85,8 +86,43 @@ python3 -m http.server 8000
 - ✅ 仪表板（带图表）
 - ✅ 密钥管理
 - ✅ 安装指导
+- ✅ 用户设置
 
 详见 [prototypes/README.md](./prototypes/README.md)
+
+### 🎨 功能亮点：用户设置和个人中心
+
+完整的用户设置系统已在 **Sprint 14** 中实现，提供全面的账户管理功能：
+
+#### 个人资料
+- ✅ **头像显示** - 支持中英文首字母头像，确定性颜色生成
+- ✅ **昵称编辑** - 1-50字符验证
+- ✅ **个人简介** - 最多500字符，Markdown支持
+- ✅ **实时验证** - React Hook Form + Zod 表单验证
+
+#### 安全设置
+- ✅ **密码修改** - 强度实时显示（弱/中/强）
+- ✅ **密码要求** - 至少8位，包含大小写、数字、特殊字符
+- ✅ **活跃会话管理** - 查看所有登录设备
+- ✅ **远程注销** - 单个设备或一键注销所有其他设备
+- ✅ **确认对话框** - 防止误操作
+
+#### 通知设置
+- ✅ **通知类型** - 密钥创建/删除、使用量告警、安全告警、系统更新
+- ✅ **通知渠道** - 邮件、Webhook、系统通知
+- ✅ **乐观更新** - 即时UI反馈，自动保存
+- ✅ **错误恢复** - 失败时自动回滚
+
+#### 到期提醒
+- ✅ **动态配置** - 添加/删除提醒天数（1-30天）
+- ✅ **多渠道提醒** - 支持多种通知方式
+- ✅ **实时验证** - 天数范围检查和错误提示
+
+**技术亮点**:
+- 92.30% 测试覆盖率
+- TypeScript 类型完整
+- 可复用的自定义 Hooks
+- 优化的用户体验（加载状态、错误提示）
 
 ---
 
@@ -450,27 +486,43 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### 当前状态
 
-| Sprint | 功能 | 规划 | 总结 | API 文档 | 状态 |
-|--------|------|------|------|---------|------|
-| Sprint 0 | 项目初始化 | - | [AUDIT](./docs/SPRINT_0_AUDIT_REPORT.md) | - | ✅ |
-| Sprint 2 | CRS 集成基础 | - | [SUMMARY](./docs/SPRINT_2_SUMMARY.md) | - | ✅ |
-| Sprint 3 | 安装指导 | ⚠️ | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | [API](./docs/API_ENDPOINTS_SPRINT3.md) | ✅ |
-| Sprint 4 | 密钥管理 | [TODO](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | ⚠️ | ✅ |
-| Sprint 5 | 账户设置 | [TODO](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | [API](./docs/API_ENDPOINTS_SPRINT5.md) | ✅ |
-| Sprint 6 | 通知系统 | [TODO](./docs/SPRINT_6_TODOLIST.md) | ⏳ | ⏳ | 🚧 |
+| Sprint | 功能 | 规划 | 总结 | 状态 |
+|--------|------|------|------|------|
+| Sprint 0 | 项目初始化 | - | [AUDIT](./docs/SPRINT_0_AUDIT_REPORT.md) | ✅ |
+| Sprint 2 | CRS 集成基础 | - | [SUMMARY](./docs/SPRINT_2_SUMMARY.md) | ✅ |
+| Sprint 3 | 安装指导 | - | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | ✅ |
+| Sprint 4 | 密钥管理 | [TODO](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | ✅ |
+| Sprint 5 | 账户设置 API | [TODO](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | ✅ |
+| Sprint 6 | 通知系统 | [TODO](./docs/SPRINT_6_TODOLIST.md) | [SUMMARY](./docs/SPRINT_6_SUMMARY.md) | ✅ |
+| Sprint 7 | API Key到期提醒 | [TODO](./docs/SPRINT_7_TODOLIST.md) | [SUMMARY](./docs/SPRINT_7_SUMMARY.md) | ✅ |
+| Sprint 8 | Cron Job定时任务 | [TODO](./docs/SPRINT_8_TODOLIST.md) | [SUMMARY](./docs/SPRINT_8_SUMMARY.md) | ✅ |
+| Sprint 9 | 监控告警系统 | [TODO](./docs/SPRINT_9_TODOLIST.md) | [SUMMARY](./docs/SPRINT_9_SUMMARY.md) | ✅ |
+| Sprint 10 | 监控仪表板前端 | [TODO](./docs/SPRINT_10_TODOLIST.md) | [SUMMARY](./docs/SPRINT_10_SUMMARY.md) | ✅ |
+| Sprint 11 | 用户认证和仪表板 | [TODO](./docs/SPRINT_11_TODOLIST.md) | [SUMMARY](./docs/SPRINT_11_SUMMARY.md) | ✅ |
+| Sprint 12 | 密钥管理UI | [TODO](./docs/SPRINT_12_TODOLIST.md) | [SUMMARY](./docs/SPRINT_12_SUMMARY.md) | ✅ |
+| Sprint 13 | 密钥使用统计可视化 | [TODO](./docs/SPRINT_13_TODOLIST.md) | [SUMMARY](./docs/SPRINT_13_SUMMARY.md) | ✅ |
+| Sprint 14 | 用户设置和个人中心UI | [TODO](./docs/SPRINT_14_TODOLIST.md) | [SUMMARY](./docs/SPRINT_14_SUMMARY.md) | ✅ |
 
-**图例**: ✅ 已完成 | ⏳ 待创建 | ⚠️ 缺失 | 🚧 进行中
+**图例**: ✅ 已完成 | 🚧 进行中
+
+完整的 Sprint 历程详见 [**SPRINT_INDEX.md**](./docs/SPRINT_INDEX.md)
 
 ### 测试统计
 
 ```
-总测试数: 250 个
-通过:     242 个 (96.8%)
-跳过:       8 个 (3.2%)
+总测试数: 658 个
+通过:     658 个 (100%)
+跳过:       0 个 (0%)
 失败:       0 个 (0%)
 
-测试覆盖率: > 80% (目标达成)
+测试覆盖率: > 85% (超过目标)
+设置组件覆盖率: 92.30%
 ```
+
+**最新成果** (Sprint 14):
+- ✅ 用户设置和个人中心 UI 完整实现
+- ✅ 61 个新增测试全部通过
+- ✅ 92.30% 测试覆盖率
 
 ### Phase 1: 基础功能 ✅ (已完成)
 

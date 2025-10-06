@@ -70,6 +70,6 @@ export function useUserProfile() {
     isLoading,
     isError,
     updateProfile: mutation.mutate,
-    isUpdating: mutation.isLoading,
+    isUpdating: mutation.isPending,
   }
 }

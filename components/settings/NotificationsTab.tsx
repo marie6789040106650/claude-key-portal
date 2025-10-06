@@ -157,7 +157,7 @@ export function NotificationsTab() {
                 id={key}
                 checked={localConfig.types[key as keyof typeof localConfig.types]}
                 onCheckedChange={(checked) => handleTypeToggle(key, checked)}
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
               />
             </div>
           ))}
@@ -180,7 +180,7 @@ export function NotificationsTab() {
                 id={key}
                 checked={localConfig.channels[key as keyof typeof localConfig.channels]}
                 onCheckedChange={(checked) => handleChannelToggle(key, checked)}
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
               />
             </div>
           ))}

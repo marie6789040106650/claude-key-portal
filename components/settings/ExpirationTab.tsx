@@ -245,8 +245,8 @@ export function ExpirationTab() {
         </CardContent>
       </Card>
 
-      <Button onClick={handleSave} disabled={mutation.isLoading || Object.keys(errors).length > 0}>
-        {mutation.isLoading ? '保存中...' : '保存设置'}
+      <Button onClick={handleSave} disabled={mutation.isPending || Object.keys(errors).length > 0}>
+        {mutation.isPending ? '保存中...' : '保存设置'}
       </Button>
     </div>
   )

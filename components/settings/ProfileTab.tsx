@@ -165,7 +165,7 @@ export function ProfileTab() {
               <FormItem>
                 <FormLabel>昵称</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={mutation.isLoading} />
+                  <Input {...field} disabled={mutation.isPending} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -188,7 +188,7 @@ export function ProfileTab() {
                 <FormControl>
                   <Textarea
                     {...field}
-                    disabled={mutation.isLoading}
+                    disabled={mutation.isPending}
                     rows={4}
                   />
                 </FormControl>
@@ -199,9 +199,9 @@ export function ProfileTab() {
 
           <Button
             type="submit"
-            disabled={mutation.isLoading || !form.formState.isValid}
+            disabled={mutation.isPending || !form.formState.isValid}
           >
-            {mutation.isLoading ? '保存中...' : '保存'}
+            {mutation.isPending ? '保存中...' : '保存'}
           </Button>
         </form>
       </Form>

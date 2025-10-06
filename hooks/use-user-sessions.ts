@@ -88,6 +88,6 @@ export function useUserSessions() {
     isError,
     deleteSession: deleteSessionMutation.mutate,
     deleteAllOtherSessions: deleteAllSessionsMutation.mutate,
-    isDeleting: deleteSessionMutation.isLoading || deleteAllSessionsMutation.isLoading,
+    isDeleting: deleteSessionMutation.isPending || deleteAllSessionsMutation.isPending,
   }
 }

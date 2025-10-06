@@ -215,7 +215,7 @@ export function SecurityTab() {
                       <Input
                         {...field}
                         type="password"
-                        disabled={passwordMutation.isLoading}
+                        disabled={passwordMutation.isPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -234,7 +234,7 @@ export function SecurityTab() {
                         {...field}
                         id={field.name}
                         type="password"
-                        disabled={passwordMutation.isLoading}
+                        disabled={passwordMutation.isPending}
                         onChange={(e) => {
                           field.onChange(e)
                           setNewPassword(e.target.value)
@@ -276,7 +276,7 @@ export function SecurityTab() {
                         {...field}
                         id={field.name}
                         type="password"
-                        disabled={passwordMutation.isLoading}
+                        disabled={passwordMutation.isPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -286,9 +286,9 @@ export function SecurityTab() {
 
               <Button
                 type="submit"
-                disabled={passwordMutation.isLoading || !form.formState.isValid}
+                disabled={passwordMutation.isPending || !form.formState.isValid}
               >
-                {passwordMutation.isLoading ? '更新中...' : '更新密码'}
+                {passwordMutation.isPending ? '更新中...' : '更新密码'}
               </Button>
             </form>
           </Form>
@@ -310,17 +310,17 @@ export function SecurityTab() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    {session.device} - {session.browser}
+                    {session.deviceInfo}
                   </span>
                   {session.isCurrent && (
                     <Badge variant="default">当前设备</Badge>
                   )}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {session.location} · {session.ip}
+                  IP: {session.ipAddress}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  最后活跃: {new Date(session.lastActiveAt).toLocaleString()}
+                  最后活跃: {new Date(session.lastActive).toLocaleString()}
                 </div>
               </div>
 
@@ -340,7 +340,7 @@ export function SecurityTab() {
             <Button
               variant="destructive"
               onClick={() => setShowDeleteAllDialog(true)}
-              disabled={deleteAllSessionsMutation.isLoading}
+              disabled={deleteAllSessionsMutation.isPending}
             >
               注销所有其他设备
             </Button>

@@ -62,8 +62,8 @@ export interface UpdateNotificationConfigInput {
 export interface ExpirationSettings {
   id: string
   userId: string
-  daysBeforeExpiration: number // 提前几天提醒（1-90天）
-  reminderChannels: ('email' | 'webhook' | 'system')[]
+  reminderDays: number[] // 提前几天提醒（支持多个提醒时间，如[7, 14, 30]）
+  notifyChannels: ('email' | 'webhook' | 'system')[]
   enabled: boolean
   createdAt: string
   updatedAt: string
@@ -73,8 +73,8 @@ export interface ExpirationSettings {
  * 到期设置更新请求
  */
 export interface UpdateExpirationSettingsInput {
-  daysBeforeExpiration?: number // 1-90
-  reminderChannels?: ('email' | 'webhook' | 'system')[]
+  reminderDays?: number[] // 1-30天，支持多个
+  notifyChannels?: ('email' | 'webhook' | 'system')[]
   enabled?: boolean
 }
 

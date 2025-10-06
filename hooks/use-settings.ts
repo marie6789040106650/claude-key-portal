@@ -133,7 +133,7 @@ export function useSettings<T>({
     isLoading,
     isError,
     updateSettings: mutation.mutate,
-    isUpdating: mutation.isLoading,
+    isUpdating: mutation.isPending,
     isSuccess: mutation.isSuccess,
   }
 }
