@@ -14,10 +14,21 @@ import { ExpirationTab } from '@/components/settings/ExpirationTab'
 import type { ExpirationSettings } from '@/types/settings'
 
 // Mock React Query
+const mockInvalidateQueries = jest.fn()
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
   useMutation: jest.fn(),
-  useQueryClient: jest.fn(),
+  useQueryClient: jest.fn(() => ({
+    invalidateQueries: mockInvalidateQueries,
+  })),
+}))
+
+// Mock toast
+const mockToast = jest.fn()
+jest.mock('@/components/ui/use-toast', () => ({
+  useToast: () => ({
+    toast: mockToast,
+  }),
 }))
 
 const { useQuery, useMutation } = require('@tanstack/react-query')
@@ -35,6 +46,8 @@ describe('ExpirationTab', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockToast.mockClear()
+    mockInvalidateQueries.mockClear()
 
     // Mock settings query
     useQuery.mockReturnValue({
@@ -150,10 +163,17 @@ describe('ExpirationTab', () => {
   describe('设置保存', () => {
     it('保存成功应该显示提示', async () => {
       const mockMutate = jest.fn()
-      useMutation.mockReturnValue({
-        mutate: mockMutate,
-        isLoading: false,
-        isSuccess: true,
+
+      // Mock mutation返回配置对象
+      useMutation.mockImplementation((config) => {
+        return {
+          mutate: (data) => {
+            mockMutate(data)
+            // 立即调用onSuccess
+            config.onSuccess?.()
+          },
+          isLoading: false,
+        }
       })
 
       const user = userEvent.setup()
@@ -164,7 +184,7 @@ describe('ExpirationTab', () => {
 
       await waitFor(() => {
         expect(mockMutate).toHaveBeenCalled()
-        expect(screen.getByText(/保存成功/)).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({ title: '保存成功' })
       })
     })
   })

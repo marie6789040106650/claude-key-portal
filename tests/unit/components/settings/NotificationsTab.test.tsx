@@ -9,7 +9,7 @@
  * - Webhook配置
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NotificationsTab } from '@/components/settings/NotificationsTab'
 import type { NotificationConfig } from '@/types/settings'
@@ -19,6 +19,14 @@ jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
   useMutation: jest.fn(),
   useQueryClient: jest.fn(),
+}))
+
+// Mock Toast
+const mockToast = jest.fn()
+jest.mock('@/components/ui/use-toast', () => ({
+  useToast: () => ({
+    toast: mockToast,
+  }),
 }))
 
 const { useQuery, useMutation } = require('@tanstack/react-query')
@@ -47,6 +55,7 @@ describe('NotificationsTab', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockToast.mockClear()
 
     // Mock config query
     useQuery.mockReturnValue({
@@ -59,6 +68,8 @@ describe('NotificationsTab', () => {
     useMutation.mockReturnValue({
       mutate: jest.fn(),
       isLoading: false,
+      isSuccess: false,
+      isError: false,
     })
   })
 
@@ -136,32 +147,57 @@ describe('NotificationsTab', () => {
       render(<NotificationsTab />)
 
       await waitFor(() => {
-        expect(screen.getByText(/保存成功/)).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '保存成功',
+        })
       })
     })
 
     it('保存失败应该恢复开关状态', async () => {
-      const mockMutate = jest.fn()
-      useMutation.mockReturnValue({
-        mutate: mockMutate,
-        isLoading: false,
-        isError: true,
-        error: new Error('保存失败'),
+      let onErrorCallback: (() => void) | undefined
+
+      useMutation.mockImplementation((options: any) => {
+        onErrorCallback = options.onError
+        return {
+          mutate: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        }
       })
 
       const user = userEvent.setup()
-      render(<NotificationsTab />)
+      const { rerender } = render(<NotificationsTab />)
 
       const keyCreatedSwitch = screen.getByLabelText(/密钥创建通知/)
-      const initialState = keyCreatedSwitch.checked
+      const initialState = keyCreatedSwitch.getAttribute('aria-checked') === 'true'
 
       // 切换开关
       await user.click(keyCreatedSwitch)
 
-      // 失败后应该恢复原状态
+      // 手动触发 onError 回调
+      await act(async () => {
+        if (onErrorCallback) {
+          onErrorCallback()
+        }
+      })
+
+      // 重新渲染以显示错误状态
+      useMutation.mockReturnValue({
+        mutate: jest.fn(),
+        isLoading: false,
+        isSuccess: false,
+        isError: true,
+      })
+      rerender(<NotificationsTab />)
+
+      // 失败后应该恢复原状态并显示错误提示
       await waitFor(() => {
-        expect(keyCreatedSwitch.checked).toBe(initialState)
-        expect(screen.getByText(/保存失败/)).toBeInTheDocument()
+        expect(keyCreatedSwitch.getAttribute('aria-checked') === 'true').toBe(initialState)
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '保存失败',
+          variant: 'destructive',
+        })
       })
     })
   })
