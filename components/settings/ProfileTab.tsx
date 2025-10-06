@@ -43,7 +43,7 @@ export function ProfileTab() {
   // 获取用户资料
   const {
     data: userProfile,
-    isLoading,
+    isPending,
     isError,
     error,
   } = useQuery<UserProfile>({
@@ -96,7 +96,7 @@ export function ProfileTab() {
   })
 
   // 加载中状态
-  if (isLoading) {
+  if (isPending) {
     return (
       <div data-testid="profile-skeleton" className="space-y-6">
         <div className="flex items-center gap-4">

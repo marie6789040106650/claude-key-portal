@@ -52,14 +52,14 @@ describe('ExpirationTab', () => {
     // Mock settings query
     useQuery.mockReturnValue({
       data: mockSettings,
-      isLoading: false,
+      isPending: false,
       isError: false,
     })
 
     // Mock mutation
     useMutation.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isPending: false,
     })
   })
 
@@ -67,7 +67,7 @@ describe('ExpirationTab', () => {
     it('加载时应该显示骨架屏', () => {
       useQuery.mockReturnValue({
         data: null,
-        isLoading: true,
+        isPending: true,
       })
 
       render(<ExpirationTab />)
@@ -172,7 +172,7 @@ describe('ExpirationTab', () => {
             // 立即调用onSuccess
             config.onSuccess?.()
           },
-          isLoading: false,
+          isPending: false,
         }
       })
 
