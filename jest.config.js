@@ -12,6 +12,10 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
+  // 修复某些测试不退出的问题（如 bcrypt 相关测试）
+  forceExit: true,
+  // 检测未关闭的句柄（开发时可启用）
+  // detectOpenHandles: true,
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',
     'components/**/*.{js,jsx,ts,tsx}',
