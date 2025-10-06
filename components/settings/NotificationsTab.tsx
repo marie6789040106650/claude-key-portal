@@ -34,7 +34,7 @@ export function NotificationsTab() {
   const [localConfig, setLocalConfig] = useState<NotificationConfig | null>(null)
 
   // 获取通知配置
-  const { data: config, isLoading } = useQuery<NotificationConfig>({
+  const { data, isPending, isError, error } = useQuery<NotificationConfig>({
     queryKey: ['notificationConfig'],
     queryFn: async () => {
       const response = await fetch('/api/user/notifications')
@@ -45,10 +45,10 @@ export function NotificationsTab() {
 
   // 同步配置到本地状态
   useEffect(() => {
-    if (config) {
-      setLocalConfig(config)
+    if (data) {
+      setLocalConfig(data)
     }
-  }, [config])
+  }, [data])
 
   // 更新通知配置
   const mutation = useMutation({
@@ -66,7 +66,7 @@ export function NotificationsTab() {
     },
     onError: () => {
       // 恢复到服务器状态
-      setLocalConfig(config!)
+      setLocalConfig(data!)
     },
   })
 
@@ -89,7 +89,7 @@ export function NotificationsTab() {
   }, [mutation.isError, toast])
 
   // 加载中状态
-  if (isLoading) {
+  if (isPending) {
     return (
       <div data-testid="notifications-skeleton" className="space-y-4">
         <Skeleton className="h-10 w-full" />

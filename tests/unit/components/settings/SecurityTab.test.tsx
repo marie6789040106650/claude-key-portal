@@ -28,22 +28,20 @@ describe('SecurityTab', () => {
     {
       id: 'session-1',
       userId: 'user-123',
-      device: 'macOS',
-      browser: 'Chrome',
-      location: '上海',
-      ip: '192.168.1.1',
-      lastActiveAt: '2025-10-06T10:00:00Z',
+      token: 'sk12...ab34',
+      deviceInfo: 'macOS - Chrome',
+      ipAddress: '192.168.1.1',
+      lastActive: '2025-10-06T10:00:00Z',
       isCurrent: true,
       createdAt: '2025-10-01T00:00:00Z',
     },
     {
       id: 'session-2',
       userId: 'user-123',
-      device: 'iOS',
-      browser: 'Safari',
-      location: '北京',
-      ip: '192.168.1.2',
-      lastActiveAt: '2025-10-06T08:00:00Z',
+      token: 'sk56...cd78',
+      deviceInfo: 'iOS - Safari',
+      ipAddress: '192.168.1.2',
+      lastActive: '2025-10-06T08:00:00Z',
       isCurrent: false,
       createdAt: '2025-10-05T00:00:00Z',
     },
@@ -55,14 +53,14 @@ describe('SecurityTab', () => {
     // Mock sessions query
     useQuery.mockReturnValue({
       data: mockSessions,
-      isLoading: false,
+      isPending: false,
       isError: false,
     })
 
     // Mock mutation
     useMutation.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isPending: false,
     })
   })
 
@@ -159,7 +157,7 @@ describe('SecurityTab', () => {
       const mockMutate = jest.fn()
       useMutation.mockReturnValue({
         mutate: mockMutate,
-        isLoading: false,
+        isPending: false,
         isSuccess: true,
       })
 
@@ -190,7 +188,7 @@ describe('SecurityTab', () => {
     it('修改失败应该显示错误提示', () => {
       useMutation.mockReturnValue({
         mutate: jest.fn(),
-        isLoading: false,
+        isPending: false,
         isError: true,
         error: new Error('旧密码错误'),
       })
@@ -222,7 +220,7 @@ describe('SecurityTab', () => {
       const mockMutate = jest.fn()
       useMutation.mockReturnValue({
         mutate: mockMutate,
-        isLoading: false,
+        isPending: false,
       })
 
       const user = userEvent.setup()
@@ -250,7 +248,7 @@ describe('SecurityTab', () => {
       const mockMutate = jest.fn()
       useMutation.mockReturnValue({
         mutate: mockMutate,
-        isLoading: false,
+        isPending: false,
       })
 
       const user = userEvent.setup()

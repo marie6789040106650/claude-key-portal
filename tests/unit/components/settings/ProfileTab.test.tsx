@@ -41,7 +41,7 @@ describe('ProfileTab', () => {
     // Mock successful query
     useQuery.mockReturnValue({
       data: mockUserProfile,
-      isLoading: false,
+      isPending: false,
       isError: false,
       error: null,
     })
@@ -49,7 +49,7 @@ describe('ProfileTab', () => {
     // Mock mutation
     useMutation.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isPending: false,
       isError: false,
     })
   })
@@ -58,7 +58,7 @@ describe('ProfileTab', () => {
     it('加载时应该显示骨架屏', () => {
       useQuery.mockReturnValue({
         data: null,
-        isLoading: true,
+        isPending: true,
         isError: false,
       })
 
@@ -78,7 +78,7 @@ describe('ProfileTab', () => {
     it('加载失败应该显示错误提示', () => {
       useQuery.mockReturnValue({
         data: null,
-        isLoading: false,
+        isPending: false,
         isError: true,
         error: new Error('Failed to load profile'),
       })
@@ -176,7 +176,7 @@ describe('ProfileTab', () => {
       const mockMutate = jest.fn()
       useMutation.mockReturnValue({
         mutate: mockMutate,
-        isLoading: false,
+        isPending: false,
         isSuccess: true,
       })
 
@@ -204,7 +204,7 @@ describe('ProfileTab', () => {
     it('提交失败应该显示错误提示', async () => {
       useMutation.mockReturnValue({
         mutate: jest.fn(),
-        isLoading: false,
+        isPending: false,
         isError: true,
         error: new Error('Update failed'),
       })
@@ -217,7 +217,7 @@ describe('ProfileTab', () => {
     it('提交时应该禁用表单', () => {
       useMutation.mockReturnValue({
         mutate: jest.fn(),
-        isLoading: true,
+        isPending: true,
       })
 
       render(<ProfileTab />)

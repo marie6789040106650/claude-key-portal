@@ -60,14 +60,14 @@ describe('NotificationsTab', () => {
     // Mock config query
     useQuery.mockReturnValue({
       data: mockConfig,
-      isLoading: false,
+      isPending: false,
       isError: false,
     })
 
     // Mock mutation
     useMutation.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isPending: false,
       isSuccess: false,
       isError: false,
     })
@@ -77,7 +77,7 @@ describe('NotificationsTab', () => {
     it('加载时应该显示骨架屏', () => {
       useQuery.mockReturnValue({
         data: null,
-        isLoading: true,
+        isPending: true,
       })
 
       render(<NotificationsTab />)
@@ -119,7 +119,7 @@ describe('NotificationsTab', () => {
       const mockMutate = jest.fn()
       useMutation.mockReturnValue({
         mutate: mockMutate,
-        isLoading: false,
+        isPending: false,
       })
 
       const user = userEvent.setup()
@@ -140,7 +140,7 @@ describe('NotificationsTab', () => {
     it('保存成功应该显示提示', async () => {
       useMutation.mockReturnValue({
         mutate: jest.fn(),
-        isLoading: false,
+        isPending: false,
         isSuccess: true,
       })
 
@@ -160,7 +160,7 @@ describe('NotificationsTab', () => {
         onErrorCallback = options.onError
         return {
           mutate: jest.fn(),
-          isLoading: false,
+          isPending: false,
           isSuccess: false,
           isError: false,
         }
@@ -185,7 +185,7 @@ describe('NotificationsTab', () => {
       // 重新渲染以显示错误状态
       useMutation.mockReturnValue({
         mutate: jest.fn(),
-        isLoading: false,
+        isPending: false,
         isSuccess: false,
         isError: true,
       })
@@ -215,7 +215,7 @@ describe('NotificationsTab', () => {
       const mockMutate = jest.fn()
       useMutation.mockReturnValue({
         mutate: mockMutate,
-        isLoading: false,
+        isPending: false,
       })
 
       const user = userEvent.setup()

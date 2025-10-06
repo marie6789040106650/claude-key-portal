@@ -24,7 +24,7 @@ export function ExpirationTab() {
   const [errors, setErrors] = useState<Record<number, string>>({})
 
   // 获取到期设置
-  const { data: settings, isLoading } = useQuery<ExpirationSettings>({
+  const { data, isPending, isError, error } = useQuery<ExpirationSettings>({
     queryKey: ['expirationSettings'],
     queryFn: async () => {
       const response = await fetch('/api/user/expiration')
@@ -35,10 +35,10 @@ export function ExpirationTab() {
 
   // 同步设置到本地状态
   useEffect(() => {
-    if (settings) {
-      setLocalSettings(settings)
+    if (data) {
+      setLocalSettings(data)
     }
-  }, [settings])
+  }, [data])
 
   // 更新设置
   const mutation = useMutation({
@@ -60,7 +60,7 @@ export function ExpirationTab() {
   })
 
   // 加载中状态
-  if (isLoading) {
+  if (isPending) {
     return (
       <div data-testid="expiration-skeleton" className="space-y-4">
         <Skeleton className="h-10 w-full" />
