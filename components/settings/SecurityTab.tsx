@@ -106,7 +106,7 @@ export function SecurityTab() {
 
   // 修改密码
   const passwordMutation = useMutation({
-    mutationFn: async (data: PasswordFormValues) => {
+    mutationFn: async (data: { oldPassword: string; newPassword: string }) => {
       const response = await fetch('/api/user/password', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
