@@ -11,19 +11,23 @@
 
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { SendNotificationUseCase } from '@/lib/application/notification/send-notification.usecase'
+import { notificationRepository } from '@/lib/infrastructure/persistence/repositories'
 import {
   AlertCondition,
   AlertRule,
   AlertSeverity,
   MetricType,
+  NotificationType,
+  NotificationChannel as PrismaChannel,
 } from '@prisma/client'
+import { NotificationChannel } from '@/lib/domain/notification/notification.types'
 
 export class AlertRuleEngine {
   private sendNotificationUseCase: SendNotificationUseCase
 
   constructor(sendNotificationUseCase?: SendNotificationUseCase) {
     this.sendNotificationUseCase =
-      sendNotificationUseCase || new SendNotificationUseCase()
+      sendNotificationUseCase || new SendNotificationUseCase(notificationRepository)
   }
 
   /**
@@ -91,10 +95,10 @@ export class AlertRuleEngine {
     // 发送告警通知
     try {
       await this.sendNotificationUseCase.execute({
-        type: 'ALERT',
+        type: NotificationType.ERROR_SPIKE, // 使用ERROR_SPIKE表示告警
         title: `[${rule.severity}] ${rule.name}`,
         message: alert.message,
-        channels: rule.channels,
+        channels: rule.channels as NotificationChannel[], // 类型转换
         data: {
           alertId: alert.id,
           ruleId: rule.id,
@@ -145,10 +149,10 @@ export class AlertRuleEngine {
     // 发送恢复通知
     try {
       await this.sendNotificationUseCase.execute({
-        type: 'ALERT_RESOLVED',
+        type: NotificationType.SYSTEM_ANNOUNCEMENT, // 使用SYSTEM_ANNOUNCEMENT表示告警恢复
         title: `[RESOLVED] ${rule.name}`,
         message: `${rule.name} has been resolved. ${rule.metric} is now back to normal (current: ${value}, threshold: ${rule.threshold})`,
-        channels: rule.channels,
+        channels: rule.channels as NotificationChannel[], // 类型转换
         data: {
           alertId: firingAlert.id,
           ruleId: rule.id,

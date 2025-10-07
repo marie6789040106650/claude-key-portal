@@ -49,7 +49,7 @@ export class SendNotificationUseCase {
     // 1. 获取用户通知配置
     const configResult = await this.repository.getConfig(userId)
     if (!configResult.isSuccess) {
-      return Result.fail(configResult.error!)
+      return Result.fail<NotificationRecord[]>(configResult.error!)
     }
 
     const config = configResult.value
@@ -100,7 +100,7 @@ export class SendNotificationUseCase {
     // 6. 检查是否所有渠道都失败
     const allFailed = results.every((result) => result.status === 'rejected')
     if (allFailed && results.length > 0) {
-      return Result.fail(new ExternalServiceError('所有通知渠道发送失败'))
+      return Result.fail<NotificationRecord[]>(new ExternalServiceError('所有通知渠道发送失败'))
     }
 
     return Result.ok(notifications)
@@ -120,7 +120,7 @@ export class SendNotificationUseCase {
 
     // 系统通知必须指定channels
     if (!channels || channels.length === 0) {
-      return Result.fail(new ValidationError('System notifications must specify channels'))
+      return Result.fail<NotificationRecord[]>(new ValidationError('System notifications must specify channels'))
     }
 
     const notifications: NotificationRecord[] = []
@@ -142,7 +142,7 @@ export class SendNotificationUseCase {
         continue
       }
 
-      const notification = createResult.value
+      const notification = createResult.value!
       notifications.push(notification)
 
       // 系统通知使用简化配置
@@ -156,7 +156,7 @@ export class SendNotificationUseCase {
     // 检查是否所有渠道都失败
     const allFailed = results.every((result) => result.status === 'rejected')
     if (allFailed && results.length > 0) {
-      return Result.fail(new ExternalServiceError('所有系统通知渠道发送失败'))
+      return Result.fail<NotificationRecord[]>(new ExternalServiceError('所有系统通知渠道发送失败'))
     }
 
     return Result.ok(notifications)

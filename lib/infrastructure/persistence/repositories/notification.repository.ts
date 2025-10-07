@@ -55,7 +55,7 @@ export class NotificationRepository {
     try {
       const notification = await prisma.notification.create({
         data: {
-          userId: input.userId || null,
+          userId: input.userId ?? null,
           type: input.type,
           title: input.title,
           message: input.message,

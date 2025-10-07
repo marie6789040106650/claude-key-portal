@@ -6,6 +6,7 @@
 
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { SendNotificationUseCase } from '@/lib/application/notification/send-notification.usecase'
+import { notificationRepository } from '@/lib/infrastructure/persistence/repositories'
 
 export class ExpirationCheckService {
   private sendNotificationUseCase: SendNotificationUseCase
@@ -16,7 +17,7 @@ export class ExpirationCheckService {
     getCurrentTime?: () => Date
   ) {
     this.sendNotificationUseCase =
-      sendNotificationUseCase || new SendNotificationUseCase()
+      sendNotificationUseCase || new SendNotificationUseCase(notificationRepository)
     this.getCurrentTime = getCurrentTime || (() => new Date())
   }
 
@@ -139,7 +140,7 @@ export class ExpirationCheckService {
         type: 'KEY_EXPIRATION_WARNING',
         title: 'API Key 即将到期',
         message: this.buildReminderMessage(key.name, daysRemaining),
-        channels: ['in-app'],
+        channels: ['system'], // 使用'system'替代'in-app'
         data: {
           apiKeyId: key.id,
           apiKeyName: key.name,
