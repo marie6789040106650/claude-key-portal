@@ -9,7 +9,7 @@
  */
 
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/infrastructure/cache/redis'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
 export interface ServiceHealth {

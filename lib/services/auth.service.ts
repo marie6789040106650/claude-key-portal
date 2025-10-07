@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/infrastructure/cache/redis'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import type { RegisterInput, LoginInput } from '@/lib/validation/auth'
