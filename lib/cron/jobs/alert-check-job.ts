@@ -5,16 +5,15 @@
  */
 
 import { CronJob, CronJobResult } from '../cron-runner'
-import { AlertRuleEngine } from '@/lib/services/alert-rule-engine'
-import { MetricsCollectorService } from '@/lib/services/metrics-collector-service'
+import {
+  alertRuleEngine,
+  metricsCollectorService,
+} from '@/lib/infrastructure/monitoring'
 
 export class AlertCheckJob implements CronJob {
   name = 'alert-check'
   schedule = '* * * * *' // 每分钟
   description = '评估告警规则并触发通知'
-
-  private alertEngine = new AlertRuleEngine()
-  private metricsService = new MetricsCollectorService()
 
   handler = async (): Promise<CronJobResult> => {
     return this.execute()
@@ -25,7 +24,7 @@ export class AlertCheckJob implements CronJob {
 
     try {
       // 加载所有启用的规则
-      const rules = await this.alertEngine.loadRules()
+      const rules = await alertRuleEngine.loadRules()
 
       let triggered = 0
       let resolved = 0
@@ -37,13 +36,13 @@ export class AlertCheckJob implements CronJob {
         // 根据指标类型获取当前值
         switch (rule.metric) {
           case 'RESPONSE_TIME':
-            currentValue = await this.metricsService.getAverageResponseTime()
+            currentValue = await metricsCollectorService.getAverageResponseTime()
             break
           case 'QPS':
-            currentValue = await this.metricsService.getQPS()
+            currentValue = await metricsCollectorService.getQPS()
             break
           case 'MEMORY_USAGE':
-            const memoryTrend = await this.metricsService.getMemoryTrend()
+            const memoryTrend = await metricsCollectorService.getMemoryTrend()
             currentValue = memoryTrend.current
             break
           default:
@@ -51,13 +50,13 @@ export class AlertCheckJob implements CronJob {
         }
 
         // 评估规则
-        const shouldAlert = await this.alertEngine.evaluateRule(rule, currentValue)
+        const shouldAlert = await alertRuleEngine.evaluateRule(rule, currentValue)
 
         if (shouldAlert) {
-          await this.alertEngine.triggerAlert(rule, currentValue)
+          await alertRuleEngine.triggerAlert(rule, currentValue)
           triggered++
         } else {
-          await this.alertEngine.resolveAlert(rule, currentValue)
+          await alertRuleEngine.resolveAlert(rule, currentValue)
           resolved++
         }
       }

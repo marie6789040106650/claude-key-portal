@@ -6,7 +6,10 @@
 
 'use client'
 
-import { SystemHealthCheck, ServiceHealth } from '@/lib/services/health-check-service'
+import {
+  SystemHealthCheck,
+  ServiceHealth,
+} from '@/lib/infrastructure/monitoring'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'

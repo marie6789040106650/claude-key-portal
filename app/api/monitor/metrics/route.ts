@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { MetricsCollectorService } from '@/lib/services/metrics-collector-service'
+import { metricsCollectorService } from '@/lib/infrastructure/monitoring'
 import { MetricType } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
@@ -18,11 +18,9 @@ export async function GET(request: NextRequest) {
     const to = searchParams.get('to')
     const type = searchParams.get('type') as MetricType | null
 
-    const metricsService = new MetricsCollectorService()
-
     // 如果指定了时间范围和类型，返回原始数据
     if (from && to && type) {
-      const metrics = await metricsService.getMetricsByTimeRange(
+      const metrics = await metricsCollectorService.getMetricsByTimeRange(
         type,
         new Date(from),
         new Date(to)
@@ -38,10 +36,10 @@ export async function GET(request: NextRequest) {
       qps,
       memoryTrend,
     ] = await Promise.all([
-      metricsService.getAverageResponseTime(),
-      metricsService.getP95ResponseTime(),
-      metricsService.getQPS(),
-      metricsService.getMemoryTrend(),
+      metricsCollectorService.getAverageResponseTime(),
+      metricsCollectorService.getP95ResponseTime(),
+      metricsCollectorService.getQPS(),
+      metricsCollectorService.getMemoryTrend(),
     ])
 
     return NextResponse.json(

@@ -14,7 +14,7 @@ describe.skip('SKIPPED - Pending React Testing Setup', () => {});
 
 import { render, screen } from '@testing-library/react'
 import { SystemHealthCard } from '@/components/monitor/SystemHealthCard'
-import type { SystemHealthCheck } from '@/lib/services/health-check-service'
+import type { SystemHealthCheck } from '@/lib/infrastructure/monitoring'
 
 // Mock date-fns 避免时间相关测试不稳定
 jest.mock('date-fns', () => ({

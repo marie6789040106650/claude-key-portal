@@ -5,12 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { HealthCheckService } from '@/lib/services/health-check-service'
+import { healthCheckService } from '@/lib/infrastructure/monitoring'
 
 export async function GET(request: NextRequest) {
   try {
-    const healthCheck = new HealthCheckService()
-    const result = await healthCheck.checkAll()
+    const result = await healthCheckService.checkAll()
 
     return NextResponse.json(result, { status: 200 })
   } catch (error: any) {

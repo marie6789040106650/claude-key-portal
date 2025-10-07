@@ -7,16 +7,15 @@
  */
 
 import { CronJob, CronJobResult } from '../cron-runner'
-import { MetricsCollectorService } from '@/lib/services/metrics-collector-service'
-import { HealthCheckService } from '@/lib/services/health-check-service'
+import {
+  metricsCollectorService,
+  healthCheckService,
+} from '@/lib/infrastructure/monitoring'
 
 export class MonitorJob implements CronJob {
   name = 'monitor'
   schedule = '* * * * *' // 每分钟
   description = '收集系统性能指标'
-
-  private metricsService = new MetricsCollectorService()
-  private healthService = new HealthCheckService()
 
   handler = async (): Promise<CronJobResult> => {
     return this.execute()
@@ -27,10 +26,10 @@ export class MonitorJob implements CronJob {
 
     try {
       // 记录内存使用
-      await this.metricsService.recordMemoryUsage()
+      await metricsCollectorService.recordMemoryUsage()
 
       // 执行健康检查
-      const healthCheck = await this.healthService.checkAll()
+      const healthCheck = await healthCheckService.checkAll()
 
       const duration = Date.now() - startTime
 

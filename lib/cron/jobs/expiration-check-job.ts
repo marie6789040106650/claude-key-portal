@@ -5,7 +5,7 @@
  * 调度: 每日09:00执行
  */
 
-import { ExpirationCheckService } from '@/lib/services/expiration-check-service'
+import { expirationCheckService } from '@/lib/infrastructure/monitoring'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import type { CronJob, CronJobResult } from '@/lib/cron/cron-runner'
 
@@ -13,12 +13,6 @@ export class ExpirationCheckJob implements CronJob {
   name = 'expiration-check'
   schedule = '0 9 * * *' // 每日09:00
   description = '检查即将到期的API Key并发送提醒'
-
-  private service: ExpirationCheckService
-
-  constructor() {
-    this.service = new ExpirationCheckService()
-  }
 
   handler = async (): Promise<CronJobResult> => {
     return this.execute()
@@ -55,7 +49,7 @@ export class ExpirationCheckJob implements CronJob {
       }
 
       // 执行到期检查
-      await this.service.checkExpirations()
+      await expirationCheckService.checkExpirations()
 
       // 统计每个Key的提醒情况
       for (const key of keys) {

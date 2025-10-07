@@ -9,11 +9,15 @@
  */
 
 import { ExpirationCheckJob } from '@/lib/cron/jobs/expiration-check-job'
-import { ExpirationCheckService } from '@/lib/services/expiration-check-service'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
+import { expirationCheckService } from '@/lib/infrastructure/monitoring'
 
-// Mock ExpirationCheckService
-jest.mock('@/lib/services/expiration-check-service')
+// Mock monitoring services
+jest.mock('@/lib/infrastructure/monitoring', () => ({
+  expirationCheckService: {
+    checkExpirations: jest.fn(),
+  },
+}))
 
 // Mock Prisma
 jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
@@ -29,12 +33,10 @@ jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
 
 describe('ExpirationCheckJob', () => {
   let job: ExpirationCheckJob
-  let mockCheckService: jest.Mocked<ExpirationCheckService>
 
   beforeEach(() => {
     jest.clearAllMocks()
     job = new ExpirationCheckJob()
-    mockCheckService = (ExpirationCheckService as jest.Mock).mock.instances[0]
   })
 
   describe('任务配置', () => {
@@ -53,12 +55,12 @@ describe('ExpirationCheckJob', () => {
 
   describe('任务执行', () => {
     it('应该调用到期检查服务', async () => {
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue([])
 
       const result = await job.execute()
 
-      expect(mockCheckService.checkExpirations).toHaveBeenCalled()
+      expect(expirationCheckService.checkExpirations).toHaveBeenCalled()
       expect(result.success).toBe(true)
     })
 
@@ -69,7 +71,7 @@ describe('ExpirationCheckJob', () => {
         { id: 'key-3', name: 'Key 3', expiresAt: new Date() },
       ]
 
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue(mockKeys)
 
       const result = await job.execute()
@@ -90,7 +92,7 @@ describe('ExpirationCheckJob', () => {
         .mockResolvedValueOnce(null) // key-1 未提醒过
         .mockResolvedValueOnce({ id: 'reminder-1' }) // key-2 已提醒过
 
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
 
       const result = await job.execute()
 
@@ -100,7 +102,7 @@ describe('ExpirationCheckJob', () => {
 
     it('应该处理服务执行错误', async () => {
       const mockError = new Error('Service error')
-      mockCheckService.checkExpirations = jest.fn().mockRejectedValue(mockError)
+      expirationCheckService.checkExpirations = jest.fn().mockRejectedValue(mockError)
 
       const result = await job.execute()
 
@@ -109,7 +111,7 @@ describe('ExpirationCheckJob', () => {
     })
 
     it('应该返回执行时长', async () => {
-      mockCheckService.checkExpirations = jest.fn().mockImplementation(
+      expirationCheckService.checkExpirations = jest.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
             setTimeout(() => resolve(undefined), 100)
@@ -132,7 +134,7 @@ describe('ExpirationCheckJob', () => {
       const sevenDaysLater = new Date('2025-10-11T09:00:00.000Z')
       const thirtyDaysLater = new Date('2025-11-03T09:00:00.000Z')
 
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue([])
 
       const result = await job.execute()
@@ -164,7 +166,7 @@ describe('ExpirationCheckJob', () => {
         },
       ]
 
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue(mockKeys)
       ;(prisma.expirationReminder.findFirst as jest.Mock).mockResolvedValue(null)
 
@@ -182,7 +184,7 @@ describe('ExpirationCheckJob', () => {
   describe('边界条件', () => {
     it('应该处理没有到期Key的情况', async () => {
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue([])
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
 
       const result = await job.execute()
 
@@ -202,7 +204,7 @@ describe('ExpirationCheckJob', () => {
         apiKeyId: 'key-1',
       })
 
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
 
       const result = await job.execute()
 
@@ -222,7 +224,7 @@ describe('ExpirationCheckJob', () => {
       ;(prisma.expirationReminder.findFirst as jest.Mock).mockResolvedValue(null)
 
       // 模拟检查服务部分失败
-      mockCheckService.checkExpirations = jest
+      expirationCheckService.checkExpirations = jest
         .fn()
         .mockRejectedValueOnce(new Error('Failed for key-1'))
         .mockResolvedValueOnce(undefined)
@@ -238,7 +240,7 @@ describe('ExpirationCheckJob', () => {
 
   describe('性能优化', () => {
     it('应该批量查询API Key', async () => {
-      mockCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
+      expirationCheckService.checkExpirations = jest.fn().mockResolvedValue(undefined)
 
       await job.execute()
 
@@ -260,7 +262,7 @@ describe('ExpirationCheckJob', () => {
       let concurrentCalls = 0
       let maxConcurrent = 0
 
-      mockCheckService.checkExpirations = jest.fn().mockImplementation(
+      expirationCheckService.checkExpirations = jest.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
             concurrentCalls++
