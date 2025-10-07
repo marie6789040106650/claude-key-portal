@@ -6,6 +6,9 @@
 import { Navbar } from '@/components/home/Navbar'
 import { HeroSection } from '@/components/home/HeroSection'
 import { FeaturesSection } from '@/components/home/FeaturesSection'
+import { HowItWorksSection } from '@/components/home/HowItWorksSection'
+import { CTASection } from '@/components/home/CTASection'
+import { Footer } from '@/components/home/Footer'
 
 export default function Home() {
   return (
@@ -13,6 +16,9 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <FeaturesSection />
+      <HowItWorksSection />
+      <CTASection />
+      <Footer />
     </div>
   )
 }
