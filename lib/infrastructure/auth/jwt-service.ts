@@ -34,16 +34,17 @@ export interface TokenPair {
  * JWT服务
  */
 export class JwtService {
-  private readonly secret: string
   private readonly defaultAccessExpiry = '24h'
   private readonly defaultRefreshExpiry = '7d'
 
-  constructor() {
-    // 确保JWT_SECRET已配置
+  /**
+   * 获取JWT密钥（延迟初始化，避免构建时错误）
+   */
+  private getSecret(): string {
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET未配置')
     }
-    this.secret = process.env.JWT_SECRET
+    return process.env.JWT_SECRET
   }
 
   /**
@@ -64,7 +65,7 @@ export class JwtService {
 
       // 生成token
       // @ts-expect-error - jsonwebtoken类型定义问题，运行时正常
-      const token = jwt.sign(payload, this.secret, { expiresIn })
+      const token = jwt.sign(payload, this.getSecret(), { expiresIn })
 
       return Result.ok(token)
     } catch (error) {
@@ -85,7 +86,7 @@ export class JwtService {
       }
 
       // 验证token
-      const payload = jwt.verify(token, this.secret) as JwtPayload
+      const payload = jwt.verify(token, this.getSecret()) as JwtPayload
 
       return Result.ok(payload)
     } catch (error) {
@@ -101,7 +102,7 @@ export class JwtService {
   async decode(token: string): Promise<Result<JwtPayload>> {
     try {
       // 使用verify但捕获错误，只返回payload
-      const payload = jwt.verify(token, this.secret, {
+      const payload = jwt.verify(token, this.getSecret(), {
         ignoreExpiration: false,
       }) as JwtPayload
 
@@ -128,7 +129,7 @@ export class JwtService {
         email,
         type: 'access',
       }
-      const accessToken = jwt.sign(accessPayload, this.secret, {
+      const accessToken = jwt.sign(accessPayload, this.getSecret(), {
         expiresIn: this.defaultAccessExpiry,
       })
 
@@ -138,7 +139,7 @@ export class JwtService {
         email,
         type: 'refresh',
       }
-      const refreshToken = jwt.sign(refreshPayload, this.secret, {
+      const refreshToken = jwt.sign(refreshPayload, this.getSecret(), {
         expiresIn: this.defaultRefreshExpiry,
       })
 
