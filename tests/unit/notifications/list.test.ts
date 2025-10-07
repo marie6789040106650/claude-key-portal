@@ -16,7 +16,7 @@ jest.mock('@/lib/auth', () => ({
   verifyToken: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     notification: {
       findMany: jest.fn(),

@@ -31,7 +31,7 @@ jest.mock('@/lib/webhook/client', () => ({
 }))
 
 // Mock dependencies
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     alertRule: {
       findMany: jest.fn(),

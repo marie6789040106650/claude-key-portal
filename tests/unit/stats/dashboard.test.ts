@@ -12,7 +12,7 @@ import { verifyToken } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
 // Mock 依赖
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     apiKey: {
       count: jest.fn(),
@@ -21,7 +21,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/crs-client', () => ({
+jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: {
     getDashboard: jest.fn(),
   },

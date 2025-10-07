@@ -12,7 +12,7 @@ import { DataSyncJob } from '@/lib/cron/jobs/data-sync-job'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 
 // Mock Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     apiKey: {
       findMany: jest.fn(),

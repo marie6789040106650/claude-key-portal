@@ -15,7 +15,7 @@ jest.mock('@/lib/auth', () => ({
   verifyToken: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     expirationSetting: {
       findUnique: jest.fn(),

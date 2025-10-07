@@ -10,7 +10,7 @@ import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import jwt from 'jsonwebtoken'
 
 // Mock Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     apiKey: {
       findUnique: jest.fn(),
@@ -21,7 +21,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 // Mock CRS Client
-jest.mock('@/lib/crs-client', () => ({
+jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: {
     updateKey: jest.fn(),
   },

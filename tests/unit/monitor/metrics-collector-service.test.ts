@@ -13,7 +13,7 @@ import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { MetricType } from '@prisma/client'
 
 // Mock Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     monitorMetric: {
       create: jest.fn(),

@@ -14,7 +14,7 @@ import { redis } from '@/lib/infrastructure/cache/redis'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
 // Mock dependencies
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     $queryRaw: jest.fn(),
     systemHealth: {
@@ -23,13 +23,13 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/redis', () => ({
+jest.mock('@/lib/infrastructure/cache/redis', () => ({
   redis: {
     ping: jest.fn(),
   },
 }))
 
-jest.mock('@/lib/crs-client', () => ({
+jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: {
     healthCheck: jest.fn(),
   },

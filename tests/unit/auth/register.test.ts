@@ -9,7 +9,7 @@ import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import bcrypt from 'bcryptjs'
 
 // Mock Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),

@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 // Mock dependencies
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -23,7 +23,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/redis', () => ({
+jest.mock('@/lib/infrastructure/cache/redis', () => ({
   redis: {
     setex: jest.fn(),
   },

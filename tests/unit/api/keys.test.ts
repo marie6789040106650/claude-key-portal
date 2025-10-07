@@ -21,7 +21,7 @@ import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import * as auth from '@/lib/auth'
 
 // Mock dependencies
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     apiKey: {
       findMany: jest.fn(),
@@ -35,7 +35,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/crs-client', () => ({
+jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: {
     createKey: jest.fn(),
     updateKey: jest.fn(),

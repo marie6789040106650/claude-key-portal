@@ -6,7 +6,7 @@
 import { NotificationService } from '@/lib/services/notification-service'
 
 // Mock 依赖
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     notificationConfig: {
       findUnique: jest.fn(),

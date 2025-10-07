@@ -23,7 +23,7 @@ jest.mock('node-cron', () => ({
 }))
 
 // Mock Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     cronJobLog: {
       create: jest.fn(),

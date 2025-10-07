@@ -11,7 +11,7 @@ import { verifyToken } from '@/lib/auth'
 import bcrypt from 'bcrypt'
 
 // Mock 依赖
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),

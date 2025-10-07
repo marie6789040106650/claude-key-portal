@@ -13,7 +13,7 @@ import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
 
 // Mock 依赖
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     session: {
       findMany: jest.fn(),

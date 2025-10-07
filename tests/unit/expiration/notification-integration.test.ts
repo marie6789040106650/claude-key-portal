@@ -7,7 +7,7 @@ import { ExpirationCheckService } from '@/lib/services/expiration-check-service'
 import { NotificationService } from '@/lib/services/notification-service'
 
 // Mock 依赖
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     apiKey: {
       findMany: jest.fn(),

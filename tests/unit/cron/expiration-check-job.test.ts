@@ -16,7 +16,7 @@ import { prisma } from '@/lib/infrastructure/persistence/prisma'
 jest.mock('@/lib/services/expiration-check-service')
 
 // Mock Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
   prisma: {
     apiKey: {
       findMany: jest.fn(),
