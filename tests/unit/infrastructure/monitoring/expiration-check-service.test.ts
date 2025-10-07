@@ -215,7 +215,7 @@ describe('ExpirationCheckService', () => {
         type: 'KEY_EXPIRATION_WARNING',
         title: 'API Key 即将到期',
         message: expect.stringContaining('7 天后到期'),
-        channels: ['in-app'],
+        channels: ['system'],
         data: {
           apiKeyId: 'key-1',
           apiKeyName: 'Test Key',
