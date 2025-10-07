@@ -9,6 +9,9 @@
 import { cookies } from 'next/headers'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 
+// 强制动态渲染（因为使用了cookies）
+export const dynamic = 'force-dynamic'
+
 async function getUser() {
   try {
     const cookieStore = cookies()

@@ -12,16 +12,8 @@
   },
   "crons": [
     {
-      "path": "/api/cron/monitor-job",
-      "schedule": "*/5 * * * *"
-    },
-    {
       "path": "/api/cron/expiration-check-job",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/alert-check-job",
-      "schedule": "*/15 * * * *"
     }
   ],
   "env": {

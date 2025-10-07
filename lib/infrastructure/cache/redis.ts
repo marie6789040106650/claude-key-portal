@@ -1,24 +1,15 @@
-import Redis from 'ioredis'
+import { Redis } from '@upstash/redis'
 
 const globalForRedis = globalThis as unknown as {
   redis: Redis | undefined
 }
 
+// 使用Upstash REST API
 export const redis =
   globalForRedis.redis ??
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-    maxRetriesPerRequest: 3,
-    retryStrategy(times) {
-      const delay = Math.min(times * 50, 2000)
-      return delay
-    },
+  new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
   })
 
 if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis
-
-// Graceful shutdown
-if (typeof process !== 'undefined') {
-  process.on('SIGTERM', async () => {
-    await redis.quit()
-  })
-}
