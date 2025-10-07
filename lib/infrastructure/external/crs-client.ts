@@ -29,7 +29,7 @@ export class CrsUnavailableError extends Error {
 /**
  * CRS Client类
  */
-class CrsClient {
+export class CrsClient {
   private token: string | null = null
   private tokenExpiry: number = 0
   private readonly baseUrl: string

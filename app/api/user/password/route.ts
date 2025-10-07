@@ -35,7 +35,7 @@ export async function PUT(request: NextRequest) {
     // 4. 执行密码更新流程
     const result = await updatePasswordUseCase.execute({
       userId: decoded.userId,
-      oldPassword: body.oldPassword,
+      currentPassword: body.oldPassword || body.currentPassword,
       newPassword: body.newPassword,
     })
 

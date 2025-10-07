@@ -115,19 +115,19 @@ export async function DELETE(
 
     // 5. 处理结果
     if (result.isSuccess) {
-      const deleteResult = result.value
+      const deleteResult = result.value!
       const response: any = {
         success: true,
+        deleted: deleteResult.deleted,
         message: deleteResult.permanent ? '密钥已永久删除' : '密钥已删除',
-        deletedKey: deleteResult.deletedKey,
       }
 
       if (deleteResult.alreadyDeleted) {
         response.alreadyDeleted = true
       }
 
-      if (deleteResult.crsNotFound) {
-        response.warning = 'CRS密钥不存在，已删除本地记录'
+      if (deleteResult.warning) {
+        response.warning = deleteResult.warning
       }
 
       return NextResponse.json(response, { status: 200 })
