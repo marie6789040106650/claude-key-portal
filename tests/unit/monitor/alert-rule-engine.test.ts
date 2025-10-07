@@ -129,7 +129,7 @@ describe.skip('AlertRuleEngine', () => {
     it('应该支持LESS_THAN条件', async () => {
       const rule = {
         id: 'rule-2',
-        metric: 'API_SUCCESS_RATE',
+        metric: 'API_SUCCESS_RATE' as const,
         condition: AlertCondition.LESS_THAN as AlertCondition,
         threshold: 95,
         severity: 'ERROR' as AlertSeverity,
@@ -143,7 +143,7 @@ describe.skip('AlertRuleEngine', () => {
     it('应该支持EQUAL_TO条件', async () => {
       const rule = {
         id: 'rule-3',
-        metric: 'CUSTOM_METRIC',
+        metric: 'CUSTOM_METRIC' as const,
         condition: 'EQUAL_TO' as AlertCondition,
         threshold: 0,
         severity: AlertSeverity.CRITICAL as AlertSeverity,
@@ -195,7 +195,7 @@ describe.skip('AlertRuleEngine', () => {
       const rule = {
         id: 'rule-1',
         name: 'Critical Error',
-        metric: 'ERROR_RATE',
+        metric: 'ERROR_RATE' as const,
         condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 10,
         severity: AlertSeverity.CRITICAL as AlertSeverity,
@@ -281,9 +281,11 @@ describe.skip('AlertRuleEngine', () => {
     it('应该在值恢复正常后解决告警', async () => {
       const rule = {
         id: 'rule-1',
+        name: 'Response Time Alert',
         metric: MetricType.RESPONSE_TIME,
         condition: AlertCondition.GREATER_THAN as AlertCondition,
         threshold: 1000,
+        channels: ['email'],
       }
 
       ;(prisma.alertRecord.findFirst as jest.Mock).mockResolvedValue({

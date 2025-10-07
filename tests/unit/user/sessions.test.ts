@@ -11,6 +11,7 @@ import { GET, DELETE } from '@/app/api/user/sessions/route'
 import { DELETE as DELETE_BY_ID } from '@/app/api/user/sessions/[id]/route'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
+import { NextRequest } from 'next/server'
 
 // Mock 依赖
 jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
@@ -77,7 +78,7 @@ describe('GET /api/user/sessions', () => {
 
       ;(prisma.session.findMany as jest.Mock).mockResolvedValue(mockSessions)
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
       })
 
@@ -118,7 +119,7 @@ describe('GET /api/user/sessions', () => {
 
       ;(prisma.session.findMany as jest.Mock).mockResolvedValue(mockSessions)
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
       })
 
@@ -162,7 +163,7 @@ describe('GET /api/user/sessions', () => {
 
       ;(prisma.session.findMany as jest.Mock).mockResolvedValue(mockSessions)
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
       })
 
@@ -180,7 +181,7 @@ describe('GET /api/user/sessions', () => {
       // Arrange
       ;(prisma.session.findMany as jest.Mock).mockResolvedValue([])
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
       })
 
@@ -201,7 +202,7 @@ describe('GET /api/user/sessions', () => {
         throw new Error('Token无效或已过期')
       })
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         headers: { Authorization: 'Bearer invalid-token' },
       })
 
@@ -220,7 +221,7 @@ describe('GET /api/user/sessions', () => {
         new Error('Database connection failed')
       )
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         headers: { Authorization: mockToken },
       })
 
@@ -271,7 +272,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
       ;(prisma.session.findUnique as jest.Mock).mockResolvedValue(mockSession)
       ;(prisma.session.delete as jest.Mock).mockResolvedValue(mockSession)
 
-      const request = new Request('http://localhost/api/user/sessions/session-to-delete', {
+      const request = new NextRequest('http://localhost/api/user/sessions/session-to-delete', {
         method: 'DELETE',
         headers: { Authorization: mockToken },
       })
@@ -296,7 +297,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
       // Arrange
       ;(prisma.session.findUnique as jest.Mock).mockResolvedValue(null)
 
-      const request = new Request('http://localhost/api/user/sessions/nonexistent', {
+      const request = new NextRequest('http://localhost/api/user/sessions/nonexistent', {
         method: 'DELETE',
         headers: { Authorization: mockToken },
       })
@@ -330,7 +331,7 @@ describe('DELETE /api/user/sessions/[id]', () => {
 
       ;(prisma.session.findUnique as jest.Mock).mockResolvedValue(otherUserSession)
 
-      const request = new Request('http://localhost/api/user/sessions/session-other', {
+      const request = new NextRequest('http://localhost/api/user/sessions/session-other', {
         method: 'DELETE',
         headers: { Authorization: mockToken },
       })
@@ -373,7 +374,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
       // Arrange
       ;(prisma.session.deleteMany as jest.Mock).mockResolvedValue({ count: 3 })
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         method: 'DELETE',
         headers: { Authorization: mockToken },
       })
@@ -398,7 +399,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
       // Arrange
       ;(prisma.session.deleteMany as jest.Mock).mockResolvedValue({ count: 0 })
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         method: 'DELETE',
         headers: { Authorization: mockToken },
       })
@@ -420,7 +421,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
         throw new Error('Token无效或已过期')
       })
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         method: 'DELETE',
         headers: { Authorization: 'Bearer invalid-token' },
       })
@@ -440,7 +441,7 @@ describe('DELETE /api/user/sessions (删除所有其他 Session)', () => {
         new Error('Database connection failed')
       )
 
-      const request = new Request('http://localhost/api/user/sessions', {
+      const request = new NextRequest('http://localhost/api/user/sessions', {
         method: 'DELETE',
         headers: { Authorization: mockToken },
       })

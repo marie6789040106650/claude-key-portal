@@ -62,7 +62,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'RATE_LIMIT_WARNING',
+            type: 'RATE_LIMIT_WARNING' as const,
             enabled: true,
             threshold: 80,
             channels: ['email', 'system'],
@@ -85,7 +85,7 @@ describe.skip('NotificationService', () => {
 
       const input = {
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: 'API 速率限制警告',
         message: '您的 API Key 已达到80%速率限制',
         data: { percentage: 80 },
@@ -118,7 +118,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'RATE_LIMIT_WARNING',
+            type: 'RATE_LIMIT_WARNING' as const,
             enabled: true,
             threshold: 80,
             channels: ['email'], // 仅邮件
@@ -134,7 +134,7 @@ describe.skip('NotificationService', () => {
 
       const input = {
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: '警告',
         message: '测试',
       }
@@ -157,7 +157,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'RATE_LIMIT_WARNING',
+            type: 'RATE_LIMIT_WARNING' as const,
             enabled: false, // 禁用
             threshold: 80,
             channels: ['email', 'system'],
@@ -171,7 +171,7 @@ describe.skip('NotificationService', () => {
 
       const input = {
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: '警告',
         message: '测试',
       }
@@ -193,7 +193,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'KEY_CREATED',
+            type: 'KEY_CREATED' as const,
             enabled: true,
             channels: ['email'],
           },
@@ -206,7 +206,7 @@ describe.skip('NotificationService', () => {
       ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
         userId: 'user-123',
-        type: 'KEY_CREATED',
+        type: 'KEY_CREATED' as const,
         title: '密钥创建成功',
         message: '测试',
         data: null,
@@ -219,7 +219,7 @@ describe.skip('NotificationService', () => {
 
       const input = {
         userId: 'user-123',
-        type: 'KEY_CREATED',
+        type: 'KEY_CREATED' as const,
         title: '密钥创建成功',
         message: '测试',
       }
@@ -254,7 +254,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'RATE_LIMIT_WARNING',
+            type: 'RATE_LIMIT_WARNING' as const,
             enabled: true,
             channels: ['email'],
           },
@@ -267,7 +267,7 @@ describe.skip('NotificationService', () => {
       ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: 'API 速率限制警告',
         message: '您的 API Key 已达到80%速率限制',
         data: null,
@@ -280,7 +280,7 @@ describe.skip('NotificationService', () => {
 
       await service.send({
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: 'API 速率限制警告',
         message: '您的 API Key 已达到80%速率限制',
       })
@@ -318,7 +318,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'KEY_CREATED',
+            type: 'KEY_CREATED' as const,
             enabled: true,
             channels: ['webhook'],
           },
@@ -331,7 +331,7 @@ describe.skip('NotificationService', () => {
       ;(prisma.notification.create as jest.Mock).mockResolvedValue({
         id: 'notif-123',
         userId: 'user-123',
-        type: 'KEY_CREATED',
+        type: 'KEY_CREATED' as const,
         title: '新密钥创建',
         message: '密钥已创建',
         data: { apiKeyId: 'key-123' },
@@ -344,7 +344,7 @@ describe.skip('NotificationService', () => {
 
       await service.send({
         userId: 'user-123',
-        type: 'KEY_CREATED',
+        type: 'KEY_CREATED' as const,
         title: '新密钥创建',
         message: '密钥已创建',
         data: { apiKeyId: 'key-123' },
@@ -358,7 +358,7 @@ describe.skip('NotificationService', () => {
         secret: 'webhook-secret',
         payload: {
           id: 'notif-123',
-          type: 'KEY_CREATED',
+          type: 'KEY_CREATED' as const,
           title: '新密钥创建',
           message: '密钥已创建',
           data: { apiKeyId: 'key-123' },
@@ -449,7 +449,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'RATE_LIMIT_WARNING',
+            type: 'RATE_LIMIT_WARNING' as const,
             enabled: true,
             threshold: 80,
             channels: ['email'],
@@ -467,7 +467,7 @@ describe.skip('NotificationService', () => {
 
       const result = await service.send({
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: '警告',
         message: '测试',
       })
@@ -486,7 +486,7 @@ describe.skip('NotificationService', () => {
         },
         rules: [
           {
-            type: 'RATE_LIMIT_WARNING',
+            type: 'RATE_LIMIT_WARNING' as const,
             enabled: false,
             threshold: 80,
             channels: ['email'],
@@ -500,7 +500,7 @@ describe.skip('NotificationService', () => {
 
       const result = await service.send({
         userId: 'user-123',
-        type: 'RATE_LIMIT_WARNING',
+        type: 'RATE_LIMIT_WARNING' as const,
         title: '警告',
         message: '测试',
       })
@@ -530,7 +530,7 @@ describe.skip('NotificationService', () => {
 
       const result = await service.send({
         userId: 'user-123',
-        type: 'KEY_CREATED',
+        type: 'KEY_CREATED' as const,
         title: '密钥创建',
         message: '测试',
       })
