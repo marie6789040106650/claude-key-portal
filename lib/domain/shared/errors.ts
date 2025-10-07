@@ -128,6 +128,24 @@ export class ValidationError extends DomainError {
 }
 
 /**
+ * 资源冲突错误
+ */
+export class ConflictError extends DomainError {
+  constructor(message: string) {
+    super(message)
+  }
+}
+
+/**
+ * 资源未找到错误
+ */
+export class NotFoundError extends DomainError {
+  constructor(message: string) {
+    super(message)
+  }
+}
+
+/**
  * 外部服务错误
  */
 export class ExternalServiceError extends DomainError {

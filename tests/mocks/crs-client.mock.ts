@@ -29,8 +29,8 @@ export const mockCrsClient = {
   healthCheck: jest.fn(),
 }
 
-// 自动 Mock @/lib/crs-client 模块
-jest.mock('@/lib/crs-client', () => ({
+// 自动 Mock @/lib/infrastructure/external/crs-client 模块
+jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: mockCrsClient,
   CrsClient: jest.fn().mockImplementation(() => mockCrsClient),
 }))
