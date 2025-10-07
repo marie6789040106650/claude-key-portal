@@ -86,7 +86,7 @@ export class SendNotificationUseCase {
         continue // 创建失败跳过此渠道
       }
 
-      const notification = createResult.value
+      const notification = createResult.value!
       notifications.push(notification)
 
       // 收集发送 Promise

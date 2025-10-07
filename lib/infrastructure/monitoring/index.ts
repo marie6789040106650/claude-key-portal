@@ -26,6 +26,11 @@ export { ExpirationCheckService } from './expiration-check-service'
 export { AlertRuleEngine } from './alert-rule-engine'
 
 // 导出单例实例（用于生产）
+import { HealthCheckService } from './health-check-service'
+import { MetricsCollectorService } from './metrics-collector-service'
+import { ExpirationCheckService } from './expiration-check-service'
+import { AlertRuleEngine } from './alert-rule-engine'
+
 export const healthCheckService = new HealthCheckService()
 export const metricsCollectorService = new MetricsCollectorService()
 export const expirationCheckService = new ExpirationCheckService()
