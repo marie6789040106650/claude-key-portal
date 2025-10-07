@@ -8,16 +8,19 @@
 import { UserRepository } from './user.repository'
 import { KeyRepository } from './key.repository'
 import { SessionRepository } from './session.repository'
+import { NotificationRepository } from './notification.repository'
 
 // 导出类（用于测试）
 export { UserRepository } from './user.repository'
 export { KeyRepository } from './key.repository'
 export { SessionRepository } from './session.repository'
+export { NotificationRepository } from './notification.repository'
 
 // 导出单例实例（用于生产）
 export const userRepository = new UserRepository()
 export const keyRepository = new KeyRepository()
 export const sessionRepository = new SessionRepository()
+export const notificationRepository = new NotificationRepository()
 
 // 导出类型
 export type { DomainUser } from './user.repository'
