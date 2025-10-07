@@ -150,6 +150,7 @@ git commit -m "docs: update API documentation for key creation"
 ### 4.1 Sprint 0: 项目初始化（2天）
 
 #### 任务 0.1: Git 仓库初始化
+
 ```bash
 # 1. 创建仓库
 git init
@@ -184,6 +185,7 @@ git push -u origin develop
 ```
 
 #### 任务 0.2: 测试环境配置
+
 ```bash
 # 1. 创建分支
 git checkout -b feature/setup-testing
@@ -227,6 +229,7 @@ git push origin feature/setup-testing
 ```
 
 #### 任务 0.3: CI/CD 配置
+
 ```bash
 # 1. 创建分支
 git checkout develop
@@ -288,7 +291,7 @@ git checkout -b feature/user-registration
 
 ```typescript
 // tests/api/auth/register.test.ts
-import { POST } from '@/app/api/auth/register/route';
+import { POST } from '@/app/api/auth/register/route'
 
 describe('POST /api/auth/register', () => {
   it('should register a new user with valid data', async () => {
@@ -297,17 +300,17 @@ describe('POST /api/auth/register', () => {
       body: JSON.stringify({
         email: 'test@example.com',
         password: 'SecurePass123!',
-        name: 'Test User'
+        name: 'Test User',
       }),
-    });
+    })
 
-    const response = await POST(request);
-    const data = await response.json();
+    const response = await POST(request)
+    const data = await response.json()
 
-    expect(response.status).toBe(201);
-    expect(data).toHaveProperty('userId');
-    expect(data).toHaveProperty('token');
-  });
+    expect(response.status).toBe(201)
+    expect(data).toHaveProperty('userId')
+    expect(data).toHaveProperty('token')
+  })
 
   it('should reject registration with invalid email', async () => {
     const request = new Request('http://localhost:3000/api/auth/register', {
@@ -315,16 +318,16 @@ describe('POST /api/auth/register', () => {
       body: JSON.stringify({
         email: 'invalid-email',
         password: 'SecurePass123!',
-        name: 'Test User'
+        name: 'Test User',
       }),
-    });
+    })
 
-    const response = await POST(request);
-    const data = await response.json();
+    const response = await POST(request)
+    const data = await response.json()
 
-    expect(response.status).toBe(400);
-    expect(data.error).toBe('Invalid email format');
-  });
+    expect(response.status).toBe(400)
+    expect(data.error).toBe('Invalid email format')
+  })
 
   it('should reject registration with weak password', async () => {
     const request = new Request('http://localhost:3000/api/auth/register', {
@@ -332,43 +335,47 @@ describe('POST /api/auth/register', () => {
       body: JSON.stringify({
         email: 'test@example.com',
         password: '123',
-        name: 'Test User'
+        name: 'Test User',
       }),
-    });
+    })
 
-    const response = await POST(request);
-    const data = await response.json();
+    const response = await POST(request)
+    const data = await response.json()
 
-    expect(response.status).toBe(400);
-    expect(data.error).toContain('Password must be');
-  });
+    expect(response.status).toBe(400)
+    expect(data.error).toContain('Password must be')
+  })
 
   it('should reject duplicate email registration', async () => {
     // 第一次注册
-    await POST(new Request('http://localhost:3000/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: 'duplicate@example.com',
-        password: 'SecurePass123!',
-        name: 'User 1'
-      }),
-    }));
+    await POST(
+      new Request('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: 'duplicate@example.com',
+          password: 'SecurePass123!',
+          name: 'User 1',
+        }),
+      })
+    )
 
     // 第二次注册相同邮箱
-    const response = await POST(new Request('http://localhost:3000/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: 'duplicate@example.com',
-        password: 'AnotherPass456!',
-        name: 'User 2'
-      }),
-    }));
+    const response = await POST(
+      new Request('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: 'duplicate@example.com',
+          password: 'AnotherPass456!',
+          name: 'User 2',
+        }),
+      })
+    )
 
-    const data = await response.json();
-    expect(response.status).toBe(409);
-    expect(data.error).toBe('Email already exists');
-  });
-});
+    const data = await response.json()
+    expect(response.status).toBe(409)
+    expect(data.error).toBe('Email already exists')
+  })
+})
 ```
 
 ```bash
@@ -387,11 +394,11 @@ npm test
 
 ```typescript
 // app/api/auth/register/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { generateToken } from '@/lib/jwt';
+import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcrypt'
+import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { generateToken } from '@/lib/jwt'
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -403,29 +410,29 @@ const registerSchema = z.object({
     .regex(/[0-9]/, 'Password must contain number')
     .regex(/[^A-Za-z0-9]/, 'Password must contain special character'),
   name: z.string().min(1, 'Name is required'),
-});
+})
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json()
 
     // 验证输入
-    const validatedData = registerSchema.parse(body);
+    const validatedData = registerSchema.parse(body)
 
     // 检查邮箱是否已存在
     const existingUser = await prisma.user.findUnique({
       where: { email: validatedData.email },
-    });
+    })
 
     if (existingUser) {
       return NextResponse.json(
         { error: 'Email already exists' },
         { status: 409 }
-      );
+      )
     }
 
     // 加密密码
-    const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+    const hashedPassword = await bcrypt.hash(validatedData.password, 10)
 
     // 创建用户
     const user = await prisma.user.create({
@@ -434,13 +441,13 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         name: validatedData.name,
       },
-    });
+    })
 
     // 生成 JWT token
     const token = generateToken({
       userId: user.id,
       email: user.email,
-    });
+    })
 
     return NextResponse.json(
       {
@@ -448,20 +455,20 @@ export async function POST(request: NextRequest) {
         token,
       },
       { status: 201 }
-    );
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.errors[0].message },
         { status: 400 }
-      );
+      )
     }
 
-    console.error('Registration error:', error);
+    console.error('Registration error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    );
+    )
   }
 }
 ```
@@ -482,7 +489,7 @@ npm test
 
 ```typescript
 // lib/validation/auth.ts
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const passwordSchema = z
   .string()
@@ -490,20 +497,20 @@ export const passwordSchema = z
   .regex(/[A-Z]/, 'Password must contain uppercase letter')
   .regex(/[a-z]/, 'Password must contain lowercase letter')
   .regex(/[0-9]/, 'Password must contain number')
-  .regex(/[^A-Za-z0-9]/, 'Password must contain special character');
+  .regex(/[^A-Za-z0-9]/, 'Password must contain special character')
 
-export const emailSchema = z.string().email('Invalid email format');
+export const emailSchema = z.string().email('Invalid email format')
 
 export const registerSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   name: z.string().min(1, 'Name is required'),
-});
+})
 
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, 'Password is required'),
-});
+})
 ```
 
 ```bash
@@ -920,14 +927,17 @@ module.exports = {
 ## 测试 / Testing
 
 ### 新增测试
+
 - [ ] 单元测试: `tests/unit/xxx.test.ts`
 - [ ] 集成测试: `tests/integration/xxx.test.ts`
 - [ ] E2E 测试: `tests/e2e/xxx.test.ts`
 
 ### 测试结果
 ```
+
 Tests: X passed, X total
 Coverage: XX% statements
+
 ```
 
 ## TDD 流程 / TDD Process
@@ -959,30 +969,35 @@ Closes #XX
 
 ```markdown
 ## 代码质量
+
 - [ ] 代码可读性良好
 - [ ] 命名清晰有意义
 - [ ] 函数职责单一
 - [ ] 没有重复代码
 
 ## 测试
+
 - [ ] 测试覆盖率达标
 - [ ] 测试用例完整
 - [ ] 测试描述清晰
 - [ ] 边界情况已测试
 
 ## 安全性
+
 - [ ] 无 SQL 注入风险
 - [ ] 无 XSS 风险
 - [ ] 敏感数据已加密
 - [ ] 权限校验完整
 
 ## 性能
+
 - [ ] 无 N+1 查询
 - [ ] 适当的缓存策略
 - [ ] 数据库索引合理
 - [ ] 无内存泄漏
 
 ## 文档
+
 - [ ] API 文档更新
 - [ ] 复杂逻辑有注释
 - [ ] README 已更新
@@ -1259,9 +1274,7 @@ npx husky add .husky/pre-commit "npx lint-staged"
       "prettier --write",
       "jest --bail --findRelatedTests"
     ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
+    "*.{json,md}": ["prettier --write"]
   }
 }
 ```
@@ -1541,6 +1554,7 @@ git revert HEAD~3..HEAD
 ## 功能开发完成检查清单
 
 ### 代码质量
+
 - [ ] 所有文件遵循命名规范
 - [ ] 代码格式化 (prettier)
 - [ ] 无 ESLint 错误
@@ -1548,36 +1562,42 @@ git revert HEAD~3..HEAD
 - [ ] 无 console.log
 
 ### TDD 流程
+
 - [ ] 🔴 测试先行 (test-first)
 - [ ] 🟢 测试全部通过
 - [ ] 🔵 代码已重构
 - [ ] 覆盖率 > 80%
 
 ### Git 规范
+
 - [ ] Commit 消息符合规范
 - [ ] 每个 commit 功能独立
 - [ ] 分支命名正确
 - [ ] 无多余文件提交
 
 ### 文档
+
 - [ ] API 文档更新
 - [ ] README 更新（如需要）
 - [ ] 代码注释充分
 - [ ] PR 描述完整
 
 ### 测试
+
 - [ ] 单元测试完整
 - [ ] 集成测试覆盖
 - [ ] 边界情况测试
 - [ ] 错误情况测试
 
 ### 安全
+
 - [ ] 输入验证完整
 - [ ] 无安全漏洞
 - [ ] 敏感数据加密
 - [ ] 权限检查到位
 
 ### 性能
+
 - [ ] 无 N+1 查询
 - [ ] 合理使用缓存
 - [ ] 数据库查询优化
@@ -1590,24 +1610,28 @@ git revert HEAD~3..HEAD
 ## Sprint 完成检查清单
 
 ### 开发完成
+
 - [ ] 所有 Issue 已关闭
 - [ ] 所有 PR 已合并
 - [ ] develop 分支构建成功
 - [ ] 无待修复的 critical bugs
 
 ### 测试完成
+
 - [ ] 所有测试通过 (unit + integration + e2e)
 - [ ] 覆盖率达标 (>80%)
 - [ ] 性能测试通过
 - [ ] 安全扫描通过
 
 ### 文档完成
+
 - [ ] API 文档更新
 - [ ] 用户文档更新
 - [ ] CHANGELOG 更新
 - [ ] 部署文档更新
 
 ### 部署准备
+
 - [ ] Staging 环境部署成功
 - [ ] 手动测试通过
 - [ ] 性能监控配置

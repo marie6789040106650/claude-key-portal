@@ -12,19 +12,21 @@
 **登录页面**：`https://claude.just-play.fun/admin-next/login`
 
 **管理员凭据**：
+
 - 用户名：`cr_admin_4ce18cd2`
 - 密码：`HCTBMoiK3PZD0eDC`
 
 使用浏览器访问以下页面：
 
-| URL | 页面类型 | 是否需要登录 | 说明 |
-|-----|---------|------------|------|
-| `https://claude.just-play.fun/admin-next/login` | 登录页面 | ❌ 公开 | 输入凭据登录 |
-| `https://claude.just-play.fun/admin-next` | Web UI 首页 | ✅ 需要 | 登录后访问 |
-| `https://claude.just-play.fun/admin-next/api-stats` | Web UI 统计页面 | ✅ 需要 | 管理页面 |
-| `https://claude.just-play.fun/admin-next/api-keys` | Web UI 密钥管理 | ✅ 需要 | 管理页面 |
+| URL                                                 | 页面类型        | 是否需要登录 | 说明         |
+| --------------------------------------------------- | --------------- | ------------ | ------------ |
+| `https://claude.just-play.fun/admin-next/login`     | 登录页面        | ❌ 公开      | 输入凭据登录 |
+| `https://claude.just-play.fun/admin-next`           | Web UI 首页     | ✅ 需要      | 登录后访问   |
+| `https://claude.just-play.fun/admin-next/api-stats` | Web UI 统计页面 | ✅ 需要      | 管理页面     |
+| `https://claude.just-play.fun/admin-next/api-keys`  | Web UI 密钥管理 | ✅ 需要      | 管理页面     |
 
 **结论**:
+
 - ✅ 登录页面：`/admin-next/login`（公开访问）
 - ✅ 管理页面：`/admin-next/*`（需要浏览器登录）
 - ✅ 浏览器登录和API登录使用相同的管理员凭据
@@ -246,13 +248,17 @@ Headers: { Authorization: "Bearer <token>" }
 - ✅ 可以通过 `POST /web/auth/refresh` 刷新token
 
 **认证流程** （实测通过）:
+
 ```typescript
 // 1. 管理员登录 ✅
-const loginResponse = await fetch('https://claude.just-play.fun/web/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ username, password })
-})
+const loginResponse = await fetch(
+  'https://claude.just-play.fun/web/auth/login',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  }
+)
 const { success, token, expiresIn, username } = await loginResponse.json()
 // token: 64字符hex字符串
 // expiresIn: 86400000 (24小时，毫秒)
@@ -260,9 +266,9 @@ const { success, token, expiresIn, username } = await loginResponse.json()
 // 2. 使用token调用Admin API ✅
 const apiResponse = await fetch('https://claude.just-play.fun/admin/api-keys', {
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  },
 })
 const { success, data } = await apiResponse.json()
 // data: ApiKey[] 数组
@@ -273,10 +279,12 @@ const { success, data } = await apiResponse.json()
 **确认**: 从Vue前端代码和Express路由代码确认
 
 **请求格式**:
+
 - ✅ `Content-Type: application/json`
 - ✅ `Authorization: Bearer <token>`
 
 **响应格式（成功）**:
+
 ```typescript
 {
   "success": true,
@@ -285,6 +293,7 @@ const { success, data } = await apiResponse.json()
 ```
 
 **响应格式（错误）**:
+
 ```typescript
 {
   "error": "Error Type",
@@ -293,6 +302,7 @@ const { success, data } = await apiResponse.json()
 ```
 
 **HTTP状态码**:
+
 - 200: 成功
 - 400: 请求参数错误
 - 401: 未认证或token过期
@@ -306,6 +316,7 @@ const { success, data } = await apiResponse.json()
 **问题**: 用户部署的CRS使用什么管理员凭据？
 
 **需要获取**:
+
 - [ ] 管理员用户名和密码（从 `data/init.json` 或环境变量）
 - [ ] 实际的CRS base URL确认
 
@@ -314,6 +325,7 @@ const { success, data } = await apiResponse.json()
 **问题**: 在实际环境中验证API调用
 
 **需要测试**:
+
 - [ ] 登录获取token
 - [ ] 使用token调用API
 - [ ] 验证响应格式
@@ -359,6 +371,7 @@ curl -X POST https://claude.just-play.fun/admin/api-keys \
 ```
 
 **期望结果**:
+
 - 登录成功 → 返回 `{ "success": true, "token": "...", "expiresIn": 86400 }`
 - 不带 Token 调用API → 401 Unauthorized
 - 带有效 Token 调用API → 200 OK，返回 JSON 数据
@@ -383,6 +396,7 @@ grep -r "Authorization\|Bearer" --include="*.ts" --include="*.js"
 ### 方法 3: 查看 CRS 文档
 
 检查 CRS 项目的文档：
+
 - README.md
 - docs/ 目录
 - API.md 或 API-DOCS.md
@@ -408,17 +422,14 @@ class CrsClient {
     }
 
     // 登录获取新token ✅ 路径已修正
-    const response = await fetch(
-      `${process.env.CRS_BASE_URL}/web/auth/login`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: process.env.CRS_ADMIN_USERNAME,
-          password: process.env.CRS_ADMIN_PASSWORD
-        })
-      }
-    )
+    const response = await fetch(`${process.env.CRS_BASE_URL}/web/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: process.env.CRS_ADMIN_USERNAME,
+        password: process.env.CRS_ADMIN_PASSWORD,
+      }),
+    })
 
     const { success, token, expiresIn } = await response.json()
     if (!success) {
@@ -438,7 +449,7 @@ class CrsClient {
       {
         ...options,
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
           ...options?.headers,
         },
@@ -470,25 +481,22 @@ export const crsClient = new CrsClient()
 
 ```typescript
 // 环境变量
-CRS_BASE_URL="https://claude.just-play.fun"
-CRS_ADMIN_USERNAME="cr_admin_4ce18cd2"
-CRS_ADMIN_PASSWORD="HCTBMoiK3PZD0eDC"
+CRS_BASE_URL = 'https://claude.just-play.fun'
+CRS_ADMIN_USERNAME = 'cr_admin_4ce18cd2'
+CRS_ADMIN_PASSWORD = 'HCTBMoiK3PZD0eDC'
 
 // 简化的client (需要实现自动登录和token管理)
 async function crsRequest(endpoint: string, options?: RequestInit) {
   const token = await ensureAuthenticated() // 自动登录获取token
 
-  const response = await fetch(
-    `${process.env.CRS_BASE_URL}/admin${endpoint}`,
-    {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-    }
-  )
+  const response = await fetch(`${process.env.CRS_BASE_URL}/admin${endpoint}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
 
   const data = await response.json()
   return data.data
@@ -529,6 +537,7 @@ CRS_ADMIN_PASSWORD="your_admin_password"
 1. **获取CRS管理员凭据**
 
    用户需要提供以下信息：
+
    ```bash
    # 管理员用户名和密码
    CRS_ADMIN_USERNAME="admin"  # 或其他用户名
@@ -540,6 +549,7 @@ CRS_ADMIN_PASSWORD="your_admin_password"
    - 或查看CRS的环境变量 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD`
 
 2. **实际API测试**（使用真实凭据）
+
    ```bash
    # 登录测试
    curl -X POST https://claude.just-play.fun/web/auth/login \
@@ -604,6 +614,7 @@ curl -X POST https://claude.just-play.fun/web/auth/login \
 ```
 
 **发现**：
+
 - ✅ 登录路径是 `/web/auth/login` (不是 `/webapi/auth/login`)
 - ✅ Token是64字符的hex字符串
 - ✅ expiresIn是毫秒数（86400000 = 24小时）
@@ -651,6 +662,7 @@ curl https://claude.just-play.fun/admin/api-keys \
 ```
 
 **发现**：
+
 - ✅ 返回完整的密钥列表
 - ✅ 包含详细的使用统计（tokens, requests, cost）
 - ✅ 响应格式符合 `{ success: true, data: [...] }`
@@ -704,6 +716,7 @@ curl https://claude.just-play.fun/admin/dashboard \
 ```
 
 **发现**：
+
 - ✅ 返回完整的仪表板统计数据
 - ✅ 包含系统健康状态
 - ✅ 实时性能指标可用
@@ -712,15 +725,15 @@ curl https://claude.just-play.fun/admin/dashboard \
 
 ## 📊 验证总结
 
-| 验证项 | 状态 | 说明 |
-|--------|------|------|
-| **API 端点路径** | ✅ 已确认 | 通过源码分析：`/admin/*` (不是 `/admin-next/*`) |
-| **Token 认证方式** | ✅ 已确认 | 使用 `Authorization: Bearer <token>` |
-| **Token 获取方式** | ✅ 已确认 | `POST /web/auth/login` 登录获取 |
-| **请求格式** | ✅ 已确认 | `Content-Type: application/json` |
-| **响应格式** | ✅ 已确认 | `{ success: true, data: {...} }` |
-| **错误响应** | ✅ 已确认 | `{ error: "...", message: "..." }` |
-| **实际API测试** | ✅ 已完成 | 登录、密钥列表、仪表板全部测试通过 |
+| 验证项             | 状态      | 说明                                            |
+| ------------------ | --------- | ----------------------------------------------- |
+| **API 端点路径**   | ✅ 已确认 | 通过源码分析：`/admin/*` (不是 `/admin-next/*`) |
+| **Token 认证方式** | ✅ 已确认 | 使用 `Authorization: Bearer <token>`            |
+| **Token 获取方式** | ✅ 已确认 | `POST /web/auth/login` 登录获取                 |
+| **请求格式**       | ✅ 已确认 | `Content-Type: application/json`                |
+| **响应格式**       | ✅ 已确认 | `{ success: true, data: {...} }`                |
+| **错误响应**       | ✅ 已确认 | `{ error: "...", message: "..." }`              |
+| **实际API测试**    | ✅ 已完成 | 登录、密钥列表、仪表板全部测试通过              |
 
 ---
 
@@ -736,6 +749,7 @@ curl https://claude.just-play.fun/admin/dashboard \
    - Auth API: `/web/auth/*` (认证) ⚠️ 注意：实际是 `/web/` 不是 `/webapi/`
 
 2. ✅ **认证流程**：
+
    ```
    登录 → 获取session token → 使用token调用API → token过期时重新登录
    ```
@@ -773,5 +787,6 @@ curl https://claude.just-play.fun/admin/dashboard \
 **状态**: 🟢 完全验证通过（源码分析 + 实际API测试）
 
 **验证方法**:
+
 - ✅ 源码分析：[claude-relay-service](https://github.com/Wei-Shaw/claude-relay-service)
 - ✅ 实际测试：使用真实管理员凭据测试3个核心API端点

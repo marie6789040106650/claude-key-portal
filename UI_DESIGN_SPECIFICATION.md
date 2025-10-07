@@ -5,12 +5,14 @@
 ### 1.1 设计原则
 
 #### 核心价值观
+
 1. **简洁高效** - 减少操作步骤，提高工作效率
 2. **清晰直观** - 信息层级分明，操作路径明确
 3. **专业可信** - 技术感与专业性并重
 4. **友好包容** - 降低使用门槛，注重无障碍访问
 
 #### 设计语言
+
 - **现代极简** - 扁平化设计，去除不必要的装饰
 - **数据驱动** - 数据可视化为核心，图表优先
 - **响应灵敏** - 快速反馈，流畅交互
@@ -23,194 +25,201 @@
 ### 2.1 色彩系统
 
 #### 主色调 (Primary Colors)
+
 ```css
 /* 品牌主色 - 蓝色系 */
---color-primary-50:  #eff6ff;   /* 极浅蓝 - 背景 */
---color-primary-100: #dbeafe;   /* 浅蓝 - hover背景 */
---color-primary-200: #bfdbfe;   /* 淡蓝 */
---color-primary-300: #93c5fd;   /* 中浅蓝 */
---color-primary-400: #60a5fa;   /* 中蓝 */
---color-primary-500: #3b82f6;   /* 主蓝 - 主要操作 */
---color-primary-600: #2563eb;   /* 深蓝 - hover状态 */
---color-primary-700: #1d4ed8;   /* 更深蓝 */
---color-primary-800: #1e40af;   /* 很深蓝 */
---color-primary-900: #1e3a8a;   /* 最深蓝 */
+--color-primary-50: #eff6ff; /* 极浅蓝 - 背景 */
+--color-primary-100: #dbeafe; /* 浅蓝 - hover背景 */
+--color-primary-200: #bfdbfe; /* 淡蓝 */
+--color-primary-300: #93c5fd; /* 中浅蓝 */
+--color-primary-400: #60a5fa; /* 中蓝 */
+--color-primary-500: #3b82f6; /* 主蓝 - 主要操作 */
+--color-primary-600: #2563eb; /* 深蓝 - hover状态 */
+--color-primary-700: #1d4ed8; /* 更深蓝 */
+--color-primary-800: #1e40af; /* 很深蓝 */
+--color-primary-900: #1e3a8a; /* 最深蓝 */
 ```
 
 #### 语义色彩 (Semantic Colors)
+
 ```css
 /* 成功 - 绿色 */
---color-success-50:  #f0fdf4;
---color-success-500: #22c55e;   /* 成功状态、密钥活跃 */
+--color-success-50: #f0fdf4;
+--color-success-500: #22c55e; /* 成功状态、密钥活跃 */
 --color-success-600: #16a34a;
 --color-success-700: #15803d;
 
 /* 警告 - 黄色 */
---color-warning-50:  #fffbeb;
---color-warning-500: #f59e0b;   /* 警告状态、即将过期 */
+--color-warning-50: #fffbeb;
+--color-warning-500: #f59e0b; /* 警告状态、即将过期 */
 --color-warning-600: #d97706;
 
 /* 错误 - 红色 */
---color-error-50:  #fef2f2;
---color-error-500: #ef4444;     /* 错误状态、密钥禁用 */
+--color-error-50: #fef2f2;
+--color-error-500: #ef4444; /* 错误状态、密钥禁用 */
 --color-error-600: #dc2626;
 --color-error-700: #b91c1c;
 
 /* 信息 - 青色 */
---color-info-50:  #ecfeff;
---color-info-500: #06b6d4;      /* 提示信息 */
+--color-info-50: #ecfeff;
+--color-info-500: #06b6d4; /* 提示信息 */
 --color-info-600: #0891b2;
 ```
 
 #### 中性色彩 (Neutral Colors)
+
 ```css
 /* 灰度系统 */
---color-gray-50:  #f9fafb;      /* 背景色 */
---color-gray-100: #f3f4f6;      /* 卡片背景 */
---color-gray-200: #e5e7eb;      /* 边框、分割线 */
---color-gray-300: #d1d5db;      /* 禁用状态边框 */
---color-gray-400: #9ca3af;      /* 占位符文字 */
---color-gray-500: #6b7280;      /* 次要文字 */
---color-gray-600: #4b5563;      /* 次要标题 */
---color-gray-700: #374151;      /* 主要文字 */
---color-gray-800: #1f2937;      /* 标题 */
---color-gray-900: #111827;      /* 强调标题 */
+--color-gray-50: #f9fafb; /* 背景色 */
+--color-gray-100: #f3f4f6; /* 卡片背景 */
+--color-gray-200: #e5e7eb; /* 边框、分割线 */
+--color-gray-300: #d1d5db; /* 禁用状态边框 */
+--color-gray-400: #9ca3af; /* 占位符文字 */
+--color-gray-500: #6b7280; /* 次要文字 */
+--color-gray-600: #4b5563; /* 次要标题 */
+--color-gray-700: #374151; /* 主要文字 */
+--color-gray-800: #1f2937; /* 标题 */
+--color-gray-900: #111827; /* 强调标题 */
 ```
 
 #### 色彩使用规范
 
-| 元素 | 浅色模式 | 深色模式 |
-|-----|---------|---------|
-| 页面背景 | gray-50 | gray-900 |
-| 卡片背景 | white | gray-800 |
-| 边框 | gray-200 | gray-700 |
-| 主要文字 | gray-900 | gray-100 |
-| 次要文字 | gray-600 | gray-400 |
-| 主按钮 | primary-500 | primary-600 |
+| 元素     | 浅色模式    | 深色模式    |
+| -------- | ----------- | ----------- |
+| 页面背景 | gray-50     | gray-900    |
+| 卡片背景 | white       | gray-800    |
+| 边框     | gray-200    | gray-700    |
+| 主要文字 | gray-900    | gray-100    |
+| 次要文字 | gray-600    | gray-400    |
+| 主按钮   | primary-500 | primary-600 |
 | 成功状态 | success-500 | success-400 |
-| 错误状态 | error-500 | error-400 |
+| 错误状态 | error-500   | error-400   |
 
 ### 2.2 字体系统
 
 #### 字体族 (Font Family)
+
 ```css
 /* 系统字体栈 - 优化阅读体验 */
---font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI",
-             Roboto, "Helvetica Neue", Arial, "Noto Sans",
-             sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+--font-sans:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+  Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 
 /* 等宽字体 - 代码、密钥显示 */
---font-mono: ui-monospace, SFMono-Regular, "SF Mono",
-             Menlo, Monaco, Consolas, "Liberation Mono",
-             "Courier New", monospace;
+--font-mono:
+  ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas,
+  'Liberation Mono', 'Courier New', monospace;
 
 /* 数字字体 - 数据统计 */
---font-numeric: "SF Pro Display", -apple-system, sans-serif;
+--font-numeric: 'SF Pro Display', -apple-system, sans-serif;
 ```
 
 #### 字号系统 (Font Size)
+
 ```css
 /* 移动优先的响应式字号 */
---text-xs:   0.75rem;   /* 12px - 辅助信息、标签 */
---text-sm:   0.875rem;  /* 14px - 次要内容、说明文字 */
---text-base: 1rem;      /* 16px - 正文、表格内容 */
---text-lg:   1.125rem;  /* 18px - 小标题 */
---text-xl:   1.25rem;   /* 20px - 卡片标题 */
---text-2xl:  1.5rem;    /* 24px - 页面标题 */
---text-3xl:  1.875rem;  /* 30px - 大标题 */
---text-4xl:  2.25rem;   /* 36px - 数据展示 */
---text-5xl:  3rem;      /* 48px - 特大数字 */
+--text-xs: 0.75rem; /* 12px - 辅助信息、标签 */
+--text-sm: 0.875rem; /* 14px - 次要内容、说明文字 */
+--text-base: 1rem; /* 16px - 正文、表格内容 */
+--text-lg: 1.125rem; /* 18px - 小标题 */
+--text-xl: 1.25rem; /* 20px - 卡片标题 */
+--text-2xl: 1.5rem; /* 24px - 页面标题 */
+--text-3xl: 1.875rem; /* 30px - 大标题 */
+--text-4xl: 2.25rem; /* 36px - 数据展示 */
+--text-5xl: 3rem; /* 48px - 特大数字 */
 ```
 
 #### 字重系统 (Font Weight)
+
 ```css
---font-normal:    400;  /* 正文 */
---font-medium:    500;  /* 次要标题、强调 */
---font-semibold:  600;  /* 标题、按钮 */
---font-bold:      700;  /* 重要标题 */
+--font-normal: 400; /* 正文 */
+--font-medium: 500; /* 次要标题、强调 */
+--font-semibold: 600; /* 标题、按钮 */
+--font-bold: 700; /* 重要标题 */
 ```
 
 #### 行高系统 (Line Height)
+
 ```css
---leading-none:    1;     /* 数字、标题 */
---leading-tight:   1.25;  /* 紧凑文本 */
---leading-snug:    1.375; /* 标题 */
---leading-normal:  1.5;   /* 正文 */
+--leading-none: 1; /* 数字、标题 */
+--leading-tight: 1.25; /* 紧凑文本 */
+--leading-snug: 1.375; /* 标题 */
+--leading-normal: 1.5; /* 正文 */
 --leading-relaxed: 1.625; /* 宽松文本 */
---leading-loose:   2;     /* 特殊用途 */
+--leading-loose: 2; /* 特殊用途 */
 ```
 
 #### 字体使用规范
 
-| 元素 | 字号 | 字重 | 行高 | 颜色 |
-|-----|------|------|------|------|
-| 页面大标题 | 2xl | semibold | tight | gray-900 |
-| 页面副标题 | lg | normal | normal | gray-600 |
-| 卡片标题 | xl | semibold | tight | gray-900 |
-| 正文 | base | normal | normal | gray-700 |
-| 辅助说明 | sm | normal | relaxed | gray-500 |
-| 标签 | xs | medium | none | gray-600 |
-| 数据数字 | 4xl | bold | none | gray-900 |
-| 按钮文字 | sm | medium | none | white |
-| 代码/密钥 | sm | normal | normal | mono |
+| 元素       | 字号 | 字重     | 行高    | 颜色     |
+| ---------- | ---- | -------- | ------- | -------- |
+| 页面大标题 | 2xl  | semibold | tight   | gray-900 |
+| 页面副标题 | lg   | normal   | normal  | gray-600 |
+| 卡片标题   | xl   | semibold | tight   | gray-900 |
+| 正文       | base | normal   | normal  | gray-700 |
+| 辅助说明   | sm   | normal   | relaxed | gray-500 |
+| 标签       | xs   | medium   | none    | gray-600 |
+| 数据数字   | 4xl  | bold     | none    | gray-900 |
+| 按钮文字   | sm   | medium   | none    | white    |
+| 代码/密钥  | sm   | normal   | normal  | mono     |
 
 ### 2.3 间距系统 (Spacing)
 
 #### 基础间距单位
+
 ```css
 /* 8px基础网格系统 */
---spacing-0:   0;
---spacing-1:   0.25rem;  /* 4px */
---spacing-2:   0.5rem;   /* 8px */
---spacing-3:   0.75rem;  /* 12px */
---spacing-4:   1rem;     /* 16px */
---spacing-5:   1.25rem;  /* 20px */
---spacing-6:   1.5rem;   /* 24px */
---spacing-8:   2rem;     /* 32px */
---spacing-10:  2.5rem;   /* 40px */
---spacing-12:  3rem;     /* 48px */
---spacing-16:  4rem;     /* 64px */
---spacing-20:  5rem;     /* 80px */
---spacing-24:  6rem;     /* 96px */
+--spacing-0: 0;
+--spacing-1: 0.25rem; /* 4px */
+--spacing-2: 0.5rem; /* 8px */
+--spacing-3: 0.75rem; /* 12px */
+--spacing-4: 1rem; /* 16px */
+--spacing-5: 1.25rem; /* 20px */
+--spacing-6: 1.5rem; /* 24px */
+--spacing-8: 2rem; /* 32px */
+--spacing-10: 2.5rem; /* 40px */
+--spacing-12: 3rem; /* 48px */
+--spacing-16: 4rem; /* 64px */
+--spacing-20: 5rem; /* 80px */
+--spacing-24: 6rem; /* 96px */
 ```
 
 #### 间距使用规范
 
-| 场景 | 间距值 | 说明 |
-|-----|--------|------|
-| 行内元素间距 | 2 (8px) | 图标与文字 |
-| 小组件内边距 | 3 (12px) | 按钮、标签 |
-| 卡片内边距 | 6 (24px) | 卡片内容区 |
-| 组件间距 | 4 (16px) | 表单字段间 |
-| 区块间距 | 8 (32px) | 功能区块间 |
-| 页面边距 | 6-8 (24-32px) | 页面左右边距 |
-| 栏间距 | 6 (24px) | 多栏布局 |
+| 场景         | 间距值        | 说明         |
+| ------------ | ------------- | ------------ |
+| 行内元素间距 | 2 (8px)       | 图标与文字   |
+| 小组件内边距 | 3 (12px)      | 按钮、标签   |
+| 卡片内边距   | 6 (24px)      | 卡片内容区   |
+| 组件间距     | 4 (16px)      | 表单字段间   |
+| 区块间距     | 8 (32px)      | 功能区块间   |
+| 页面边距     | 6-8 (24-32px) | 页面左右边距 |
+| 栏间距       | 6 (24px)      | 多栏布局     |
 
 ### 2.4 圆角系统 (Border Radius)
 
 ```css
 --radius-none: 0;
---radius-sm:   0.25rem;  /* 4px - 小元素 */
---radius-md:   0.375rem; /* 6px - 按钮、输入框 */
---radius-lg:   0.5rem;   /* 8px - 卡片 */
---radius-xl:   0.75rem;  /* 12px - 模态框 */
---radius-2xl:  1rem;     /* 16px - 大容器 */
---radius-full: 9999px;   /* 圆形 - 头像、徽章 */
+--radius-sm: 0.25rem; /* 4px - 小元素 */
+--radius-md: 0.375rem; /* 6px - 按钮、输入框 */
+--radius-lg: 0.5rem; /* 8px - 卡片 */
+--radius-xl: 0.75rem; /* 12px - 模态框 */
+--radius-2xl: 1rem; /* 16px - 大容器 */
+--radius-full: 9999px; /* 圆形 - 头像、徽章 */
 ```
 
 ### 2.5 阴影系统 (Shadows)
 
 ```css
 /* 层级阴影 - 创建深度感 */
---shadow-xs:  0 1px 2px 0 rgba(0, 0, 0, 0.05);
---shadow-sm:  0 1px 3px 0 rgba(0, 0, 0, 0.1),
-              0 1px 2px -1px rgba(0, 0, 0, 0.1);
---shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.1),
-              0 2px 4px -2px rgba(0, 0, 0, 0.1);
---shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.1),
-              0 4px 6px -4px rgba(0, 0, 0, 0.1);
---shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.1),
-              0 8px 10px -6px rgba(0, 0, 0, 0.1);
+--shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+--shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+--shadow-md:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+--shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+--shadow-xl:
+  0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
 /* 特殊阴影 */
@@ -220,13 +229,13 @@
 
 #### 阴影使用规范
 
-| 元素 | 阴影 | 说明 |
-|-----|------|------|
-| 卡片 | sm | 轻微浮起 |
-| 悬停卡片 | md | 中度浮起 |
-| 下拉菜单 | lg | 明显浮起 |
-| 模态框 | xl | 强调层级 |
-| 按钮悬停 | md | 交互反馈 |
+| 元素       | 阴影  | 说明     |
+| ---------- | ----- | -------- |
+| 卡片       | sm    | 轻微浮起 |
+| 悬停卡片   | md    | 中度浮起 |
+| 下拉菜单   | lg    | 明显浮起 |
+| 模态框     | xl    | 强调层级 |
+| 按钮悬停   | md    | 交互反馈 |
 | 输入框聚焦 | focus | 焦点提示 |
 
 ---
@@ -706,11 +715,21 @@ toast.success('创建成功', { id: toastId });
 }
 
 /* 常用布局 */
-.col-span-3  { grid-column: span 3; }  /* 1/4 */
-.col-span-4  { grid-column: span 4; }  /* 1/3 */
-.col-span-6  { grid-column: span 6; }  /* 1/2 */
-.col-span-8  { grid-column: span 8; }  /* 2/3 */
-.col-span-12 { grid-column: span 12; } /* 全宽 */
+.col-span-3 {
+  grid-column: span 3;
+} /* 1/4 */
+.col-span-4 {
+  grid-column: span 4;
+} /* 1/3 */
+.col-span-6 {
+  grid-column: span 6;
+} /* 1/2 */
+.col-span-8 {
+  grid-column: span 8;
+} /* 2/3 */
+.col-span-12 {
+  grid-column: span 12;
+} /* 全宽 */
 
 /* 响应式网格 */
 @media (max-width: 768px) {
@@ -724,11 +743,21 @@ toast.success('创建成功', { id: toastId });
 
 ```css
 /* 最大宽度限制 */
-.container-sm  { max-width: 640px; }   /* 小容器 */
-.container-md  { max-width: 768px; }   /* 中容器 */
-.container-lg  { max-width: 1024px; }  /* 大容器 */
-.container-xl  { max-width: 1280px; }  /* 超大容器 */
-.container-2xl { max-width: 1536px; }  /* 最大容器 */
+.container-sm {
+  max-width: 640px;
+} /* 小容器 */
+.container-md {
+  max-width: 768px;
+} /* 中容器 */
+.container-lg {
+  max-width: 1024px;
+} /* 大容器 */
+.container-xl {
+  max-width: 1280px;
+} /* 超大容器 */
+.container-2xl {
+  max-width: 1536px;
+} /* 最大容器 */
 
 /* 内容区默认 */
 .main-content {
@@ -746,13 +775,13 @@ toast.success('创建成功', { id: toastId });
 
 ```css
 /* 标准时长 */
---duration-fast:   150ms;  /* 快速 - hover, focus */
---duration-normal: 300ms;  /* 标准 - modal, drawer */
---duration-slow:   500ms;  /* 慢速 - page transition */
+--duration-fast: 150ms; /* 快速 - hover, focus */
+--duration-normal: 300ms; /* 标准 - modal, drawer */
+--duration-slow: 500ms; /* 慢速 - page transition */
 
 /* 缓动函数 */
---ease-in:     cubic-bezier(0.4, 0, 1, 1);
---ease-out:    cubic-bezier(0, 0, 0.2, 1);
+--ease-in: cubic-bezier(0.4, 0, 1, 1);
+--ease-out: cubic-bezier(0, 0, 0.2, 1);
 --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 ```
 
@@ -866,8 +895,12 @@ toast.success('创建成功', { id: toastId });
 
 /* 数字滚动动画 */
 @keyframes countUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* 消息淡入淡出 */
@@ -901,11 +934,11 @@ import {
   KeyIcon,
   ChartBarIcon,
   ArrowDownTrayIcon,
-  Cog6ToothIcon
-} from '@heroicons/react/24/outline';
+  Cog6ToothIcon,
+} from '@heroicons/react/24/outline'
 
 // 实心图标
-import { KeyIcon as KeyIconSolid } from '@heroicons/react/24/solid';
+import { KeyIcon as KeyIconSolid } from '@heroicons/react/24/solid'
 ```
 
 ### 6.2 图标尺寸
@@ -919,25 +952,25 @@ import { KeyIcon as KeyIconSolid } from '@heroicons/react/24/solid';
 
 ### 6.3 常用图标映射
 
-| 功能 | 图标 | 使用场景 |
-|-----|------|---------|
-| 首页 | HomeIcon | 导航 - 仪表板 |
-| 密钥 | KeyIcon | 导航 - 密钥管理 |
-| 统计 | ChartBarIcon | 导航 - 使用统计 |
-| 下载 | ArrowDownTrayIcon | 按钮 - 下载脚本 |
-| 设置 | Cog6ToothIcon | 导航 - 设置 |
-| 搜索 | MagnifyingGlassIcon | 搜索框 |
-| 通知 | BellIcon | 顶栏 - 通知中心 |
-| 用户 | UserIcon | 顶栏 - 用户菜单 |
-| 添加 | PlusIcon | 按钮 - 创建 |
-| 编辑 | PencilIcon | 操作 - 编辑 |
-| 删除 | TrashIcon | 操作 - 删除 |
-| 更多 | EllipsisHorizontalIcon | 操作菜单 |
-| 关闭 | XMarkIcon | 关闭按钮 |
-| 成功 | CheckCircleIcon | 状态 - 成功 |
-| 错误 | XCircleIcon | 状态 - 错误 |
-| 警告 | ExclamationTriangleIcon | 状态 - 警告 |
-| 信息 | InformationCircleIcon | 状态 - 信息 |
+| 功能 | 图标                    | 使用场景        |
+| ---- | ----------------------- | --------------- |
+| 首页 | HomeIcon                | 导航 - 仪表板   |
+| 密钥 | KeyIcon                 | 导航 - 密钥管理 |
+| 统计 | ChartBarIcon            | 导航 - 使用统计 |
+| 下载 | ArrowDownTrayIcon       | 按钮 - 下载脚本 |
+| 设置 | Cog6ToothIcon           | 导航 - 设置     |
+| 搜索 | MagnifyingGlassIcon     | 搜索框          |
+| 通知 | BellIcon                | 顶栏 - 通知中心 |
+| 用户 | UserIcon                | 顶栏 - 用户菜单 |
+| 添加 | PlusIcon                | 按钮 - 创建     |
+| 编辑 | PencilIcon              | 操作 - 编辑     |
+| 删除 | TrashIcon               | 操作 - 删除     |
+| 更多 | EllipsisHorizontalIcon  | 操作菜单        |
+| 关闭 | XMarkIcon               | 关闭按钮        |
+| 成功 | CheckCircleIcon         | 状态 - 成功     |
+| 错误 | XCircleIcon             | 状态 - 错误     |
+| 警告 | ExclamationTriangleIcon | 状态 - 警告     |
+| 信息 | InformationCircleIcon   | 状态 - 信息     |
 
 ---
 
@@ -947,13 +980,13 @@ import { KeyIcon as KeyIconSolid } from '@heroicons/react/24/solid';
 
 ```css
 /* 主题色板 - 用于多系列数据 */
---chart-1: #3b82f6;  /* 蓝色 */
---chart-2: #10b981;  /* 绿色 */
---chart-3: #f59e0b;  /* 橙色 */
---chart-4: #ef4444;  /* 红色 */
---chart-5: #8b5cf6;  /* 紫色 */
---chart-6: #ec4899;  /* 粉色 */
---chart-7: #06b6d4;  /* 青色 */
+--chart-1: #3b82f6; /* 蓝色 */
+--chart-2: #10b981; /* 绿色 */
+--chart-3: #f59e0b; /* 橙色 */
+--chart-4: #ef4444; /* 红色 */
+--chart-5: #8b5cf6; /* 紫色 */
+--chart-6: #ec4899; /* 粉色 */
+--chart-7: #06b6d4; /* 青色 */
 
 /* 渐变色 - 用于热力图、区域图 */
 --gradient-blue: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
@@ -969,13 +1002,13 @@ const chartConfig = {
   axisLine: { stroke: '#e5e7eb' },
   axisLabel: {
     fill: '#6b7280',
-    fontSize: 12
+    fontSize: 12,
   },
 
   // 网格线
   grid: {
     stroke: '#f3f4f6',
-    strokeDasharray: '3 3'
+    strokeDasharray: '3 3',
   },
 
   // 工具提示
@@ -984,18 +1017,18 @@ const chartConfig = {
       backgroundColor: '#fff',
       border: '1px solid #e5e7eb',
       borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-    }
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    },
   },
 
   // 图例
   legend: {
     iconType: 'circle',
     wrapperStyle: {
-      paddingTop: '1rem'
-    }
-  }
-};
+      paddingTop: '1rem',
+    },
+  },
+}
 ```
 
 ### 7.3 空状态设计
@@ -1101,16 +1134,16 @@ useEffect(() => {
 
 ```css
 /* 深色模式色彩系统 */
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   /* 背景色 */
-  --color-bg-primary: #111827;   /* 主背景 */
+  --color-bg-primary: #111827; /* 主背景 */
   --color-bg-secondary: #1f2937; /* 卡片背景 */
-  --color-bg-tertiary: #374151;  /* 悬停背景 */
+  --color-bg-tertiary: #374151; /* 悬停背景 */
 
   /* 文字色 */
-  --color-text-primary: #f9fafb;   /* 主文字 */
+  --color-text-primary: #f9fafb; /* 主文字 */
   --color-text-secondary: #e5e7eb; /* 次要文字 */
-  --color-text-tertiary: #9ca3af;  /* 辅助文字 */
+  --color-text-tertiary: #9ca3af; /* 辅助文字 */
 
   /* 边框色 */
   --color-border: #374151;
@@ -1184,7 +1217,7 @@ useEffect(() => {
 ```css
 /* 增大触摸目标 */
 .touch-target {
-  min-height: 44px;  /* iOS推荐 */
+  min-height: 44px; /* iOS推荐 */
   min-width: 44px;
 }
 
@@ -1233,12 +1266,13 @@ export const tokens = {
     // ...
   },
   // ...
-};
+}
 ```
 
 ### 11.3 Figma 设计文件
 
 包含：
+
 - 完整色彩系统
 - 字体样式库
 - 组件库（所有状态）
@@ -1270,15 +1304,12 @@ module.exports = {
         mono: ['var(--font-mono)'],
       },
       boxShadow: {
-        'focus': '0 0 0 3px rgba(59, 130, 246, 0.5)',
+        focus: '0 0 0 3px rgba(59, 130, 246, 0.5)',
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ],
-};
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+}
 ```
 
 ### 12.2 CSS 变量使用
@@ -1291,11 +1322,11 @@ module.exports = {
 
 @layer base {
   :root {
-    --color-primary: 59 130 246;  /* RGB值 */
+    --color-primary: 59 130 246; /* RGB值 */
     --radius: 0.5rem;
   }
 
-  :root[data-theme="dark"] {
+  :root[data-theme='dark'] {
     --color-bg-primary: 17 24 39;
   }
 }

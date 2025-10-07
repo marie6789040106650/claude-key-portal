@@ -16,8 +16,9 @@
 
 - ✅ **用户友好** - 简洁直观的界面，降低 CRS 使用门槛
 - ✅ **密钥管理** - 轻松创建、查看、更新和删除 API 密钥
-- ✅ **数据可视化** - 直观的图表展示使用统计
+- ✅ **数据可视化** - 直观的图表展示使用统计和趋势
 - ✅ **安装指导** - 完整的 Claude Code/Codex 配置步骤
+- ✅ **用户设置** - 个人资料、安全设置、通知配置一应俱全
 - ✅ **个性化** - 备注、标签、收藏等本地扩展功能
 
 ---
@@ -52,15 +53,15 @@
 
 ### 职责边界
 
-| 功能 | Portal | CRS |
-|-----|--------|-----|
-| **用户管理** | ✅ | ❌ |
-| **密钥生成** | ❌ | ✅ |
-| **密钥验证** | ❌ | ✅ |
-| **使用统计** | ❌ | ✅ |
-| **界面展示** | ✅ | ❌ |
-| **数据可视化** | ✅ | ❌ |
-| **安装指导** | ✅ | ❌ |
+| 功能           | Portal | CRS |
+| -------------- | ------ | --- |
+| **用户管理**   | ✅     | ❌  |
+| **密钥生成**   | ❌     | ✅  |
+| **密钥验证**   | ❌     | ✅  |
+| **使用统计**   | ❌     | ✅  |
+| **界面展示**   | ✅     | ❌  |
+| **数据可视化** | ✅     | ❌  |
+| **安装指导**   | ✅     | ❌  |
 
 ---
 
@@ -79,13 +80,49 @@ python3 -m http.server 8000
 ```
 
 **原型包含**:
+
 - ✅ 首页/欢迎页
 - ✅ 登录/注册页面
 - ✅ 仪表板（带图表）
 - ✅ 密钥管理
 - ✅ 安装指导
+- ✅ 用户设置
 
 详见 [prototypes/README.md](./prototypes/README.md)
+
+### 🎨 功能亮点：用户设置和个人中心
+
+完整的用户设置系统已在 **Sprint 14** 中实现，提供全面的账户管理功能：
+
+#### 个人资料
+- ✅ **头像显示** - 支持中英文首字母头像，确定性颜色生成
+- ✅ **昵称编辑** - 1-50字符验证
+- ✅ **个人简介** - 最多500字符，Markdown支持
+- ✅ **实时验证** - React Hook Form + Zod 表单验证
+
+#### 安全设置
+- ✅ **密码修改** - 强度实时显示（弱/中/强）
+- ✅ **密码要求** - 至少8位，包含大小写、数字、特殊字符
+- ✅ **活跃会话管理** - 查看所有登录设备
+- ✅ **远程注销** - 单个设备或一键注销所有其他设备
+- ✅ **确认对话框** - 防止误操作
+
+#### 通知设置
+- ✅ **通知类型** - 密钥创建/删除、使用量告警、安全告警、系统更新
+- ✅ **通知渠道** - 邮件、Webhook、系统通知
+- ✅ **乐观更新** - 即时UI反馈，自动保存
+- ✅ **错误恢复** - 失败时自动回滚
+
+#### 到期提醒
+- ✅ **动态配置** - 添加/删除提醒天数（1-30天）
+- ✅ **多渠道提醒** - 支持多种通知方式
+- ✅ **实时验证** - 天数范围检查和错误提示
+
+**技术亮点**:
+- 92.30% 测试覆盖率
+- TypeScript 类型完整
+- 可复用的自定义 Hooks
+- 优化的用户体验（加载状态、错误提示）
 
 ---
 
@@ -111,6 +148,7 @@ cp .env.production.template .env.production
 ```
 
 **必需配置**：
+
 - `DATABASE_URL` - PostgreSQL 数据库连接
 - `REDIS_URL` - Redis 连接
 - `CRS_BASE_URL` - CRS服务地址
@@ -155,25 +193,43 @@ npm test -- --testNamePattern="user registration"
 ## 📚 文档
 
 ### 📖 完整文档索引
+
 👉 查看 [**DOCS_INDEX.md**](./DOCS_INDEX.md) - 文档导航中心
 
 ### 快速开始文档
+
 - [**CONFIGURATION_GUIDE.md**](./CONFIGURATION_GUIDE.md) - 环境配置指南
 - [**DEVELOPMENT_READINESS_REPORT.md**](./DEVELOPMENT_READINESS_REPORT.md) - 开发准备报告
 - [**TDD_GIT_WORKFLOW.md**](./TDD_GIT_WORKFLOW.md) - TDD 和 Git 工作流
 
+### Sprint 开发文档
+
+- [**docs/SPRINT_INDEX.md**](./docs/SPRINT_INDEX.md) - Sprint 开发历程总览
+- [**docs/DOCUMENTATION_STANDARD.md**](./docs/DOCUMENTATION_STANDARD.md) - 文档管理标准
+- **Sprint 规划和总结**:
+  - Sprint 3: [TODOLIST (缺失)]() | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | [API 文档](./docs/API_ENDPOINTS_SPRINT3.md)
+  - Sprint 4: [TODOLIST](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | [API 文档 (待补齐)]()
+  - Sprint 5: [TODOLIST](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | [API 文档](./docs/API_ENDPOINTS_SPRINT5.md)
+  - Sprint 6: [TODOLIST](./docs/SPRINT_6_TODOLIST.md) | [SUMMARY (待创建)]() | [API 文档 (待创建)]()
+
 ### 核心文档
+
 - [**PROJECT_CORE_DOCS/**](./PROJECT_CORE_DOCS/) - 项目核心文档目录
-  - [01_项目背景.md](./PROJECT_CORE_DOCS/01_项目背景.md) - 项目定位和动机
-  - [02_功能需求和边界.md](./PROJECT_CORE_DOCS/02_功能需求和边界.md) - 功能范围
-  - [03_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md) - 开发路线图
+  - [01\_项目背景.md](./PROJECT_CORE_DOCS/01_项目背景.md) - 项目定位和动机
+  - [02\_功能需求和边界.md](./PROJECT_CORE_DOCS/02_功能需求和边界.md) - 功能范围
+  - [03\_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md) - 开发路线图
 
 ### 技术规范
+
 - [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) - 数据库设计
 - [**API_MAPPING_SPECIFICATION.md**](./API_MAPPING_SPECIFICATION.md) - API 规范
 - [**UI_DESIGN_SPECIFICATION.md**](./UI_DESIGN_SPECIFICATION.md) - UI/UX 设计
 - [**COMPONENT_LIBRARY.md**](./COMPONENT_LIBRARY.md) - 组件库
 - [**PAGE_HIERARCHY_AND_MODULES.md**](./PAGE_HIERARCHY_AND_MODULES.md) - 页面结构
+
+### 项目审计报告
+
+- [**PROJECT_STRUCTURE_AUDIT.md**](./docs/PROJECT_STRUCTURE_AUDIT.md) - 项目结构审计（2025-10-04）
 
 ---
 
@@ -302,6 +358,7 @@ subject: 简短描述
 ```
 
 示例:
+
 ```bash
 test: add user registration validation test
 feat: implement user registration endpoint
@@ -357,6 +414,7 @@ vercel --prod
 ```
 
 **选择 Vercel 的原因**:
+
 - ✅ **零配置部署** - Next.js 官方平台，开箱即用
 - ✅ **完整 Prisma 支持** - 直连 PostgreSQL，无需额外配置
 - ✅ **免费额度充足** - 100 GB 带宽/月，足够 1000+ 用户使用
@@ -364,6 +422,7 @@ vercel --prod
 - ✅ **自动优化** - HTTPS、CDN、图片优化全自动
 
 **成本估算**（Hobby 免费计划）:
+
 - 带宽: 100 GB/月（预计1000用户使用 ~30 GB）
 - 构建: 6000 分钟/月
 - 函数调用: 无限次
@@ -374,11 +433,13 @@ vercel --prod
 ### 备选方案：Docker 自托管 (可选)
 
 **注意**: 仅在以下情况考虑自托管
+
 - Vercel 免费额度耗尽（月访问量 > 10万）
 - 企业内网部署需求
 - 需要完全控制基础设施
 
 项目已配置 Docker 支持，但**优先使用 Vercel**。Docker 配置文件位于：
+
 - `Dockerfile` - 生产环境构建
 - `docker-compose.yml` - 本地开发环境
 - `docker-compose.prod.yml` - 生产部署（含 Nginx）
@@ -395,6 +456,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 详见项目中的 Docker 配置文件。
+
 </details>
 
 ---
@@ -404,12 +466,14 @@ docker-compose -f docker-compose.prod.yml up -d
 **重要提示**: 由于技术限制，不推荐使用 Cloudflare Pages
 
 **原因**:
+
 - ❌ Cloudflare Workers 不支持 TCP 连接
 - ❌ Prisma 需要 Data Proxy（额外 $25/月）
 - ❌ 需要重写大量代码（340+ 小时）
 - ❌ 实际成本更高（$25/月 vs Vercel $0/月）
 
 **如果一定要使用**，需要：
+
 1. 使用 Prisma Data Proxy（付费服务）
 2. 或替换为 Supabase JS SDK（放弃 Prisma）
 3. 重写认证逻辑（替换 bcrypt）
@@ -418,38 +482,97 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ---
 
-## 🛣️ 路线图
+## 🛣️ 开发进度
 
-### Phase 1: 规划设计 ✅ (已完成)
-- [x] 项目文档
-- [x] 设计规范
-- [x] 技术架构
-- [x] 生产环境配置 (Supabase, R2, Redis)
-- [x] 部署平台分析和选型
+### 当前状态
 
-### Phase 2: MVP 开发 📋 (准备中)
-- [ ] **Sprint 0: 项目初始化（2天）** ← 即将开始
-  - [ ] Git 仓库初始化
-  - [ ] Next.js 项目搭建
-  - [ ] 数据库初始化（Prisma）
-  - [ ] 测试环境配置
-- [ ] Sprint 1: 用户认证（3-4天）
-- [ ] Sprint 2: CRS 集成 + 密钥管理（4-5天）
-- [ ] Sprint 3: 统计展示（3-4天）
-- [ ] Sprint 4: 安装指导（2-3天）
+| Sprint | 功能 | 规划 | 总结 | 状态 |
+|--------|------|------|------|------|
+| Sprint 0 | 项目初始化 | - | [AUDIT](./docs/SPRINT_0_AUDIT_REPORT.md) | ✅ |
+| Sprint 2 | CRS 集成基础 | - | [SUMMARY](./docs/SPRINT_2_SUMMARY.md) | ✅ |
+| Sprint 3 | 安装指导 | - | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | ✅ |
+| Sprint 4 | 密钥管理 | [TODO](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | ✅ |
+| Sprint 5 | 账户设置 API | [TODO](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | ✅ |
+| Sprint 6 | 通知系统 | [TODO](./docs/SPRINT_6_TODOLIST.md) | [SUMMARY](./docs/SPRINT_6_SUMMARY.md) | ✅ |
+| Sprint 7 | API Key到期提醒 | [TODO](./docs/SPRINT_7_TODOLIST.md) | [SUMMARY](./docs/SPRINT_7_SUMMARY.md) | ✅ |
+| Sprint 8 | Cron Job定时任务 | [TODO](./docs/SPRINT_8_TODOLIST.md) | [SUMMARY](./docs/SPRINT_8_SUMMARY.md) | ✅ |
+| Sprint 9 | 监控告警系统 | [TODO](./docs/SPRINT_9_TODOLIST.md) | [SUMMARY](./docs/SPRINT_9_SUMMARY.md) | ✅ |
+| Sprint 10 | 监控仪表板前端 | [TODO](./docs/SPRINT_10_TODOLIST.md) | [SUMMARY](./docs/SPRINT_10_SUMMARY.md) | ✅ |
+| Sprint 11 | 用户认证和仪表板 | [TODO](./docs/SPRINT_11_TODOLIST.md) | [SUMMARY](./docs/SPRINT_11_SUMMARY.md) | ✅ |
+| Sprint 12 | 密钥管理UI | [TODO](./docs/SPRINT_12_TODOLIST.md) | [SUMMARY](./docs/SPRINT_12_SUMMARY.md) | ✅ |
+| Sprint 13 | 密钥使用统计可视化 | [TODO](./docs/SPRINT_13_TODOLIST.md) | [SUMMARY](./docs/SPRINT_13_SUMMARY.md) | ✅ |
+| Sprint 14 | 用户设置和个人中心UI | [TODO](./docs/SPRINT_14_TODOLIST.md) | [SUMMARY](./docs/SPRINT_14_SUMMARY.md) | ✅ |
+
+**图例**: ✅ 已完成 | 🚧 进行中
+
+完整的 Sprint 历程详见 [**SPRINT_INDEX.md**](./docs/SPRINT_INDEX.md)
+
+### 测试统计
+
+```
+总测试数: 658 个
+通过:     658 个 (100%)
+跳过:       0 个 (0%)
+失败:       0 个 (0%)
+
+测试覆盖率: > 85% (超过目标)
+设置组件覆盖率: 92.30%
+```
+
+**最新成果** (Sprint 14):
+- ✅ 用户设置和个人中心 UI 完整实现
+- ✅ 61 个新增测试全部通过
+- ✅ 92.30% 测试覆盖率
+
+### Phase 1: 基础功能 ✅ (已完成)
+
+- [x] **Sprint 0**: 项目初始化和 TDD 环境
+  - [x] Git 仓库和分支策略
+  - [x] Next.js 14 + TypeScript 搭建
+  - [x] Prisma + PostgreSQL 配置
+  - [x] Jest 测试环境
+- [x] **Sprint 2**: CRS 集成基础
+  - [x] CRS Client 封装
+  - [x] 用户认证系统（注册/登录）
+  - [x] JWT 令牌管理
+- [x] **Sprint 3**: 安装指导
+  - [x] 多平台脚本生成 (macOS/Linux/Windows)
+  - [x] 环境变量配置
+  - [x] 安装说明生成
+- [x] **Sprint 4**: 密钥管理
+  - [x] 密钥 CRUD 操作（代理 CRS）
+  - [x] 密钥列表展示
+  - [x] 统计数据 Dashboard
+- [x] **Sprint 5**: 账户设置
+  - [x] 用户资料管理（GET/PUT）
+  - [x] 密码修改和强度验证
+  - [x] 会话管理（列表/登出设备）
+
+### Phase 2: 增强功能 🚧 (进行中)
+
+- [x] ~~Sprint 1: 用户认证~~ (已合并到 Sprint 2)
+- [ ] **Sprint 6**: 通知系统 ← 当前 Sprint
+  - [ ] 通知配置 API
+  - [ ] 通知记录 API
+  - [ ] 邮件通知服务
+  - [ ] Webhook 通知支持
+- [ ] Sprint 7: 数据可视化优化
+- [ ] Sprint 8: 性能优化和缓存
 
 ### Phase 3: 生产部署 📋 (计划中)
+
 - [ ] 环境配置和安全加固
-- [ ] 监控和日志
-- [ ] 正式上线
+- [ ] 监控和日志系统
+- [ ] Vercel 部署上线
 
 ### Phase 4: 功能扩展 🌟 (未来)
-- [ ] 个性化功能
-- [ ] 高级统计
-- [ ] 团队协作
+
+- [ ] 个性化功能（备注、标签、收藏）
+- [ ] 高级统计和分析
+- [ ] 团队协作功能
 - [ ] 移动端优化
 
-详细路线图请参考 [03_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md)
+详细路线图请参考 [03\_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md)
 
 ---
 

@@ -1,0 +1,131 @@
+/**
+ * API密钥管理API
+ * GET /api/keys - 列出密钥
+ * POST /api/keys - 创建密钥
+ */
+
+import { NextResponse } from 'next/server'
+import { verifyToken } from '@/lib/auth'
+
+/**
+ * GET /api/keys - 列出API密钥
+ */
+export async function GET(request: Request) {
+  try {
+    // 1. 验证JWT Token
+    const authHeader = request.headers.get('Authorization')
+    let userId: string
+
+    try {
+      const tokenData = verifyToken(authHeader)
+      userId = tokenData.userId
+    } catch (error: any) {
+      return NextResponse.json({ error: error.message }, { status: 401 })
+    }
+
+    // 2. 解析查询参数
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const status = searchParams.get('status') || undefined
+    const tag = searchParams.get('tag') || undefined
+    const sync = searchParams.get('sync') === 'true'
+
+    // 3. 创建UseCase实例
+    const { ListKeysUseCase } = await import('@/lib/application/key')
+    const { keyRepository } = await import('@/lib/infrastructure/persistence/repositories')
+    const { crsClient } = await import('@/lib/infrastructure/external/crs-client')
+    const listKeysUseCase = new ListKeysUseCase(keyRepository, crsClient)
+
+    // 4. 执行列表查询
+    const result = await listKeysUseCase.execute({
+      userId,
+      page,
+      limit,
+      status: status as any,
+      tag,
+      sync,
+    })
+
+    // 5. 处理结果
+    if (result.isSuccess) {
+      return NextResponse.json(result.value, { status: 200 })
+    } else {
+      const error = result.error!
+
+      if (error.name === 'ValidationError') {
+        return NextResponse.json({ error: error.message }, { status: 400 })
+      }
+
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+  } catch (error: any) {
+    console.error('List keys error:', error)
+    return NextResponse.json(
+      { error: '系统错误，请稍后重试' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST /api/keys - 创建API密钥
+ */
+export async function POST(request: Request) {
+  try {
+    // 1. 验证JWT Token
+    const authHeader = request.headers.get('Authorization')
+    let userId: string
+
+    try {
+      const tokenData = verifyToken(authHeader)
+      userId = tokenData.userId
+    } catch (error: any) {
+      return NextResponse.json({ error: error.message }, { status: 401 })
+    }
+
+    // 2. 解析请求体
+    const body = await request.json()
+
+    // 3. 创建UseCase实例
+    const { CreateKeyUseCase } = await import('@/lib/application/key')
+    const { keyRepository } = await import('@/lib/infrastructure/persistence/repositories')
+    const { crsClient } = await import('@/lib/infrastructure/external/crs-client')
+    const createKeyUseCase = new CreateKeyUseCase(keyRepository, crsClient)
+
+    // 4. 执行创建流程
+    const result = await createKeyUseCase.execute({
+      userId,
+      ...body,
+    })
+
+    // 5. 处理结果
+    if (result.isSuccess) {
+      return NextResponse.json(
+        {
+          key: result.value,
+          warning: '请妥善保管密钥，此密钥只会显示一次！',
+        },
+        { status: 201 }
+      )
+    } else {
+      const error = result.error!
+
+      if (error.name === 'ValidationError') {
+        return NextResponse.json({ error: error.message }, { status: 400 })
+      }
+
+      if (error.name === 'ConflictError') {
+        return NextResponse.json({ error: error.message }, { status: 409 })
+      }
+
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+  } catch (error: any) {
+    console.error('Create key error:', error)
+    return NextResponse.json(
+      { error: '系统错误，请稍后重试' },
+      { status: 500 }
+    )
+  }
+}

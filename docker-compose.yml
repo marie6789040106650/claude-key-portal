@@ -13,13 +13,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
     networks:
       - claude-portal-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,13 +30,13 @@ services:
     container_name: claude-portal-redis-dev
     command: redis-server --appendonly yes
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_dev_data:/data
     networks:
       - claude-portal-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,7 +48,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: claude-portal-app-dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       # 数据库配置
       DATABASE_URL: postgresql://postgres:password@postgres:5432/claude_portal_dev

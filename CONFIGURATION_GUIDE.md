@@ -3,11 +3,13 @@
 ## 环境配置文件
 
 ### 开发环境
+
 ```bash
 cp .env.local.template .env.local
 ```
 
 ### 生产环境
+
 ```bash
 cp .env.production.template .env.production
 ```
@@ -19,11 +21,13 @@ cp .env.production.template .env.production
 ### 1. 数据库 (PostgreSQL)
 
 **开发环境** - 本地数据库：
+
 ```bash
 DATABASE_URL="postgresql://postgres:password@localhost:5432/claude_portal_dev"
 ```
 
 **生产环境** - Supabase（新建独立项目）：
+
 ```bash
 # 项目名称：Claude Key Portal
 # 项目 ID：gvcfrzaxfehydtxiaxcw
@@ -33,22 +37,26 @@ DATABASE_URL="postgresql://postgres.gvcfrzaxfehydtxiaxcw:DrvsiLusxqKXCwZrRYWILoM
 ```
 
 **重要说明**：
+
 - ✅ **数据隔离**：这是专为 Claude Key Portal 创建的独立 Supabase 项目
 - 🔒 **安全性**：与其他项目（如 AI 图像视频生成）完全隔离，避免表冲突
 - 🌍 **区域一致**：与 R2 和 Redis 都部署在 us-west-1，优化延迟
 
 **配置步骤**：
+
 1. ✅ 已在 Supabase 中创建新项目：`Claude Key Portal`
 2. 运行 Prisma 迁移：`npx prisma migrate deploy`
 
 ### 2. Redis
 
 **开发环境** - 本地 Redis：
+
 ```bash
 REDIS_URL="redis://localhost:6379"
 ```
 
 **生产环境** - Upstash Redis（免费计划）：
+
 ```bash
 # Database: claude-portal-prod
 # Region: N. California, USA (us-west-1)
@@ -64,6 +72,7 @@ UPSTASH_REDIS_REST_TOKEN="[从控制台复制]"
 ```
 
 **免费计划限制**：
+
 - 最大数据大小：256 MB
 - 最大请求数：10,000 次/秒
 - 最大记录大小：100 MB
@@ -72,6 +81,7 @@ UPSTASH_REDIS_REST_TOKEN="[从控制台复制]"
 - 月度带宽：50 GB
 
 **获取密码/Token**：
+
 1. ✅ 数据库已创建
 2. 访问控制台：https://console.upstash.com/redis/87712ca2-c4de-4462-ab2b-7a17acf94cd8/details?teamid=0
 3. 复制 Redis 密码或 REST Token
@@ -85,6 +95,7 @@ CRS_ADMIN_PASSWORD="HCTBMoiK3PZD0eDC"
 ```
 
 **说明**：
+
 1. CRS使用session token认证（24小时有效期）
 2. Portal通过管理员凭据自动登录获取token
 3. Token会自动缓存和刷新
@@ -98,6 +109,7 @@ openssl rand -base64 32
 ```
 
 **配置**：
+
 ```bash
 NEXTAUTH_SECRET="生成的随机字符串"
 JWT_SECRET="生成的随机字符串"
@@ -127,11 +139,13 @@ R2_ACCOUNT_ID="5fe8e7d41200626ce0d3e24d15fbbfd2"
 ```
 
 **重要说明**：
+
 - 🌍 **区域一致**：Bucket 位于 North America West (WNAM)，与 Supabase/Redis 一致
 - 🔒 **最小权限**：API Token 仅允许 Object Read/Write，仅限 `claude-portal` bucket
 - 📦 **S3 兼容**：可使用任何 S3 客户端库进行操作
 
 **配置步骤**：
+
 1. ✅ 已在 Cloudflare 中创建 R2 bucket：`claude-portal`
 2. ✅ 已创建 API Token (最小权限原则)
 3. 如需配置 CORS 策略，可在 Cloudflare Dashboard 中设置
@@ -174,12 +188,14 @@ curl -H "Authorization: Bearer $TOKEN" https://claude.just-play.fun/admin/api-ke
 ## 安全建议
 
 ### 密钥管理
+
 - ✅ 使用 `.env` 文件存储敏感信息
 - ✅ 将 `.env` 添加到 `.gitignore`
 - ✅ 生产环境使用环境变量（不提交到代码库）
 - ❌ 不要在代码中硬编码密钥
 
 ### 生产环境
+
 - ✅ 使用强 JWT 密钥（32+ 字符）
 - ✅ 启用 HTTPS
 - ✅ 定期轮换密钥

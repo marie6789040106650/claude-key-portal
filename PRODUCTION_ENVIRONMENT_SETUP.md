@@ -11,12 +11,14 @@
 ### 1. Supabase PostgreSQL Database
 
 **项目信息**:
+
 - **项目名称**: Claude Key Portal
 - **项目 ID**: `gvcfrzaxfehydtxiaxcw`
 - **区域**: us-west-1 (West US - North California)
 - **创建时间**: 2025-10-03
 
 **连接信息**:
+
 ```bash
 # 数据库连接字符串 (Transaction模式，适用于serverless)
 DATABASE_URL="postgresql://postgres.gvcfrzaxfehydtxiaxcw:DrvsiLusxqKXCwZrRYWILoM4JfbHl1VqBgFt94kXtuY=@aws-1-us-west-1.pooler.supabase.com:6543/postgres"
@@ -30,12 +32,14 @@ DATABASE_URL="postgresql://postgres.gvcfrzaxfehydtxiaxcw:DrvsiLusxqKXCwZrRYWILoM
 ```
 
 **重要决策**:
+
 - ✅ **完全隔离**: 创建了全新的独立 Supabase 项目
 - ❌ **不使用旧项目**: 避免与 AI 图像视频生成项目的数据混合
 - 🔒 **数据安全**: 避免 `users` 表等表名冲突
 - 📊 **当前状态**: 0 张表（全新数据库）
 
 **免费计划限制**:
+
 - 数据库大小: 500 MB
 - 文件存储: 1 GB
 - 月度带宽: 2 GB
@@ -48,12 +52,14 @@ DATABASE_URL="postgresql://postgres.gvcfrzaxfehydtxiaxcw:DrvsiLusxqKXCwZrRYWILoM
 ### 2. Upstash Redis
 
 **数据库信息**:
+
 - **数据库名称**: claude-portal-prod
 - **区域**: N. California, USA (us-west-1)
 - **计划**: Free Tier
 - **创建时间**: 2025-10-03
 
 **连接信息**:
+
 ```bash
 # Redis 连接 (TLS加密)
 Endpoint: next-woodcock-18201.upstash.io
@@ -69,11 +75,13 @@ UPSTASH_REDIS_REST_TOKEN="[从控制台复制]"
 ```
 
 **获取密码/Token**:
+
 - 控制台地址: https://console.upstash.com/redis/87712ca2-c4de-4462-ab2b-7a17acf94cd8/details?teamid=0
 - 密码在创建时显示一次，或在控制台查看
 - REST Token 在控制台的 "REST API" 标签页
 
 **免费计划限制**:
+
 - 最大数据大小: **256 MB**
 - 最大请求数: **10,000 次/秒**
 - 最大记录大小: **100 MB**
@@ -83,6 +91,7 @@ UPSTASH_REDIS_REST_TOKEN="[从控制台复制]"
 - 价格: **$0/月**
 
 **适用性评估**: ✅ **完全够用**
+
 - 缓存 CRS 响应数据（统计信息、密钥列表）
 - Session 存储（预计 < 1000 活跃用户，每个 session ~5KB，总计 < 5MB）
 - Rate limiting 计数器（极小内存占用）
@@ -93,11 +102,13 @@ UPSTASH_REDIS_REST_TOKEN="[从控制台复制]"
 ### 3. Cloudflare R2 Object Storage
 
 **Bucket 信息**:
+
 - **Bucket 名称**: claude-portal
 - **区域**: North America West (WNAM)
 - **创建时间**: 2025-10-03
 
 **访问凭据**:
+
 ```bash
 # S3 兼容访问
 R2_BUCKET_NAME="claude-portal"
@@ -114,17 +125,20 @@ Scope: 仅限 claude-portal bucket
 ```
 
 **安全配置**:
+
 - ✅ **最小权限**: Token 仅允许 Object Read/Write（不允许 Admin 操作）
 - ✅ **范围限制**: 仅限 `claude-portal` bucket（不影响其他 bucket）
 - ✅ **S3 兼容**: 可使用 AWS SDK 或其他 S3 客户端
 
 **免费计划限制**:
+
 - 存储空间: **10 GB/月**
 - Class A 操作 (写入): **100 万次/月**
 - Class B 操作 (读取): **1000 万次/月**
 - 出站流量: **免费** (R2 不收取出站费用)
 
 **适用性评估**: ✅ **完全够用**
+
 - 用户头像上传（预计 < 1000 用户，每个头像 ~100KB，总计 < 100MB）
 - 导出文件临时存储（CSV/JSON，单个文件 < 1MB）
 - 预计总使用量: **< 500 MB**
@@ -165,6 +179,7 @@ Next.js Application (Cloudflare Pages/Vercel)
 ```
 
 **优势**:
+
 - ✅ 最低延迟（同区域内网通信）
 - ✅ 数据合规（全部在美国境内）
 - ✅ 高可用性（AWS us-west-1 区域）
@@ -175,26 +190,29 @@ Next.js Application (Cloudflare Pages/Vercel)
 
 ### 免费计划总计
 
-| 服务 | 计划 | 月度成本 | 年度成本 |
-|------|------|---------|---------|
-| Supabase | Free Tier | $0 | $0 |
-| Upstash Redis | Free Tier | $0 | $0 |
-| Cloudflare R2 | Free Allowance | $0 | $0 |
-| **总计** | | **$0/月** | **$0/年** |
+| 服务          | 计划           | 月度成本  | 年度成本  |
+| ------------- | -------------- | --------- | --------- |
+| Supabase      | Free Tier      | $0        | $0        |
+| Upstash Redis | Free Tier      | $0        | $0        |
+| Cloudflare R2 | Free Allowance | $0        | $0        |
+| **总计**      |                | **$0/月** | **$0/年** |
 
 ### 使用量预测（基于 1000 活跃用户）
 
 #### Supabase
+
 - 数据库大小: ~50 MB (用户表、密钥映射表、session表)
 - 月度带宽: ~500 MB (API 查询、写入)
 - **状态**: ✅ 远低于 500 MB 限制
 
 #### Upstash Redis
+
 - 数据大小: ~30 MB (缓存 + session)
 - 请求数: ~100,000/月 (每用户 100 次/月)
 - **状态**: ✅ 远低于 10,000 次/秒 限制
 
 #### Cloudflare R2
+
 - 存储空间: ~300 MB (头像 + 导出文件)
 - Class A 操作: ~5,000/月 (头像上传)
 - Class B 操作: ~50,000/月 (头像加载)
@@ -202,13 +220,14 @@ Next.js Application (Cloudflare Pages/Vercel)
 
 ### 扩展计划（如需付费升级）
 
-| 服务 | 付费计划 | 升级价格 | 触发条件 |
-|------|---------|---------|---------|
-| Supabase | Pro | $25/月 | 数据库 > 500 MB 或需要更多并发连接 |
-| Upstash Redis | Pay as You Go | ~$0.2/100K 请求 | 请求数超过免费额度 |
-| Cloudflare R2 | Pay as You Go | $0.015/GB 存储 | 存储 > 10 GB/月 |
+| 服务          | 付费计划      | 升级价格        | 触发条件                           |
+| ------------- | ------------- | --------------- | ---------------------------------- |
+| Supabase      | Pro           | $25/月          | 数据库 > 500 MB 或需要更多并发连接 |
+| Upstash Redis | Pay as You Go | ~$0.2/100K 请求 | 请求数超过免费额度                 |
+| Cloudflare R2 | Pay as You Go | $0.015/GB 存储  | 存储 > 10 GB/月                    |
 
 **结论**:
+
 - ✅ **免费计划完全够用**: 预计用户数 < 5000 时都在免费额度内
 - ✅ **成本可控**: 即使超出免费额度，付费成本也非常低（< $50/月）
 - ✅ **无需预付**: 所有平台都是 Pay as You Go，无需前期投入
@@ -262,6 +281,7 @@ Next.js Application (Cloudflare Pages/Vercel)
 **结论**: ✅ **三个平台完全适合 Claude Key Portal 项目**
 
 **理由**:
+
 1. **免费额度充足**: 预计 5000 用户内都在免费范围
 2. **技术栈匹配**: 与 Next.js + Prisma + Redis 完美集成
 3. **运维成本低**: 全托管服务，无需专人运维
@@ -269,6 +289,7 @@ Next.js Application (Cloudflare Pages/Vercel)
 5. **区域一致**: 全部部署在 us-west-1，延迟最优
 
 **风险**:
+
 - ⚠️ Supabase 项目暂停风险（可通过定时任务 keep-alive 解决）
 - ⚠️ 免费计划限制（但升级成本很低）
 
@@ -377,6 +398,7 @@ npx prisma db push
 **状态**: ✅ 生产环境配置完成
 
 **已完成**:
+
 1. ✅ Supabase PostgreSQL - 独立项目创建
 2. ✅ Upstash Redis - 免费计划配置
 3. ✅ Cloudflare R2 - Bucket 和 Token 创建
@@ -385,6 +407,7 @@ npx prisma db push
 6. ✅ 文档更新 - 所有配置文档已更新
 
 **下一步**:
+
 - 完成环境变量配置（JWT 密钥、Redis 密码）
 - 运行数据库迁移
 - 开始 Sprint 0 开发

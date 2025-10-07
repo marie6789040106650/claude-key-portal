@@ -1,4 +1,5 @@
 # Claude Key Portal 项目配置
+
 # Claude Key Portal Project Configuration
 
 > **项目**: Claude Key Portal - CRS 用户管理门户
@@ -26,6 +27,7 @@ Claude Key Portal = CRS 的用户管理门户
 ### 职责边界强制执行
 
 **必须本地实现**:
+
 - ✅ 用户注册、登录、认证
 - ✅ 用户信息管理
 - ✅ 用户-密钥映射关系
@@ -34,6 +36,7 @@ Claude Key Portal = CRS 的用户管理门户
 - ✅ 安装指导和配置生成
 
 **必须代理 CRS**:
+
 - ✅ 密钥创建（调用 CRS Admin API）
 - ✅ 密钥更新（调用 CRS Admin API）
 - ✅ 密钥删除（调用 CRS Admin API）
@@ -41,6 +44,7 @@ Claude Key Portal = CRS 的用户管理门户
 - ✅ 密钥状态（从 CRS 获取状态）
 
 **严禁实现**:
+
 - ❌ 密钥生成算法
 - ❌ 密钥验证逻辑
 - ❌ API 请求中转
@@ -57,6 +61,7 @@ Claude Key Portal = CRS 的用户管理门户
 开始任何开发工作前，必须参考以下文档：
 
 1. **项目定位和背景**
+
    ```
    阅读: PROJECT_CORE_DOCS/01_项目背景.md
    目的: 理解项目是什么，为什么做这个项目
@@ -64,6 +69,7 @@ Claude Key Portal = CRS 的用户管理门户
    ```
 
 2. **功能需求和边界**
+
    ```
    阅读: PROJECT_CORE_DOCS/02_功能需求和边界.md
    目的: 明确做什么，不做什么
@@ -71,6 +77,7 @@ Claude Key Portal = CRS 的用户管理门户
    ```
 
 3. **CRS 集成规范**
+
    ```
    阅读: API_MAPPING_SPECIFICATION.md
    目的: 了解如何与 CRS 交互
@@ -81,6 +88,7 @@ Claude Key Portal = CRS 的用户管理门户
    ```
 
 4. **数据库设计**
+
    ```
    阅读: DATABASE_SCHEMA.md
    目的: 理解数据模型
@@ -95,6 +103,24 @@ Claude Key Portal = CRS 的用户管理门户
    阅读: TDD_GIT_WORKFLOW.md
    目的: 遵循开发流程
    关键: 🔴 RED → 🟢 GREEN → 🔵 REFACTOR
+   ```
+
+6. **🆕 DDD + TDD + Git 综合开发标准** ⭐ 最重要！
+   ```
+   阅读: DDD_TDD_GIT_STANDARD.md
+   目的: 理解项目的完整开发标准和架构设计
+   关键:
+   - DDD Lite 分层架构（domain/application/infrastructure）
+   - TDD 强制执行流程（🔴 RED → 🟢 GREEN → 🔵 REFACTOR）
+   - Git 提交规范（与TDD结合）
+   - Result模式和错误处理
+   - 完整工作流示例
+
+   **必读原因**:
+   - 定义了整个项目的架构分层
+   - 规定了严格的TDD开发流程
+   - 提供了Git提交和PR规范
+   - 解决了当前84.3%测试失败的根本问题
    ```
 
 ### HTML 原型参考
@@ -119,30 +145,85 @@ prototypes/
 
 ## 🔧 开发规范约束 / Development Standards
 
-### TDD 强制执行
+### ⚠️ 首要规范：必须遵循 DDD_TDD_GIT_STANDARD.md
 
-所有功能开发必须遵循 TDD 流程：
+**铁律**: 开始任何开发工作前，必须完整阅读并遵循 `DDD_TDD_GIT_STANDARD.md`
 
-```bash
-# 1. 🔴 RED: 先写测试
-git commit -m "test: add user registration validation test"
+**核心要求**:
+```
+1. 架构分层 (DDD Lite):
+   - 表现层 (app/) - HTTP处理
+   - 应用层 (lib/application/) - 流程编排  ⭐ 新增
+   - 领域层 (lib/domain/) - 业务逻辑      ⭐ 新增
+   - 基础设施层 (lib/infrastructure/) - 技术实现
 
-# 2. 🟢 GREEN: 再写实现
-git commit -m "feat: implement user registration"
+2. TDD强制执行:
+   🔴 RED: 先写测试（必须失败）
+   🟢 GREEN: 实现功能（让测试通过）
+   🔵 REFACTOR: 重构优化（保持测试通过）
 
-# 3. 🔵 REFACTOR: 重构优化
-git commit -m "refactor: extract validation logic"
+3. Git提交规范:
+   type(scope): subject (🔴 RED|🟢 GREEN|🔵 REFACTOR)
+   示例: feat(key): implement monthly limit (🟢 GREEN)
+
+4. 质量标准:
+   - 测试覆盖率 > 80% (应用层>90%, 领域层>95%)
+   - 所有测试必须通过
+   - TypeScript无错误
+   - ESLint通过
 ```
 
-**违反 TDD 的代码不允许合并！**
+**违反后果**:
+- ❌ PR不允许合并
+- ❌ Pre-commit Hook阻止提交
+- ❌ CI构建失败
+
+详见: `DDD_TDD_GIT_STANDARD.md` (1,246行完整标准)
+
+---
+
+### TDD + 集成验证 强制执行（混合方案）
+
+**项目决策**: 所有涉及CRS的功能，必须采用混合测试方案
+
+```bash
+开发阶段 (Day 1-4):
+# 1. 🔴 RED: 先写测试（Mock CRS）
+git commit -m "test: add key management tests (🔴 RED)"
+
+# 2. 🟢 GREEN: 再写实现
+git commit -m "feat: implement key management (🟢 GREEN)"
+
+# 3. 🔵 REFACTOR: 重构优化
+git commit -m "refactor: extract utilities (🔵 REFACTOR)"
+
+集成验证阶段 (Day 5): ← 强制执行！
+# 4. ✅ 运行CRS集成测试
+npx tsx scripts/test-crs-xxx.ts
+
+# 5. 🔧 修复问题（如果有）
+git commit -m "fix: adjust API format to match CRS"
+
+# 6. 📝 记录测试结果
+更新 docs/INTEGRATION_TEST_LOG.md
+```
+
+**铁律**:
+- ✅ TDD开发使用Mock保持快速迭代
+- ✅ 功能完成后必须进行CRS集成验证
+- ✅ 集成测试通过才能合并到develop
+- ❌ 不允许跳过集成验证环节
+
+详见: `docs/CRS_INTEGRATION_STANDARD.md`
 
 ### CRS 集成规范
 
 所有与 CRS 交互的代码必须：
 
 1. **使用 Circuit Breaker 模式**
+
    ```typescript
-   import { crsClient } from '@/lib/crs-client'
+   import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
    try {
      const result = await crsClient.createKey(data)
@@ -155,11 +236,12 @@ git commit -m "refactor: extract validation logic"
    ```
 
 2. **实现超时和重试**
+
    ```typescript
    const result = await crsClient.createKey(data, {
-     timeout: 5000,      // 5秒超时
-     retries: 2,         // 重试2次
-     fallback: 'cached'  // 失败时使用缓存
+     timeout: 5000, // 5秒超时
+     retries: 2, // 重试2次
+     fallback: 'cached', // 失败时使用缓存
    })
    ```
 
@@ -168,7 +250,7 @@ git commit -m "refactor: extract validation logic"
    // 缓存统计数据 1 分钟
    const stats = await getCachedCrsStats(userId, {
      ttl: 60,
-     key: `crs:stats:${userId}`
+     key: `crs:stats:${userId}`,
    })
    ```
 
@@ -194,21 +276,34 @@ coverageThreshold: {
 
 **覆盖率不达标的 PR 不允许合并！**
 
-### Git Commit 规范
+### Git Commit 规范（与TDD结合）
+
+**格式**: `<type>(<scope>): <subject> (<tdd-phase>)`
 
 ```
-<type>(<scope>): <subject>
-
 type: test, feat, fix, refactor, docs, style, perf, chore
-scope: auth, keys, stats, crs, ui, etc.
-subject: 简短描述（50字符内）
+scope: user, key, stats, auth, infra (对应领域层)
+tdd-phase: 🔴 RED | 🟢 GREEN | 🔵 REFACTOR (必须标记！)
 
-示例:
-test: add user registration validation test
-feat: implement CRS API key creation
-fix: correct token expiration check
-refactor: extract CRS client configuration
+TDD示例:
+test(key): add monthly limit validation test (🔴 RED)
+feat(key): implement monthly limit field (🟢 GREEN)
+refactor(key): extract validation logic (🔵 REFACTOR)
+
+非TDD示例:
+fix(key): correct password field name to passwordHash
+docs(core): update API mapping specification
+chore(infra): configure pre-commit hooks
 ```
+
+**Pre-commit Hook验证**:
+- ✅ TDD相关commit必须包含phase标记
+- ✅ 所有测试必须通过
+- ✅ 测试覆盖率 > 80%
+- ✅ TypeScript类型检查通过
+- ✅ ESLint检查通过
+
+详见: `DDD_TDD_GIT_STANDARD.md` Section "Git工作流规范"
 
 ---
 
@@ -229,17 +324,14 @@ class CrsClient {
     }
 
     // 自动登录获取新token
-    const response = await fetch(
-      `${process.env.CRS_BASE_URL}/web/auth/login`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: process.env.CRS_ADMIN_USERNAME,
-          password: process.env.CRS_ADMIN_PASSWORD
-        })
-      }
-    )
+    const response = await fetch(`${process.env.CRS_BASE_URL}/web/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: process.env.CRS_ADMIN_USERNAME,
+        password: process.env.CRS_ADMIN_PASSWORD,
+      }),
+    })
 
     const { success, token, expiresIn } = await response.json()
     if (!success) {
@@ -261,7 +353,7 @@ class CrsClient {
         {
           ...options,
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             ...options?.headers,
           },
@@ -302,7 +394,7 @@ try {
     return NextResponse.json(
       {
         error: 'CRS服务暂时不可用，请稍后重试',
-        fallback: true
+        fallback: true,
       },
       { status: 503 }
     )
@@ -334,7 +426,8 @@ const ERROR_MESSAGES = {
   // 认证错误
   INVALID_CREDENTIALS: '邮箱或密码错误',
   EMAIL_EXISTS: '该邮箱已被注册',
-  WEAK_PASSWORD: '密码强度不够，请使用至少8位字符，包含大小写字母、数字和特殊符号',
+  WEAK_PASSWORD:
+    '密码强度不够，请使用至少8位字符，包含大小写字母、数字和特殊符号',
 
   // 权限错误
   UNAUTHORIZED: '请先登录',
@@ -448,7 +541,7 @@ const keys = await prisma.apiKey.findMany({
 ### CRS 响应缓存
 
 ```typescript
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/infrastructure/cache/redis'
 
 async function getCrsStats(userId: string) {
   // 1. 尝试从缓存获取
@@ -481,7 +574,7 @@ export function useKeys() {
       const response = await fetch('/api/keys')
       return response.json()
     },
-    staleTime: 60 * 1000,    // 1分钟内数据视为新鲜
+    staleTime: 60 * 1000, // 1分钟内数据视为新鲜
     cacheTime: 5 * 60 * 1000, // 缓存5分钟
     refetchOnWindowFocus: true,
   })
@@ -513,11 +606,9 @@ const isValid = await bcrypt.compare(password, hashedPassword)
 import jwt from 'jsonwebtoken'
 
 // ✅ 生成 Token
-const token = jwt.sign(
-  { userId, email },
-  process.env.JWT_SECRET!,
-  { expiresIn: '24h' }
-)
+const token = jwt.sign({ userId, email }, process.env.JWT_SECRET!, {
+  expiresIn: '24h',
+})
 
 // ✅ 验证 Token
 const decoded = jwt.verify(token, process.env.JWT_SECRET!)
@@ -542,6 +633,87 @@ const validatedData = schema.parse(body)
 // ❌ 不要信任用户输入
 // ❌ 不要跳过验证
 ```
+
+---
+
+## 🏗️ 项目架构规范 / Architecture Standards
+
+### DDD Lite 分层架构（强制执行）
+
+**新的目录结构**:
+```
+lib/
+├── domain/                   # 📦 领域层（业务逻辑）
+│   ├── user/                 # 用户领域
+│   │   ├── user.entity.ts        # 用户实体
+│   │   ├── user.types.ts         # 用户类型
+│   │   └── user.validation.ts    # 用户验证
+│   ├── key/                  # 密钥领域
+│   │   ├── key.entity.ts
+│   │   ├── key.types.ts
+│   │   └── key.validation.ts
+│   └── shared/               # 共享领域对象
+│       ├── result.ts             # Result模式（统一错误处理）
+│       └── errors.ts
+│
+├── application/              # 🎯 应用层（流程编排）
+│   ├── user/
+│   │   ├── register.usecase.ts
+│   │   ├── login.usecase.ts
+│   │   └── update-profile.usecase.ts
+│   └── key/
+│       ├── create-key.usecase.ts
+│       ├── list-keys.usecase.ts
+│       └── delete-key.usecase.ts
+│
+├── infrastructure/           # 🔌 基础设施层（技术实现）
+│   ├── persistence/
+│   │   ├── prisma.ts
+│   │   └── repositories/
+│   │       ├── user.repository.ts
+│   │       ├── key.repository.ts
+│   │       └── stats.repository.ts
+│   ├── external/
+│   │   ├── crs-client.ts
+│   │   ├── email/
+│   │   └── webhook/
+│   └── cache/
+│       └── redis.ts
+│
+└── utils/                    # 工具函数（保持现状）
+```
+
+**层次职责**:
+- **表现层** (app/) - 只处理HTTP请求/响应
+- **应用层** (lib/application/) - 编排业务流程，协调领域和基础设施
+- **领域层** (lib/domain/) - 核心业务逻辑和规则
+- **基础设施层** (lib/infrastructure/) - 技术实现和外部服务
+
+**Result模式（必须使用）**:
+```typescript
+// lib/domain/shared/result.ts
+export class Result<T> {
+  public readonly isSuccess: boolean
+  public readonly value?: T
+  public readonly error?: Error
+
+  static ok<U>(value: U): Result<U>
+  static fail<U>(error: string | Error): Result<U>
+}
+
+// 使用示例
+const result = await createKeyUseCase.execute(input)
+if (result.isSuccess) {
+  return NextResponse.json(result.value, { status: 201 })
+} else {
+  return NextResponse.json(
+    { error: result.error.message },
+    { status: 500 }
+  )
+}
+```
+
+详见: `DDD_TDD_GIT_STANDARD.md` Section "DDD Lite方案"
 
 ---
 
@@ -591,23 +763,24 @@ export async function createKey(userId: string, data: CreateKeyInput) {
 **请求**:
 \`\`\`typescript
 {
-  name: string;
-  description?: string;
-  rateLimit?: number;
+name: string;
+description?: string;
+rateLimit?: number;
 }
 \`\`\`
 
 **响应**:
 \`\`\`typescript
 {
-  id: string;
-  key: string;
-  name: string;
-  createdAt: string;
+id: string;
+key: string;
+name: string;
+createdAt: string;
 }
 \`\`\`
 
 **错误**:
+
 - 400: 输入验证失败
 - 503: CRS 服务不可用
 ```
@@ -643,6 +816,7 @@ NODE_ENV=production
 ### 部署平台策略
 
 **主要方案**: **Vercel** (生产环境)
+
 - ✅ Next.js 官方平台，零配置部署
 - ✅ 原生支持 Prisma ORM（直连 PostgreSQL）
 - ✅ 免费额度充足（100 GB 带宽/月，足够1000+用户使用）
@@ -650,11 +824,13 @@ NODE_ENV=production
 - ✅ 最佳开发体验（Git 集成、实时日志）
 
 **备选方案**: **Docker 自托管** (可选)
+
 - 仅在 Vercel 免费额度不足时考虑
 - 项目已配置 Docker 支持（`Dockerfile`、`docker-compose.yml`）
 - 适合企业内网部署或需要完全控制的场景
 
 **不推荐**: **Cloudflare Pages**
+
 - ❌ Workers 不支持 TCP 连接，Prisma 需要 Data Proxy（$25/月额外成本）
 - ❌ 需要重写大量代码（340+ 小时工作量）
 - 详见: [部署平台分析](./DEPLOYMENT_PLATFORM_ANALYSIS.md)
@@ -663,20 +839,47 @@ NODE_ENV=production
 
 ## 🎯 开发检查清单 / Development Checklist
 
+### 开发前检查（强制）
+
+```markdown
+- [ ] ✅ 已阅读 DDD_TDD_GIT_STANDARD.md
+- [ ] ✅ 理解分层架构（domain/application/infrastructure）
+- [ ] ✅ 理解TDD流程（🔴 RED → 🟢 GREEN → 🔵 REFACTOR）
+- [ ] ✅ 理解Git提交规范（必须包含TDD phase标记）
+- [ ] ✅ 创建了feature分支
+- [ ] ✅ 准备先写测试（RED阶段）
+```
+
+### 编码中检查
+
+```markdown
+- [ ] ✅ 代码放在正确的分层
+  - [ ] 业务逻辑在领域层 (lib/domain/)
+  - [ ] 流程编排在应用层 (lib/application/)
+  - [ ] HTTP处理在表现层 (app/)
+  - [ ] 技术细节在基础设施层 (lib/infrastructure/)
+- [ ] ✅ 使用Result模式处理错误
+- [ ] ✅ TDD流程正确执行
+  - [ ] 🔴 测试先行（测试必须先失败）
+  - [ ] 🟢 实现通过（写最少代码让测试通过）
+  - [ ] 🔵 重构优化（保持测试通过）
+- [ ] ✅ Commit message包含TDD phase标记
+```
+
 ### 每个功能完成前
 
 ```markdown
 - [ ] ✅ TDD 流程完整 (🔴 RED → 🟢 GREEN → 🔵 REFACTOR)
-- [ ] ✅ 测试覆盖率 > 80%
+- [ ] ✅ 测试覆盖率 > 80% (应用层>90%, 领域层>95%)
 - [ ] ✅ 所有测试通过
 - [ ] ✅ TypeScript 类型完整
 - [ ] ✅ ESLint 无错误
 - [ ] ✅ Prettier 格式化
-- [ ] ✅ 错误处理完整
+- [ ] ✅ 错误处理使用Result模式
 - [ ] ✅ 加载状态显示
 - [ ] ✅ 用户提示友好
 - [ ] ✅ 代码注释充分
-- [ ] ✅ Git commit 规范
+- [ ] ✅ Git commit 规范（包含TDD phase）
 - [ ] ✅ PR 描述完整
 ```
 
@@ -787,10 +990,12 @@ NODE_ENV=production
 - **CRS 源码**: https://github.com/Wei-Shaw/claude-relay-service
 
 **API 架构** (已验证):
+
 - 认证API: `POST /web/auth/login` - 管理员登录获取token
 - Admin API基础路径: `/admin` (不是 `/admin-next`)
 
 **主要 API 端点**:
+
 - `POST /web/auth/login` - 管理员登录
 - `GET /admin/api-keys` - 获取密钥列表
 - `POST /admin/api-keys` - 创建密钥
@@ -804,11 +1009,41 @@ NODE_ENV=production
 
 ---
 
-**配置版本**: v1.0
-**创建时间**: 2025-10-03
-**维护者**: Claude Key Portal Team
-**下次更新**: Sprint 1 结束时
+---
+
+## 📖 核心文档索引 / Core Documentation Index
+
+**必读文档（优先级从高到低）**:
+
+1. **DDD_TDD_GIT_STANDARD.md** ⭐⭐⭐ - 综合开发标准（最重要！）
+2. **PROJECT_CORE_DOCS/01_项目背景.md** - 项目定位
+3. **PROJECT_CORE_DOCS/02_功能需求和边界.md** - 需求边界
+4. **API_MAPPING_SPECIFICATION.md** - API规范
+5. **DATABASE_SCHEMA.md** - 数据模型
+6. **TDD_GIT_WORKFLOW.md** - TDD详细流程
+7. **CRS_INTEGRATION_STANDARD.md** - CRS集成标准
+
+**架构文档**:
+- **DDD_TDD_GIT_STANDARD.md** - 完整分层架构设计
+- **UI_DESIGN_SPECIFICATION.md** - UI/UX设计系统
+- **COMPONENT_LIBRARY.md** - 组件库文档
+
+**部署文档**:
+- **DEPLOYMENT_PLATFORM_ANALYSIS.md** - 平台选型分析
+- **PRODUCTION_ENVIRONMENT_SETUP.md** - 生产环境配置
+
+**开发工具**:
+- **PROJECT_STRUCTURE_ANALYSIS.md** - 目录结构分析
+- **prototypes/** - HTML原型参考
 
 ---
 
-*"清晰的约束，是项目成功的保障！"*
+**配置版本**: v2.0
+**创建时间**: 2025-10-03
+**最后更新**: 2025-10-06 (添加DDD+TDD+Git标准)
+**维护者**: Claude Key Portal Team
+**下次更新**: 标准执行1个月后评估
+
+---
+
+_"清晰的标准 + 严格的执行 = 项目成功的保障！"_

@@ -64,6 +64,7 @@ Claude Key Portal
 ### 📄 Page 1: 登录页 `/login`
 
 #### 层级位置
+
 ```
 Root
 └── (auth)
@@ -74,6 +75,7 @@ Root
 #### 功能模块
 
 **1. 登录表单模块**
+
 ```tsx
 组件: LoginForm
 功能:
@@ -85,6 +87,7 @@ Root
 ```
 
 **2. 快捷登录模块**
+
 ```tsx
 组件: QuickLogin
 功能:
@@ -93,14 +96,14 @@ Root
 ```
 
 **3. 导航模块**
+
 ```tsx
 组件: AuthNavigation
-功能:
-- 跳转注册页
-- 跳转忘记密码
+功能: -跳转注册页 - 跳转忘记密码
 ```
 
 #### 页面布局
+
 ```
 ┌──────────────────────────────────────────────┐
 │                   Logo                        │
@@ -124,6 +127,7 @@ Root
 ```
 
 #### 交互流程
+
 1. 用户输入账号密码 → 点击登录
 2. 前端验证 → 调用API `/api/v1/auth/login`
 3. 成功 → 保存Token → 跳转仪表板
@@ -134,6 +138,7 @@ Root
 ### 📄 Page 2: 注册页 `/register`
 
 #### 层级位置
+
 ```
 Root
 └── (auth)
@@ -144,6 +149,7 @@ Root
 #### 功能模块
 
 **1. 注册表单模块**
+
 ```tsx
 组件: RegisterForm
 功能:
@@ -156,6 +162,7 @@ Root
 ```
 
 **2. 验证码模块**
+
 ```tsx
 组件: VerificationCode
 功能:
@@ -165,15 +172,14 @@ Root
 ```
 
 **3. 密码强度模块**
+
 ```tsx
 组件: PasswordStrength
-功能:
-- 实时密码强度检测
-- 弱/中/强提示
-- 密码要求说明
+功能: -实时密码强度检测 - 弱 / 中 / 强提示 - 密码要求说明
 ```
 
 #### 页面布局
+
 ```
 ┌──────────────────────────────────────────────┐
 │                   Logo                        │
@@ -202,6 +208,7 @@ Root
 ### 📄 Page 3: 仪表板（首页）`/`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -211,6 +218,7 @@ Root
 #### 功能模块
 
 **1. 概览卡片模块**
+
 ```tsx
 组件: OverviewCards
 功能:
@@ -223,6 +231,7 @@ Root
 ```
 
 **2. 实时指标模块**
+
 ```tsx
 组件: RealtimeMetrics
 功能:
@@ -234,6 +243,7 @@ Root
 ```
 
 **3. 调用趋势图模块**
+
 ```tsx
 组件: CallsTrendChart
 功能:
@@ -245,6 +255,7 @@ Root
 ```
 
 **4. 模型分布模块**
+
 ```tsx
 组件: ModelDistributionChart
 功能:
@@ -254,6 +265,7 @@ Root
 ```
 
 **5. Top密钥模块**
+
 ```tsx
 组件: TopKeysTable
 功能:
@@ -263,6 +275,7 @@ Root
 ```
 
 **6. 快捷操作模块**
+
 ```tsx
 组件: QuickActions
 功能:
@@ -272,6 +285,7 @@ Root
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  仪表板                                    [刷新] [设置]    │
@@ -314,6 +328,7 @@ Root
 ```
 
 #### 数据刷新策略
+
 - 概览卡片：30秒自动刷新
 - 实时指标：5秒轮询或WebSocket
 - 图表数据：用户切换时间范围时刷新
@@ -324,6 +339,7 @@ Root
 ### 📄 Page 4: 密钥列表页 `/keys`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -334,6 +350,7 @@ Root
 #### 功能模块
 
 **1. 顶部操作栏模块**
+
 ```tsx
 组件: KeysToolbar
 功能:
@@ -344,6 +361,7 @@ Root
 ```
 
 **2. 筛选模块**
+
 ```tsx
 组件: KeysFilter
 功能:
@@ -354,6 +372,7 @@ Root
 ```
 
 **3. 密钥表格模块**
+
 ```tsx
 组件: KeysTable
 功能:
@@ -367,6 +386,7 @@ Root
 ```
 
 **4. 密钥卡片模块（移动端）**
+
 ```tsx
 组件: KeyCard
 功能:
@@ -378,6 +398,7 @@ Root
 ```
 
 **5. 分页模块**
+
 ```tsx
 组件: Pagination
 功能:
@@ -388,6 +409,7 @@ Root
 ```
 
 **6. 空状态模块**
+
 ```tsx
 组件: EmptyState
 功能:
@@ -397,6 +419,7 @@ Root
 ```
 
 #### 页面布局（桌面端）
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  密钥管理                                                   │
@@ -418,6 +441,7 @@ Root
 ```
 
 #### 交互流程
+
 1. **创建密钥**: 点击"创建密钥" → 打开创建表单Modal → 填写信息 → 提交 → 刷新列表
 2. **查看详情**: 点击密钥行 → 跳转到 `/keys/[id]`
 3. **批量操作**: 选择多个密钥 → 批量操作下拉 → 选择操作 → 确认 → 刷新列表
@@ -429,6 +453,7 @@ Root
 ### 📄 Page 5: 创建密钥页 `/keys/new`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -440,6 +465,7 @@ Root
 #### 功能模块
 
 **1. 基本信息模块**
+
 ```tsx
 组件: BasicInfoForm
 功能:
@@ -450,6 +476,7 @@ Root
 ```
 
 **2. 限制配置模块**
+
 ```tsx
 组件: LimitsConfiguration
 功能:
@@ -461,6 +488,7 @@ Root
 ```
 
 **3. 模型限制模块**
+
 ```tsx
 组件: ModelRestriction
 功能:
@@ -474,6 +502,7 @@ Root
 ```
 
 **4. 高级设置模块**
+
 ```tsx
 组件: AdvancedSettings
 功能:
@@ -486,6 +515,7 @@ Root
 ```
 
 **5. 预览模块**
+
 ```tsx
 组件: ConfigPreview
 功能:
@@ -495,6 +525,7 @@ Root
 ```
 
 **6. 操作按钮模块**
+
 ```tsx
 组件: FormActions
 功能:
@@ -504,6 +535,7 @@ Root
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  ← 返回密钥列表                     创建API密钥             │
@@ -553,6 +585,7 @@ Root
 ```
 
 #### 表单验证规则
+
 - 密钥名称：必填，2-50字符
 - Token限制：正整数
 - 并发限制：1-100
@@ -560,6 +593,7 @@ Root
 - 模型：至少选择一个（如启用限制）
 
 #### 交互流程
+
 1. 用户填写表单 → 实时验证 → 更新预览
 2. 点击"创建密钥" → 前端验证 → 调用API
 3. 创建成功 → 显示完整密钥（仅一次）→ Modal提示保存
@@ -570,6 +604,7 @@ Root
 ### 📄 Page 6: 密钥详情页 `/keys/[id]`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -581,6 +616,7 @@ Root
 #### 功能模块
 
 **1. 密钥信息卡片模块**
+
 ```tsx
 组件: KeyInfoCard
 功能:
@@ -592,6 +628,7 @@ Root
 ```
 
 **2. 使用概览模块**
+
 ```tsx
 组件: UsageOverview
 功能:
@@ -604,6 +641,7 @@ Root
 ```
 
 **3. 使用趋势图模块**
+
 ```tsx
 组件: KeyUsageTrend
 功能:
@@ -614,6 +652,7 @@ Root
 ```
 
 **4. 模型使用分布模块**
+
 ```tsx
 组件: ModelUsageDistribution
 功能:
@@ -626,6 +665,7 @@ Root
 ```
 
 **5. 最近调用日志模块**
+
 ```tsx
 组件: RecentCallLogs
 功能:
@@ -636,6 +676,7 @@ Root
 ```
 
 **6. 配置信息模块**
+
 ```tsx
 组件: KeyConfiguration
 功能:
@@ -648,17 +689,14 @@ Root
 ```
 
 **7. 操作历史模块**
+
 ```tsx
 组件: KeyHistory
-功能:
-- 时间线显示操作历史
-  - 创建
-  - 更新配置
-  - 禁用/启用
-  - 重新生成
+功能: -时间线显示操作历史 - 创建 - 更新配置 - 禁用 / 启用 - 重新生成
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  ← 返回列表              Production Key                     │
@@ -712,6 +750,7 @@ Root
 ```
 
 #### 数据加载策略
+
 - 初始加载：并行请求密钥详情、使用统计、最近日志
 - 图表数据：按需加载（切换时间范围时）
 - 最近日志：30秒自动刷新
@@ -722,6 +761,7 @@ Root
 ### 📄 Page 7: 使用统计页 `/usage`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -732,6 +772,7 @@ Root
 #### 功能模块
 
 **1. 时间范围选择模块**
+
 ```tsx
 组件: TimeRangeSelector
 功能:
@@ -741,6 +782,7 @@ Root
 ```
 
 **2. 总览指标模块**
+
 ```tsx
 组件: UsageOverviewMetrics
 功能:
@@ -754,6 +796,7 @@ Root
 ```
 
 **3. 调用趋势模块**
+
 ```tsx
 组件: DetailedCallsTrend
 功能:
@@ -767,6 +810,7 @@ Root
 ```
 
 **4. 模型使用统计模块**
+
 ```tsx
 组件: ModelUsageStats
 功能:
@@ -777,6 +821,7 @@ Root
 ```
 
 **5. 密钥使用排行模块**
+
 ```tsx
 组件: KeyUsageRanking
 功能:
@@ -786,6 +831,7 @@ Root
 ```
 
 **6. 错误分析模块**
+
 ```tsx
 组件: ErrorAnalysis
 功能:
@@ -795,6 +841,7 @@ Root
 ```
 
 **7. 数据导出模块**
+
 ```tsx
 组件: DataExport
 功能:
@@ -805,6 +852,7 @@ Root
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  使用统计                                                   │
@@ -853,6 +901,7 @@ Root
 ### 📄 Page 8: 调用日志页 `/usage/logs`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -864,6 +913,7 @@ Root
 #### 功能模块
 
 **1. 日志筛选模块**
+
 ```tsx
 组件: LogsFilter
 功能:
@@ -876,6 +926,7 @@ Root
 ```
 
 **2. 日志列表模块**
+
 ```tsx
 组件: LogsList
 功能:
@@ -895,6 +946,7 @@ Root
 ```
 
 **3. 日志详情抽屉模块**
+
 ```tsx
 组件: LogDetailDrawer
 功能:
@@ -917,17 +969,14 @@ Root
 ```
 
 **4. 日志统计模块**
+
 ```tsx
 组件: LogsStats
-功能:
-- 当前筛选条件下的统计
-  - 总日志数
-  - 成功率
-  - 平均耗时
-  - 总Token数
+功能: -当前筛选条件下的统计 - 总日志数 - 成功率 - 平均耗时 - 总Token数
 ```
 
 **5. 导出模块**
+
 ```tsx
 组件: LogsExport
 功能:
@@ -937,6 +986,7 @@ Root
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  调用日志                                   ☐ 实时更新      │
@@ -970,6 +1020,7 @@ Root
 ### 📄 Page 9: 安装指导页 `/install`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -980,6 +1031,7 @@ Root
 #### 功能模块
 
 **1. 平台选择模块**
+
 ```tsx
 组件: PlatformSelector
 功能:
@@ -989,6 +1041,7 @@ Root
 ```
 
 **2. 密钥选择模块**
+
 ```tsx
 组件: KeySelector
 功能:
@@ -998,6 +1051,7 @@ Root
 ```
 
 **3. 环境选择模块**
+
 ```tsx
 组件: EnvironmentSelector
 功能:
@@ -1006,6 +1060,7 @@ Root
 ```
 
 **4. 选项配置模块**
+
 ```tsx
 组件: InstallOptions
 功能:
@@ -1017,6 +1072,7 @@ Root
 ```
 
 **5. 脚本生成模块**
+
 ```tsx
 组件: ScriptGenerator
 功能:
@@ -1028,6 +1084,7 @@ Root
 ```
 
 **6. 执行步骤模块**
+
 ```tsx
 组件: InstallationSteps
 功能:
@@ -1038,6 +1095,7 @@ Root
 ```
 
 **7. 环境检测模块**
+
 ```tsx
 组件: EnvironmentCheck
 功能:
@@ -1047,6 +1105,7 @@ Root
 ```
 
 **8. 常见问题模块**
+
 ```tsx
 组件: FAQ
 功能:
@@ -1056,6 +1115,7 @@ Root
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  安装指导                                                   │
@@ -1126,6 +1186,7 @@ Root
 ### 📄 Page 10: 个人设置页 `/settings/profile`
 
 #### 层级位置
+
 ```
 Root
 └── (dashboard)
@@ -1137,16 +1198,14 @@ Root
 #### 功能模块
 
 **1. 头像模块**
+
 ```tsx
 组件: AvatarUpload
-功能:
-- 显示当前头像
-- 点击上传新头像
-- 拖放上传
-- 裁剪功能
+功能: -显示当前头像 - 点击上传新头像 - 拖放上传 - 裁剪功能
 ```
 
 **2. 基本信息表单模块**
+
 ```tsx
 组件: ProfileForm
 功能:
@@ -1158,6 +1217,7 @@ Root
 ```
 
 **3. 账号信息模块**
+
 ```tsx
 组件: AccountInfo
 功能:
@@ -1168,6 +1228,7 @@ Root
 ```
 
 **4. 偏好设置模块**
+
 ```tsx
 组件: Preferences
 功能:
@@ -1178,6 +1239,7 @@ Root
 ```
 
 **5. 通知设置模块**
+
 ```tsx
 组件: NotificationSettings
 功能:
@@ -1188,6 +1250,7 @@ Root
 ```
 
 #### 页面布局
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  设置                                                       │
@@ -1246,6 +1309,7 @@ Root
 ### 3.1 布局组件
 
 **RootLayout**
+
 ```tsx
 组件路径: app/layout.tsx
 功能:
@@ -1257,28 +1321,23 @@ Root
 ```
 
 **DashboardLayout**
+
 ```tsx
-组件路径: app/(dashboard)/layout.tsx
-功能:
-- 顶部导航栏
-- 左侧边栏
-- 主内容区
-- 面包屑导航
-- 用户菜单
+组件路径: app / dashboard / layout.tsx
+功能: -顶部导航栏 - 左侧边栏 - 主内容区 - 面包屑导航 - 用户菜单
 ```
 
 **AuthLayout**
+
 ```tsx
-组件路径: app/(auth)/layout.tsx
-功能:
-- 居中布局
-- 背景装饰
-- Logo显示
+组件路径: app / auth / layout.tsx
+功能: -居中布局 - 背景装饰 - Logo显示
 ```
 
 ### 3.2 导航组件
 
 **Sidebar**
+
 ```tsx
 组件: components/layout/Sidebar.tsx
 功能:
@@ -1294,6 +1353,7 @@ Root
 ```
 
 **Header**
+
 ```tsx
 组件: components/layout/Header.tsx
 功能:
@@ -1308,17 +1368,16 @@ Root
 ```
 
 **Breadcrumb**
+
 ```tsx
-组件: components/layout/Breadcrumb.tsx
-功能:
-- 自动根据路由生成面包屑
-- 点击跳转
-- 当前页高亮
+组件: components / layout / Breadcrumb.tsx
+功能: -自动根据路由生成面包屑 - 点击跳转 - 当前页高亮
 ```
 
 ### 3.3 通用UI组件
 
 **Button**
+
 ```tsx
 变体: primary, secondary, ghost, danger
 尺寸: sm, md, lg
@@ -1326,20 +1385,23 @@ Root
 ```
 
 **Input**
+
 ```tsx
-类型: text, password, email, number
-特性: prefix, suffix, clearable, showCount
+类型: (text, password, email, number)
+特性: (prefix, suffix, clearable, showCount)
 验证: 实时验证 + 错误提示
 ```
 
 **Select**
+
 ```tsx
-特性: 单选/多选
+特性: 单选 / 多选
 搜索: 支持搜索过滤
 分组: 支持选项分组
 ```
 
 **Modal**
+
 ```tsx
 用途: 确认对话框、表单弹窗
 特性: 可拖动、自定义尺寸
@@ -1347,6 +1409,7 @@ Root
 ```
 
 **Table**
+
 ```tsx
 特性: 排序、筛选、分页
 选择: 单选/多选
@@ -1355,6 +1418,7 @@ Root
 ```
 
 **Chart**
+
 ```tsx
 类型: 折线图、柱状图、饼图、面积图
 交互: 悬停提示、图例切换、缩放
@@ -1362,6 +1426,7 @@ Root
 ```
 
 **Card**
+
 ```tsx
 用途: 内容容器
 特性: 标题、描述、操作按钮
@@ -1369,6 +1434,7 @@ Root
 ```
 
 **Badge**
+
 ```tsx
 用途: 状态指示、数量显示
 颜色: success, warning, error, info
@@ -1376,13 +1442,15 @@ Root
 ```
 
 **Toast**
+
 ```tsx
-类型: success, error, warning, info
-位置: top, bottom, top-right等
+类型: (success, error, warning, info)
+位置: (top, bottom, top - right等)
 持续时间: 可配置
 ```
 
 **Loading**
+
 ```tsx
 类型:
 - Spinner（小加载图标）
@@ -1394,18 +1462,21 @@ Root
 ### 3.4 业务组件
 
 **KeyStatusBadge**
+
 ```tsx
 功能: 显示密钥状态
 状态: 活跃(绿)、禁用(灰)、过期(红)、即将过期(黄)
 ```
 
 **UsageProgressBar**
+
 ```tsx
 功能: 显示使用量进度
 显示: 已用/总量、百分比、颜色指示
 ```
 
 **EmptyState**
+
 ```tsx
 功能: 无数据时的占位符
 内容: 图标、文字、操作按钮
@@ -1413,6 +1484,7 @@ Root
 ```
 
 **ConfirmDialog**
+
 ```tsx
 功能: 确认操作对话框
 用途: 删除密钥、重新生成等危险操作
@@ -1513,33 +1585,40 @@ Root
 
 ```css
 /* 移动端 */
-@media (max-width: 640px) { }
+@media (max-width: 640px) {
+}
 
 /* 平板 */
-@media (min-width: 641px) and (max-width: 1024px) { }
+@media (min-width: 641px) and (max-width: 1024px) {
+}
 
 /* 桌面 */
-@media (min-width: 1025px) { }
+@media (min-width: 1025px) {
+}
 ```
 
 ### 5.2 移动端适配
 
 **侧边栏**
+
 - 移动端: 抽屉式侧边栏，默认隐藏
 - 平板: 可折叠侧边栏
 - 桌面: 固定侧边栏
 
 **表格**
+
 - 移动端: 卡片列表布局
 - 平板: 简化表格（隐藏次要列）
 - 桌面: 完整表格
 
 **图表**
+
 - 移动端: 单列布局，简化图例
 - 平板: 双列布局
 - 桌面: 多列布局
 
 **表单**
+
 - 移动端: 单列布局，大按钮
 - 平板: 单列或双列
 - 桌面: 多列布局
@@ -1552,11 +1631,11 @@ Root
 
 ```tsx
 // 路由级代码分割
-const KeysPage = lazy(() => import('./pages/KeysPage'));
-const UsagePage = lazy(() => import('./pages/UsagePage'));
+const KeysPage = lazy(() => import('./pages/KeysPage'))
+const UsagePage = lazy(() => import('./pages/UsagePage'))
 
 // 组件级代码分割
-const HeavyChart = lazy(() => import('./components/HeavyChart'));
+const HeavyChart = lazy(() => import('./components/HeavyChart'))
 ```
 
 ### 6.2 图片优化
@@ -1578,17 +1657,20 @@ const HeavyChart = lazy(() => import('./components/HeavyChart'));
 ## 七、开发优先级
 
 ### Phase 1: 核心功能（第1-2周）
+
 1. ✅ 登录/注册页
 2. ✅ 仪表板页
 3. ✅ 密钥列表页
 4. ✅ 密钥详情页
 
 ### Phase 2: 扩展功能（第3周）
+
 5. ✅ 创建/编辑密钥
 6. ✅ 使用统计页
 7. ✅ 安装指导页
 
 ### Phase 3: 完善功能（第4周）
+
 8. ✅ 调用日志页
 9. ✅ 个人设置页
 10. ✅ 响应式优化
