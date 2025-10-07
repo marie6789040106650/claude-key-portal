@@ -3,7 +3,7 @@
  * 检查即将到期的 API Key 并发送提醒通知
  */
 
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { NotificationService } from './notification-service'
 
 export class ExpirationCheckService {

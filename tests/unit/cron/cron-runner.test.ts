@@ -9,7 +9,7 @@
  */
 
 import { CronRunner, CronJob, CronJobResult } from '@/lib/cron/cron-runner'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 
 // Mock node-cron
 jest.mock('node-cron', () => ({

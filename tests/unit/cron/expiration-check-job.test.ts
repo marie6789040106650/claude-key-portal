@@ -10,7 +10,7 @@
 
 import { ExpirationCheckJob } from '@/lib/cron/jobs/expiration-check-job'
 import { ExpirationCheckService } from '@/lib/services/expiration-check-service'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 
 // Mock ExpirationCheckService
 jest.mock('@/lib/services/expiration-check-service')

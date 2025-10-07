@@ -6,7 +6,7 @@
  */
 
 import { ExpirationCheckService } from '@/lib/services/expiration-check-service'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import type { CronJob, CronJobResult } from '@/lib/cron/cron-runner'
 
 export class ExpirationCheckJob implements CronJob {

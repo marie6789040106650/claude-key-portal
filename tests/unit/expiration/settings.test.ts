@@ -26,7 +26,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 import { verifyToken } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 
 describe('GET /api/user/expiration-settings', () => {
   beforeEach(() => {

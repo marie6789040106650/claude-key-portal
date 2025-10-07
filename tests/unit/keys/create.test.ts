@@ -5,8 +5,8 @@
  */
 
 import { POST } from '@/app/api/keys/route'
-import { prisma } from '@/lib/prisma'
-import { crsClient } from '@/lib/crs-client'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
+import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import jwt from 'jsonwebtoken'
 
 // Mock Prisma

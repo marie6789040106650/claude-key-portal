@@ -158,6 +158,15 @@ export class BusinessRuleViolationError extends DomainError {
 }
 
 /**
+ * 数据库错误
+ */
+export class DatabaseError extends DomainError {
+  constructor(message: string) {
+    super(message)
+  }
+}
+
+/**
  * 错误工厂函数
  */
 export class ErrorFactory {
@@ -173,7 +182,7 @@ export class ErrorFactory {
       case 404:
         return new UserNotFoundError(message || 'Resource not found')
       default:
-        return new DomainError(message || `HTTP错误: ${status}`)
+        return new ExternalServiceError('HTTP', message || `HTTP错误: ${status}`)
     }
   }
 
@@ -192,6 +201,6 @@ export class ErrorFactory {
       return new UserNotFoundError('Record not found')
     }
 
-    return new DomainError(error.message || '数据库错误')
+    return new DatabaseError(error.message || '数据库错误')
   }
 }

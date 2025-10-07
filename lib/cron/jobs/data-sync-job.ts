@@ -5,7 +5,7 @@
  * 调度: 每小时执行一次
  */
 
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import type { CronJob, CronJobResult } from '@/lib/cron/cron-runner'
 
 export class DataSyncJob implements CronJob {

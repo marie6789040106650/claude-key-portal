@@ -5,7 +5,7 @@
  */
 
 import cron, { ScheduledTask } from 'node-cron'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 
 export interface CronJob {
   name: string

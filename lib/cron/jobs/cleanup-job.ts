@@ -5,7 +5,7 @@
  * 调度: 每日00:00执行
  */
 
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import type { CronJob, CronJobResult } from '@/lib/cron/cron-runner'
 
 export interface CleanupJobConfig {

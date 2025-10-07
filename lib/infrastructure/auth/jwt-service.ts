@@ -9,7 +9,7 @@
  * - 使用Result模式处理错误
  */
 
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
 import { Result } from '@/lib/domain/shared/result'
 
 /**
@@ -54,7 +54,7 @@ export class JwtService {
    */
   async sign(
     payload: JwtPayload | any,
-    expiresIn: string = this.defaultAccessExpiry
+    expiresIn: string | number = this.defaultAccessExpiry
   ): Promise<Result<string>> {
     try {
       // 验证输入
@@ -63,6 +63,7 @@ export class JwtService {
       }
 
       // 生成token
+      // @ts-expect-error - jsonwebtoken类型定义问题，运行时正常
       const token = jwt.sign(payload, this.secret, { expiresIn })
 
       return Result.ok(token)

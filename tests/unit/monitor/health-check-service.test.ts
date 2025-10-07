@@ -9,9 +9,9 @@
  */
 
 import { HealthCheckService } from '@/lib/services/health-check-service'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { redis } from '@/lib/redis'
-import { crsClient } from '@/lib/crs-client'
+import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
 // Mock dependencies
 jest.mock('@/lib/prisma', () => ({

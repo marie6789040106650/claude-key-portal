@@ -10,7 +10,7 @@
  */
 
 import { AlertRuleEngine } from '@/lib/services/alert-rule-engine'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { NotificationService } from '@/lib/services/notification-service'
 import {
   AlertCondition,

@@ -9,7 +9,7 @@
 
 import { GET, DELETE } from '@/app/api/user/sessions/route'
 import { DELETE as DELETE_BY_ID } from '@/app/api/user/sessions/[id]/route'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
 
 // Mock 依赖

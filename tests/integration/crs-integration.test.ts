@@ -12,7 +12,7 @@
  * @jest-environment node
  */
 
-import { crsClient } from '@/lib/crs-client'
+import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
 describe('CRS Integration Tests', () => {
   let testKeyId: string

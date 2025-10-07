@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { AlertStatus, AlertSeverity } from '@prisma/client'
 
 export async function GET(request: NextRequest) {

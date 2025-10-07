@@ -5,7 +5,7 @@
  */
 
 import { POST } from '@/app/api/auth/login/route'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { redis } from '@/lib/redis'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'

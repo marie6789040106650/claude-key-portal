@@ -3,9 +3,9 @@
  * 负责多渠道通知发送和管理
  */
 
-import { prisma } from '@/lib/prisma'
-import { sendEmail, generateEmailHtml } from '@/lib/email/mailer'
-import { sendWebhook } from '@/lib/webhook/client'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
+import { sendEmail, generateEmailHtml } from '@/lib/infrastructure/external/email/mailer'
+import { sendWebhook } from '@/lib/infrastructure/external/webhook/client'
 import { NotificationType } from '@prisma/client'
 
 interface SendNotificationInput {

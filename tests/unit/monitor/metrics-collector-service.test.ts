@@ -9,7 +9,7 @@
  */
 
 import { MetricsCollectorService } from '@/lib/services/metrics-collector-service'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { MetricType } from '@prisma/client'
 
 // Mock Prisma

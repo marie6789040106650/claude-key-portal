@@ -30,7 +30,7 @@ async function testCrsStats() {
   console.log('🔍 开始测试 Sprint 3 - CRS Stats 集成...\n')
 
   // 动态导入crsClient（确保环境变量已设置）
-  const { crsClient } = await import('@/lib/crs-client')
+  const { crsClient } = await import('@/lib/infrastructure/external/crs-client')
 
   let testKeyId: string | undefined
   let testApiKey: string | undefined
@@ -143,7 +143,7 @@ async function testCrsStats() {
     if (testKeyId) {
       try {
         console.log('\n🧹 尝试清理测试数据...')
-        const { crsClient } = await import('@/lib/crs-client')
+        const { crsClient } = await import('@/lib/infrastructure/external/crs-client')
         await crsClient.deleteKey(testKeyId)
         console.log('✅ 测试密钥已删除')
       } catch (cleanupError) {

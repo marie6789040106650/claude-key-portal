@@ -38,9 +38,9 @@ jest.mock('@/lib/webhook/client', () => ({
   sendWebhook: jest.fn(),
 }))
 
-import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email/mailer'
-import { sendWebhook } from '@/lib/webhook/client'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
+import { sendEmail } from '@/lib/infrastructure/external/email/mailer'
+import { sendWebhook } from '@/lib/infrastructure/external/webhook/client'
 
 describe('ExpirationCheckService + NotificationService 集成测试', () => {
   let expirationService: ExpirationCheckService

@@ -6,7 +6,7 @@
  */
 
 import { POST } from '@/app/api/install/generate/route'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
 
 // Mock 依赖

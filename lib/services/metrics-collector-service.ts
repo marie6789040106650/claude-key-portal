@@ -8,7 +8,7 @@
  * - 内存使用统计
  */
 
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { MetricType } from '@prisma/client'
 
 export interface RecordOptions {

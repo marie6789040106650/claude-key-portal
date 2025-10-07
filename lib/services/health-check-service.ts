@@ -8,9 +8,9 @@
  * - 整体健康状态聚合
  */
 
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { redis } from '@/lib/redis'
-import { crsClient } from '@/lib/crs-client'
+import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
 export interface ServiceHealth {
   status: 'healthy' | 'unhealthy'

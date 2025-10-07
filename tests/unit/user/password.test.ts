@@ -6,7 +6,7 @@
  */
 
 import { PUT } from '@/app/api/user/password/route'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
 import bcrypt from 'bcrypt'
 

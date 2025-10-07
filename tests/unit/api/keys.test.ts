@@ -16,8 +16,8 @@
 import { NextRequest } from 'next/server'
 import { GET, POST } from '@/app/api/keys/route'
 import { PATCH, DELETE } from '@/app/api/keys/[id]/route'
-import { prisma } from '@/lib/prisma'
-import { crsClient } from '@/lib/crs-client'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
+import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import * as auth from '@/lib/auth'
 
 // Mock dependencies

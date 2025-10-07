@@ -6,8 +6,8 @@
  */
 
 import { GET } from '@/app/api/dashboard/route'
-import { prisma } from '@/lib/prisma'
-import { crsClient } from '@/lib/crs-client'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
+import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import { verifyToken } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 

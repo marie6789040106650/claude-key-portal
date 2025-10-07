@@ -30,7 +30,7 @@ async function testCrsConnection() {
   console.log('🔍 开始测试CRS连接...\n')
 
   // 动态导入crsClient（确保环境变量已设置）
-  const { crsClient } = await import('@/lib/crs-client')
+  const { crsClient } = await import('@/lib/infrastructure/external/crs-client')
 
   try {
     // 1. 测试认证

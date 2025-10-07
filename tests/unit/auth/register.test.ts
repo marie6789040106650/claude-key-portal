@@ -5,7 +5,7 @@
  */
 
 import { POST } from '@/app/api/auth/register/route'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import bcrypt from 'bcryptjs'
 
 // Mock Prisma
