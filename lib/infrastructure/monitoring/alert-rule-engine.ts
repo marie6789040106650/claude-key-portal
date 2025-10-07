@@ -18,7 +18,6 @@ import {
   AlertSeverity,
   MetricType,
   NotificationType,
-  NotificationChannel as PrismaChannel,
 } from '@prisma/client'
 import { NotificationChannel } from '@/lib/domain/notification/notification.types'
 

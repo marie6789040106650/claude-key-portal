@@ -100,7 +100,7 @@ export class SendNotificationUseCase {
     // 6. 检查是否所有渠道都失败
     const allFailed = results.every((result) => result.status === 'rejected')
     if (allFailed && results.length > 0) {
-      return Result.fail<NotificationRecord[]>(new ExternalServiceError('所有通知渠道发送失败'))
+      return Result.fail<NotificationRecord[]>(new ExternalServiceError('Notification', '所有通知渠道发送失败'))
     }
 
     return Result.ok(notifications)
@@ -156,7 +156,7 @@ export class SendNotificationUseCase {
     // 检查是否所有渠道都失败
     const allFailed = results.every((result) => result.status === 'rejected')
     if (allFailed && results.length > 0) {
-      return Result.fail<NotificationRecord[]>(new ExternalServiceError('所有系统通知渠道发送失败'))
+      return Result.fail<NotificationRecord[]>(new ExternalServiceError('Notification', '所有系统通知渠道发送失败'))
     }
 
     return Result.ok(notifications)
