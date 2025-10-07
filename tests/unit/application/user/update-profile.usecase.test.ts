@@ -5,7 +5,7 @@
  * TDD Phase: 🔴 RED
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from '@jest/globals'
 import { UpdateProfileUseCase } from '@/lib/application/user/update-profile.usecase'
 import type { UserRepository } from '@/lib/infrastructure/persistence/repositories/user.repository'
 
@@ -15,8 +15,8 @@ describe('UpdateProfileUseCase', () => {
 
   beforeEach(() => {
     mockUserRepository = {
-      findById: vi.fn(),
-      update: vi.fn(),
+      findById: jest.fn(),
+      update: jest.fn(),
     } as any
 
     updateProfileUseCase = new UpdateProfileUseCase(mockUserRepository)
@@ -36,7 +36,7 @@ describe('UpdateProfileUseCase', () => {
         nickname: 'OldNickname',
       }
 
-      vi.mocked(mockUserRepository.findById).mockResolvedValue({
+      ;(mockUserRepository.findById as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
@@ -46,7 +46,7 @@ describe('UpdateProfileUseCase', () => {
         nickname: 'NewNickname',
       }
 
-      vi.mocked(mockUserRepository.update).mockResolvedValue({
+      ;(mockUserRepository.update as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: updatedUser,
       } as any)
@@ -75,7 +75,7 @@ describe('UpdateProfileUseCase', () => {
         email: 'test@example.com',
       }
 
-      vi.mocked(mockUserRepository.findById).mockResolvedValue({
+      ;(mockUserRepository.findById as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
@@ -85,7 +85,7 @@ describe('UpdateProfileUseCase', () => {
         avatar: 'https://example.com/avatar.jpg',
       }
 
-      vi.mocked(mockUserRepository.update).mockResolvedValue({
+      ;(mockUserRepository.update as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: updatedUser,
       } as any)
@@ -111,7 +111,7 @@ describe('UpdateProfileUseCase', () => {
         email: 'test@example.com',
       }
 
-      vi.mocked(mockUserRepository.findById).mockResolvedValue({
+      ;(mockUserRepository.findById as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
@@ -122,7 +122,7 @@ describe('UpdateProfileUseCase', () => {
         avatar: 'https://example.com/avatar.jpg',
       }
 
-      vi.mocked(mockUserRepository.update).mockResolvedValue({
+      ;(mockUserRepository.update as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: updatedUser,
       } as any)
@@ -143,7 +143,7 @@ describe('UpdateProfileUseCase', () => {
         nickname: 'NewNickname',
       }
 
-      vi.mocked(mockUserRepository.findById).mockResolvedValue({
+      ;(mockUserRepository.findById as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
       } as any)
@@ -184,12 +184,12 @@ describe('UpdateProfileUseCase', () => {
         email: 'test@example.com',
       }
 
-      vi.mocked(mockUserRepository.findById).mockResolvedValue({
+      ;(mockUserRepository.findById as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockUserRepository.update).mockResolvedValue({
+      ;(mockUserRepository.update as jest.Mock).mockResolvedValue({
         isSuccess: false,
         error: new Error('Database error'),
       } as any)

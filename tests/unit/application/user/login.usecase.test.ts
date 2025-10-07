@@ -5,7 +5,7 @@
  * TDD Phase: 🔴 RED
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from '@jest/globals'
 import { LoginUseCase } from '@/lib/application/user/login.usecase'
 import type { UserRepository } from '@/lib/infrastructure/persistence/repositories/user.repository'
 import type { SessionRepository } from '@/lib/infrastructure/persistence/repositories/session.repository'
@@ -22,21 +22,21 @@ describe('LoginUseCase', () => {
   beforeEach(() => {
     // Mock repositories and services
     mockUserRepository = {
-      findByEmail: vi.fn(),
-      findByPhone: vi.fn(),
-      updateLastLogin: vi.fn(),
+      findByEmail: jest.fn(),
+      findByPhone: jest.fn(),
+      updateLastLogin: jest.fn(),
     } as any
 
     mockSessionRepository = {
-      create: vi.fn(),
+      create: jest.fn(),
     } as any
 
     mockPasswordService = {
-      compare: vi.fn(),
+      compare: jest.fn(),
     } as any
 
     mockJwtService = {
-      generateTokens: vi.fn(),
+      generateTokens: jest.fn(),
     } as any
 
     loginUseCase = new LoginUseCase(
@@ -65,12 +65,12 @@ describe('LoginUseCase', () => {
         nickname: 'TestUser',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockPasswordService.compare).mockResolvedValue({
+      ;(mockPasswordService.compare as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: true,
       } as any)
@@ -80,17 +80,17 @@ describe('LoginUseCase', () => {
         refreshToken: 'refresh_token_123',
       }
 
-      vi.mocked(mockJwtService.generateTokens).mockResolvedValue({
+      ;(mockJwtService.generateTokens as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockTokens,
       } as any)
 
-      vi.mocked(mockSessionRepository.create).mockResolvedValue({
+      ;(mockSessionRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: { id: 'session_123' },
       } as any)
 
-      vi.mocked(mockUserRepository.updateLastLogin).mockResolvedValue({
+      ;(mockUserRepository.updateLastLogin as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: undefined,
       } as any)
@@ -132,17 +132,17 @@ describe('LoginUseCase', () => {
         status: 'ACTIVE',
       }
 
-      vi.mocked(mockUserRepository.findByPhone).mockResolvedValue({
+      ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockPasswordService.compare).mockResolvedValue({
+      ;(mockPasswordService.compare as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: true,
       } as any)
 
-      vi.mocked(mockJwtService.generateTokens).mockResolvedValue({
+      ;(mockJwtService.generateTokens as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: {
           accessToken: 'token',
@@ -150,12 +150,12 @@ describe('LoginUseCase', () => {
         },
       } as any)
 
-      vi.mocked(mockSessionRepository.create).mockResolvedValue({
+      ;(mockSessionRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: { id: 'session' },
       } as any)
 
-      vi.mocked(mockUserRepository.updateLastLogin).mockResolvedValue({
+      ;(mockUserRepository.updateLastLogin as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: undefined,
       } as any)
@@ -177,7 +177,7 @@ describe('LoginUseCase', () => {
         userAgent: 'Mozilla/5.0',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
       } as any)
@@ -207,12 +207,12 @@ describe('LoginUseCase', () => {
         status: 'ACTIVE',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockPasswordService.compare).mockResolvedValue({
+      ;(mockPasswordService.compare as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: false, // Password mismatch
       } as any)
@@ -242,12 +242,12 @@ describe('LoginUseCase', () => {
         status: 'SUSPENDED',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockPasswordService.compare).mockResolvedValue({
+      ;(mockPasswordService.compare as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: true,
       } as any)
@@ -277,12 +277,12 @@ describe('LoginUseCase', () => {
         status: 'DELETED',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockPasswordService.compare).mockResolvedValue({
+      ;(mockPasswordService.compare as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: true,
       } as any)
@@ -311,17 +311,17 @@ describe('LoginUseCase', () => {
         status: 'ACTIVE',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
 
-      vi.mocked(mockPasswordService.compare).mockResolvedValue({
+      ;(mockPasswordService.compare as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: true,
       } as any)
 
-      vi.mocked(mockJwtService.generateTokens).mockResolvedValue({
+      ;(mockJwtService.generateTokens as jest.Mock).mockResolvedValue({
         isSuccess: false,
         error: new Error('Token generation failed'),
       } as any)

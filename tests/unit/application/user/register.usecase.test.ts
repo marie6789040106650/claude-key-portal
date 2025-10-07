@@ -5,7 +5,7 @@
  * TDD Phase: 🔴 RED
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi, Mock } from '@jest/globals'
 import { RegisterUseCase } from '@/lib/application/user/register.usecase'
 import type { UserRepository } from '@/lib/infrastructure/persistence/repositories/user.repository'
 import type { PasswordService } from '@/lib/infrastructure/auth/password-service'
@@ -18,14 +18,14 @@ describe('RegisterUseCase', () => {
   beforeEach(() => {
     // Mock UserRepository
     mockUserRepository = {
-      findByEmail: vi.fn(),
-      findByPhone: vi.fn(),
-      create: vi.fn(),
+      findByEmail: jest.fn(),
+      findByPhone: jest.fn(),
+      create: jest.fn(),
     } as any
 
     // Mock PasswordService
     mockPasswordService = {
-      hash: vi.fn(),
+      hash: jest.fn(),
     } as any
 
     // 创建UseCase实例
@@ -44,12 +44,12 @@ describe('RegisterUseCase', () => {
         nickname: 'TestUser',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null, // 用户不存在
       } as any)
 
-      vi.mocked(mockPasswordService.hash).mockResolvedValue({
+      ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: 'hashed_password',
       } as any)
@@ -61,7 +61,7 @@ describe('RegisterUseCase', () => {
         createdAt: new Date(),
       }
 
-      vi.mocked(mockUserRepository.create).mockResolvedValue({
+      ;(mockUserRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
@@ -88,12 +88,12 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      vi.mocked(mockUserRepository.findByPhone).mockResolvedValue({
+      ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
       } as any)
 
-      vi.mocked(mockPasswordService.hash).mockResolvedValue({
+      ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: 'hashed_password',
       } as any)
@@ -104,7 +104,7 @@ describe('RegisterUseCase', () => {
         createdAt: new Date(),
       }
 
-      vi.mocked(mockUserRepository.create).mockResolvedValue({
+      ;(mockUserRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
       } as any)
@@ -124,7 +124,7 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: { id: 'existing_user', email: 'existing@example.com' },
       } as any)
@@ -146,7 +146,7 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      vi.mocked(mockUserRepository.findByPhone).mockResolvedValue({
+      ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: { id: 'existing_user', phone: '13800138000' },
       } as any)
@@ -166,12 +166,12 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
       } as any)
 
-      vi.mocked(mockPasswordService.hash).mockResolvedValue({
+      ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: false,
         error: new Error('Hash failed'),
       } as any)
@@ -191,17 +191,17 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue({
+      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
       } as any)
 
-      vi.mocked(mockPasswordService.hash).mockResolvedValue({
+      ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: 'hashed_password',
       } as any)
 
-      vi.mocked(mockUserRepository.create).mockResolvedValue({
+      ;(mockUserRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: false,
         error: new Error('Database error'),
       } as any)
