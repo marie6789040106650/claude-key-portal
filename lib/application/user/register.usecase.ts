@@ -52,27 +52,27 @@ export class RegisterUseCase {
 
       // 2. 检查用户是否已存在
       if (input.email) {
-        const existingUserResult = await this.userRepository.findByEmail(
+        const existsResult = await this.userRepository.existsByEmail(
           input.email
         )
-        if (!existingUserResult.isSuccess) {
-          return Result.fail(existingUserResult.error!)
+        if (!existsResult.isSuccess) {
+          return Result.fail(existsResult.error!)
         }
 
-        if (existingUserResult.value) {
+        if (existsResult.value) {
           return Result.fail(new ConflictError('该邮箱已被注册'))
         }
       }
 
       if (input.phone) {
-        const existingUserResult = await this.userRepository.findByPhone(
+        const existsResult = await this.userRepository.existsByPhone(
           input.phone
         )
-        if (!existingUserResult.isSuccess) {
-          return Result.fail(existingUserResult.error!)
+        if (!existsResult.isSuccess) {
+          return Result.fail(existsResult.error!)
         }
 
-        if (existingUserResult.value) {
+        if (existsResult.value) {
           return Result.fail(new ConflictError('该手机号已被注册'))
         }
       }
