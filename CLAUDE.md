@@ -223,7 +223,7 @@ git commit -m "fix: adjust API format to match CRS"
 1. **使用 Circuit Breaker 模式**
 
    ```typescript
-   import { crsClient } from '@/lib/crs-client'
+   import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
    try {
      const result = await crsClient.createKey(data)
@@ -541,7 +541,7 @@ const keys = await prisma.apiKey.findMany({
 ### CRS 响应缓存
 
 ```typescript
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/infrastructure/cache/redis'
 
 async function getCrsStats(userId: string) {
   // 1. 尝试从缓存获取
