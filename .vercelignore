@@ -1,0 +1,51 @@
+# Vercel Ignore File
+# 排除不需要部署到Vercel的文件
+
+# 开发环境
+.env.local
+.env.development
+
+# 测试文件
+tests/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+jest.config.js
+jest.setup.ts
+
+# Docker相关
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile
+.dockerignore
+
+# 文档
+docs/
+*.md
+!README.md
+
+# IDE配置
+.vscode/
+.idea/
+
+# 日志
+logs/
+*.log
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# Node modules (Vercel会自动安装)
+node_modules/
+
+# Build输出（Vercel会重新构建）
+.next/
+out/
+build/
+dist/
+
+# 原型文件
+prototypes/

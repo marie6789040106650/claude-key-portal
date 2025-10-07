@@ -1,0 +1,47 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["sfo1"],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/monitor-job",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/expiration-check-job",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/alert-check-job",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": false
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
