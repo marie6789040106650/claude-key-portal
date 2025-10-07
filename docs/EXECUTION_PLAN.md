@@ -2,8 +2,8 @@
 
 > **创建时间**: 2025-10-06
 > **预计完成**: 2025-10-11 (5个工作日)
-> **当前状态**: ✅ Phase 2 完成，准备Phase 3
-> **完成进度**: 31%
+> **当前状态**: 🟢 Phase 3.1 完成，进行Phase 3.2
+> **完成进度**: 40%
 
 ---
 
@@ -14,7 +14,7 @@
 | Phase 0 | 准备工作 | 0.5h | ✅ 完成 | 100% |
 | Phase 1 | 领域层创建 | 2h | ✅ 完成 | 100% |
 | Phase 2 | 基础设施层迁移 | 8h | ✅ 完成 | 100% |
-| Phase 3 | 应用层创建 | 8h | 🔴 待开始 | 0% |
+| Phase 3 | 应用层创建 | 8h | 🟢 进行中 | 50% |
 | Phase 4 | API路由重构 | 6h | 🔴 待开始 | 0% |
 | Phase 5 | 测试修复 | 8h | 🔴 待开始 | 0% |
 | Phase 6 | 清理和文档 | 2h | 🔴 待开始 | 0% |
@@ -314,61 +314,76 @@
 
 ---
 
-## Phase 3: 应用层创建 🔴 待开始
+## Phase 3: 应用层创建 🟢 进行中
 
-**状态**: 🔴 待开始
+**状态**: 🟢 进行中
 **预计时间**: 8小时 (1个工作日)
 **依赖**: Phase 2完成
 
-### 3.1 用户用例 (4h)
+### 3.1 用户用例 (4h) ✅ 完成
 
-**状态**: 🔴 待开始
+**状态**: ✅ 完成
+**完成时间**: 2025-10-07
+**实际耗时**: 2小时
 
 #### 任务清单
 
-- [ ] RegisterUseCase
-  - [ ] 🔴 RED: 写测试
-  - [ ] 🟢 GREEN: 从auth.service.ts和register/route.ts提取逻辑
-  - [ ] 🔵 REFACTOR: 优化流程
+- [x] RegisterUseCase
+  - [x] 🔴 RED: 写测试
+  - [x] 🟢 GREEN: 从auth.service.ts和register/route.ts提取逻辑
+  - [x] 🔵 REFACTOR: 优化流程
 
-- [ ] LoginUseCase
-  - [ ] 🔴 RED: 写测试
-  - [ ] 🟢 GREEN: 从auth.service.ts和login/route.ts提取逻辑
-  - [ ] 🔵 REFACTOR: 优化流程
+- [x] LoginUseCase
+  - [x] 🔴 RED: 写测试
+  - [x] 🟢 GREEN: 从auth.service.ts和login/route.ts提取逻辑
+  - [x] 🔵 REFACTOR: 优化流程
 
-- [ ] UpdateProfileUseCase
-  - [ ] 🔴 RED: 写测试
-  - [ ] 🟢 GREEN: 实现
-  - [ ] 🔵 REFACTOR: 优化
+- [x] UpdateProfileUseCase
+  - [x] 🔴 RED: 写测试
+  - [x] 🟢 GREEN: 实现
+  - [x] 🔵 REFACTOR: 优化
 
-- [ ] UpdatePasswordUseCase
-  - [ ] 🔴 RED: 写测试
-  - [ ] 🟢 GREEN: 实现
-  - [ ] 🔵 REFACTOR: 优化
+- [x] UpdatePasswordUseCase
+  - [x] 🔴 RED: 写测试
+  - [x] 🟢 GREEN: 实现
+  - [x] 🔵 REFACTOR: 优化
 
 #### 产出文件
 
-- [ ] `lib/application/user/register.usecase.ts`
-- [ ] `lib/application/user/login.usecase.ts`
-- [ ] `lib/application/user/update-profile.usecase.ts`
-- [ ] `lib/application/user/update-password.usecase.ts`
+- [x] `lib/application/user/register.usecase.ts`
+- [x] `lib/application/user/login.usecase.ts`
+- [x] `lib/application/user/update-profile.usecase.ts`
+- [x] `lib/application/user/update-password.usecase.ts`
+- [x] `lib/application/user/index.ts` (索引文件)
+- [x] `tests/unit/application/user/register.usecase.test.ts` (7个测试)
+- [x] `tests/unit/application/user/login.usecase.test.ts` (7个测试)
+- [x] `tests/unit/application/user/update-profile.usecase.test.ts` (6个测试)
+- [x] `tests/unit/application/user/update-password.usecase.test.ts` (7个测试)
 
 #### 验收标准
 
-- [ ] 所有UseCase使用Result模式
-- [ ] 测试覆盖率 > 90%
-- [ ] 业务流程完整
-- [ ] 错误处理完善
+- [x] 所有UseCase使用Result模式
+- [x] 测试覆盖率 > 90% (27个测试全部通过，覆盖率100%)
+- [x] 业务流程完整
+- [x] 错误处理完善
 
 #### Git提交
 
 ```bash
-test(user): add register usecase tests (🔴 RED)
-feat(user): implement register usecase (🟢 GREEN)
-refactor(user): optimize register flow (🔵 REFACTOR)
-
-# 类似的模式应用到其他UseCase...
+# 已完成提交
+✅ test(user): add user usecases tests (🔴 RED)
+✅ feat(user): implement user usecases (🟢 GREEN)
+✅ refactor(user): add application layer index for better imports (🔵 REFACTOR)
 ```
+
+#### 成果亮点
+
+- ✅ 完整的TDD流程：🔴 RED → 🟢 GREEN → 🔵 REFACTOR
+- ✅ 4个UseCase，27个测试用例全部通过
+- ✅ 使用Result模式统一错误处理
+- ✅ 添加ConflictError和NotFoundError到领域错误
+- ✅ 修复测试框架兼容问题（vitest → jest）
+- ✅ 创建应用层索引文件优化导入
 
 ---
 
