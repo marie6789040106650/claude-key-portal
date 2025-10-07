@@ -91,84 +91,34 @@ export async function PUT(request: NextRequest) {
 
     // 2. 解析请求体
     const body = await request.json()
-    const { nickname, avatar, bio } = body
 
-    // 3. 验证输入
-    const updates: {
-      nickname?: string
-      avatar?: string
-      bio?: string
-    } = {}
+    // 3. 创建UseCase实例
+    const { UpdateProfileUseCase } = await import('@/lib/application/user')
+    const { userRepository } = await import('@/lib/infrastructure/persistence/repositories')
+    const updateProfileUseCase = new UpdateProfileUseCase(userRepository)
 
-    // 验证昵称
-    if (nickname !== undefined) {
-      if (typeof nickname !== 'string') {
-        return NextResponse.json(
-          { error: '昵称必须是字符串' },
-          { status: 400 }
-        )
-      }
-      if (nickname.length > 50) {
-        return NextResponse.json(
-          { error: '昵称长度不能超过50个字符' },
-          { status: 400 }
-        )
-      }
-      updates.nickname = nickname
-    }
-
-    // 验证头像
-    if (avatar !== undefined) {
-      if (typeof avatar !== 'string' && avatar !== null) {
-        return NextResponse.json(
-          { error: '头像必须是字符串或null' },
-          { status: 400 }
-        )
-      }
-      updates.avatar = avatar
-    }
-
-    // 验证简介
-    if (bio !== undefined) {
-      if (typeof bio !== 'string' && bio !== null) {
-        return NextResponse.json(
-          { error: '简介必须是字符串或null' },
-          { status: 400 }
-        )
-      }
-      if (bio && bio.length > 200) {
-        return NextResponse.json(
-          { error: '简介长度不能超过200个字符' },
-          { status: 400 }
-        )
-      }
-      updates.bio = bio
-    }
-
-    // 检查是否有需要更新的内容
-    if (Object.keys(updates).length === 0) {
-      return NextResponse.json(
-        { error: '没有需要更新的内容' },
-        { status: 400 }
-      )
-    }
-
-    // 4. 更新用户信息
-    const updatedUser = await prisma.user.update({
-      where: { id: decoded.userId },
-      data: updates,
+    // 4. 执行更新流程
+    const result = await updateProfileUseCase.execute({
+      userId: decoded.userId,
+      ...body,
     })
 
-    // 5. 返回更新后的用户信息（手动选择字段，避免返回敏感信息）
-    return NextResponse.json({
-      id: updatedUser.id,
-      email: updatedUser.email!,
-      nickname: updatedUser.nickname,
-      avatar: updatedUser.avatar,
-      bio: updatedUser.bio,
-      createdAt: updatedUser.createdAt.toISOString(),
-      updatedAt: updatedUser.updatedAt.toISOString(),
-    })
+    // 5. 处理结果
+    if (result.isSuccess) {
+      return NextResponse.json(result.value, { status: 200 })
+    } else {
+      const error = result.error!
+
+      if (error.name === 'ValidationError') {
+        return NextResponse.json({ error: error.message }, { status: 400 })
+      }
+
+      if (error.name === 'NotFoundError') {
+        return NextResponse.json({ error: error.message }, { status: 404 })
+      }
+
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
   } catch (error) {
     console.error('更新用户信息失败:', error)
 

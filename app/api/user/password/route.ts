@@ -4,55 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
-import bcrypt from 'bcrypt'
-
-/**
- * 验证密码强度
- * 至少8位，包含大小写字母、数字和特殊字符
- */
-function validatePasswordStrength(password: string): {
-  valid: boolean
-  error?: string
-} {
-  if (password.length < 8) {
-    return {
-      valid: false,
-      error: '密码强度不足：至少8位字符',
-    }
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    return {
-      valid: false,
-      error: '密码强度不足：必须包含大写字母',
-    }
-  }
-
-  if (!/[a-z]/.test(password)) {
-    return {
-      valid: false,
-      error: '密码强度不足：必须包含小写字母',
-    }
-  }
-
-  if (!/[0-9]/.test(password)) {
-    return {
-      valid: false,
-      error: '密码强度不足：必须包含数字',
-    }
-  }
-
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    return {
-      valid: false,
-      error: '密码强度不足：必须包含特殊字符',
-    }
-  }
-
-  return { valid: true }
-}
 
 /**
  * PUT /api/user/password
@@ -70,83 +22,39 @@ export async function PUT(request: NextRequest) {
 
     // 2. 解析请求体
     const body = await request.json()
-    const { oldPassword, newPassword } = body
 
-    // 3. 验证必需参数
-    if (!oldPassword) {
-      return NextResponse.json(
-        { error: '缺少必需参数: oldPassword' },
-        { status: 400 }
-      )
-    }
-
-    if (!newPassword) {
-      return NextResponse.json(
-        { error: '缺少必需参数: newPassword' },
-        { status: 400 }
-      )
-    }
-
-    // 4. 验证新密码强度
-    const strengthCheck = validatePasswordStrength(newPassword)
-    if (!strengthCheck.valid) {
-      return NextResponse.json({ error: strengthCheck.error }, { status: 400 })
-    }
-
-    // 5. 查询用户
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    })
-
-    if (!user) {
-      return NextResponse.json({ error: '用户不存在' }, { status: 404 })
-    }
-
-    // 兼容测试环境和生产环境的字段名
-    const currentPasswordHash =
-      (user as any).passwordHash || (user as any).password
-
-    // 6. 验证旧密码
-    const isOldPasswordValid = await bcrypt.compare(
-      oldPassword,
-      currentPasswordHash
+    // 3. 创建UseCase实例
+    const { UpdatePasswordUseCase } = await import('@/lib/application/user')
+    const { userRepository } = await import('@/lib/infrastructure/persistence/repositories')
+    const { passwordService } = await import('@/lib/infrastructure/auth')
+    const updatePasswordUseCase = new UpdatePasswordUseCase(
+      userRepository,
+      passwordService
     )
 
-    if (!isOldPasswordValid) {
-      return NextResponse.json({ error: '旧密码不正确' }, { status: 400 })
+    // 4. 执行密码更新流程
+    const result = await updatePasswordUseCase.execute({
+      userId: decoded.userId,
+      oldPassword: body.oldPassword,
+      newPassword: body.newPassword,
+    })
+
+    // 5. 处理结果
+    if (result.isSuccess) {
+      return NextResponse.json({ message: '密码修改成功' }, { status: 200 })
+    } else {
+      const error = result.error!
+
+      if (error.name === 'ValidationError' || error.name === 'UnauthorizedError') {
+        return NextResponse.json({ error: error.message }, { status: 400 })
+      }
+
+      if (error.name === 'NotFoundError') {
+        return NextResponse.json({ error: error.message }, { status: 404 })
+      }
+
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-
-    // 7. 验证新密码不能与旧密码相同
-    const isSamePassword = await bcrypt.compare(newPassword, currentPasswordHash)
-
-    if (isSamePassword) {
-      return NextResponse.json(
-        { error: '新密码不能与旧密码相同' },
-        { status: 400 }
-      )
-    }
-
-    // 8. 哈希新密码
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10)
-
-    // 9. 记录密码修改历史
-    await prisma.passwordHistory.create({
-      data: {
-        userId: decoded.userId,
-        hashedPassword: currentPasswordHash, // 保存旧密码
-      },
-    })
-
-    // 10. 更新密码
-    await prisma.user.update({
-      where: { id: decoded.userId },
-      data: { passwordHash: hashedNewPassword },
-    })
-
-    // 11. 返回成功
-    return NextResponse.json({
-      message: '密码修改成功',
-    })
   } catch (error) {
     console.error('修改密码失败:', error)
 
