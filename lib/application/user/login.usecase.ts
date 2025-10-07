@@ -98,7 +98,7 @@ export class LoginUseCase {
       // 4. 检查账户状态
       const statusCheck = this.checkAccountStatus(user.status)
       if (!statusCheck.isSuccess) {
-        return statusCheck
+        return Result.fail(statusCheck.error!)
       }
 
       // 5. 生成 JWT Token

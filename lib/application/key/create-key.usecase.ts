@@ -92,7 +92,7 @@ export class CreateKeyUseCase {
         crsKeyId: crsKey.id,
         crsKey: crsKey.key,
         name: input.name,
-        description: input.description || null,
+        description: input.description,
       })
 
       if (!createResult.isSuccess) {

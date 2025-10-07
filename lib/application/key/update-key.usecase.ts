@@ -16,7 +16,7 @@ import type {
   DomainKey,
 } from '@/lib/infrastructure/persistence/repositories/key.repository'
 import type { CrsClient } from '@/lib/infrastructure/external/crs-client'
-import type { KeyStatus } from '@/lib/domain/key/key.types'
+import { KeyStatus } from '@/lib/domain/key/key.types'
 
 /**
  * 更新密钥输入
@@ -60,7 +60,7 @@ export class UpdateKeyUseCase {
       }
 
       // 3. 验证密钥状态
-      if (existingKey.status === 'DELETED') {
+      if (existingKey.status === KeyStatus.DELETED) {
         return Result.fail(new ValidationError('密钥已删除，无法更新'))
       }
 

@@ -9,6 +9,7 @@ import { Result } from '@/lib/domain/shared/result'
 import { UnauthorizedError } from '@/lib/domain/shared/errors'
 import type { KeyRepository } from '@/lib/infrastructure/persistence/repositories/key.repository'
 import type { CrsClient } from '@/lib/infrastructure/external/crs-client'
+import { KeyStatus } from '@/lib/domain/key/key.types'
 
 /**
  * 删除密钥输入
@@ -59,7 +60,7 @@ export class DeleteKeyUseCase {
       }
 
       // 3. 检查是否已删除（幂等性）
-      if (existingKey.status === 'DELETED') {
+      if (existingKey.status === KeyStatus.DELETED) {
         return Result.ok({
           deleted: true,
           permanent: false,
@@ -100,7 +101,7 @@ export class DeleteKeyUseCase {
       } else {
         // 软删除
         const updateResult = await this.keyRepository.update(input.keyId, {
-          status: 'DELETED',
+          status: KeyStatus.DELETED,
         })
 
         if (!updateResult.isSuccess) {

@@ -9,6 +9,8 @@ export enum KeyStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
   EXPIRED = 'EXPIRED',
+  DELETED = 'DELETED',
+  RATE_LIMITED = 'RATE_LIMITED',
 }
 
 /**

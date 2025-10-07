@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals'
 import { UpdateKeyUseCase } from '@/lib/application/key/update-key.usecase'
 import type { KeyRepository } from '@/lib/infrastructure/persistence/repositories/key.repository'
 import type { CrsClient } from '@/lib/infrastructure/external/crs-client'
+import { KeyStatus } from '@/lib/domain/key/key.types'
 
 describe('UpdateKeyUseCase', () => {
   let updateKeyUseCase: UpdateKeyUseCase
@@ -52,7 +53,7 @@ describe('UpdateKeyUseCase', () => {
         crsKey: 'sk-ant-test123',
         name: 'Test Key',
         description: null,
-        status: 'ACTIVE' as const,
+        status: KeyStatus.ACTIVE,
         totalCalls: 10,
         totalTokens: 1000,
         lastUsedAt: new Date(),
@@ -90,7 +91,7 @@ describe('UpdateKeyUseCase', () => {
         userId: 'user_123',
         name: 'Updated Name',
         description: 'Updated Description',
-        status: 'INACTIVE' as const,
+        status: KeyStatus.INACTIVE,
       }
 
       const existingKey = {
@@ -100,7 +101,7 @@ describe('UpdateKeyUseCase', () => {
         crsKey: 'sk-ant-test123',
         name: 'Test Key',
         description: null,
-        status: 'ACTIVE' as const,
+        status: KeyStatus.ACTIVE,
         totalCalls: 10,
         totalTokens: 1000,
         lastUsedAt: new Date(),
@@ -127,7 +128,7 @@ describe('UpdateKeyUseCase', () => {
         ...existingKey,
         name: 'Updated Name',
         description: 'Updated Description',
-        status: 'INACTIVE' as const,
+        status: KeyStatus.INACTIVE,
       }
 
       ;(mockKeyRepository.update as jest.Mock).mockResolvedValue({
@@ -144,7 +145,7 @@ describe('UpdateKeyUseCase', () => {
       expect(mockCrsClient.updateKey).toHaveBeenCalledWith('crs_123', {
         name: 'Updated Name',
         description: 'Updated Description',
-        status: 'INACTIVE',
+        status: KeyStatus.INACTIVE,
       })
     })
 
@@ -185,7 +186,7 @@ describe('UpdateKeyUseCase', () => {
         crsKey: 'sk-ant-test123',
         name: 'Test Key',
         description: null,
-        status: 'ACTIVE' as const,
+        status: KeyStatus.ACTIVE,
         totalCalls: 10,
         totalTokens: 1000,
         lastUsedAt: new Date(),
@@ -260,7 +261,7 @@ describe('UpdateKeyUseCase', () => {
         crsKey: 'sk-ant-test123',
         name: 'Test Key',
         description: null,
-        status: 'ACTIVE' as const,
+        status: KeyStatus.ACTIVE,
         totalCalls: 10,
         totalTokens: 1000,
         lastUsedAt: new Date(),
@@ -302,7 +303,7 @@ describe('UpdateKeyUseCase', () => {
         crsKey: 'sk-ant-test123',
         name: 'Test Key',
         description: null,
-        status: 'ACTIVE' as const,
+        status: KeyStatus.ACTIVE,
         totalCalls: 10,
         totalTokens: 1000,
         lastUsedAt: new Date(),
@@ -348,7 +349,7 @@ describe('UpdateKeyUseCase', () => {
         crsKey: 'sk-ant-test123',
         name: 'Test Key',
         description: null,
-        status: 'ACTIVE' as const,
+        status: KeyStatus.ACTIVE,
         totalCalls: 10,
         totalTokens: 1000,
         lastUsedAt: new Date(),

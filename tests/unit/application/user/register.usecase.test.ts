@@ -5,15 +5,15 @@
  * TDD Phase: 🔴 RED
  */
 
-import { describe, it, expect, beforeEach, vi, Mock } from '@jest/globals'
+import { describe, it, expect, beforeEach, jest } from '@jest/globals'
 import { RegisterUseCase } from '@/lib/application/user/register.usecase'
 import type { UserRepository } from '@/lib/infrastructure/persistence/repositories/user.repository'
 import type { PasswordService } from '@/lib/infrastructure/auth/password-service'
 
 describe('RegisterUseCase', () => {
   let registerUseCase: RegisterUseCase
-  let mockUserRepository: UserRepository
-  let mockPasswordService: PasswordService
+  let mockUserRepository: Partial<UserRepository>
+  let mockPasswordService: Partial<PasswordService>
 
   beforeEach(() => {
     // Mock UserRepository
@@ -30,8 +30,8 @@ describe('RegisterUseCase', () => {
 
     // 创建UseCase实例
     registerUseCase = new RegisterUseCase(
-      mockUserRepository,
-      mockPasswordService
+      mockUserRepository as UserRepository,
+      mockPasswordService as PasswordService
     )
   })
 
@@ -47,12 +47,12 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null, // 用户不存在
-      } as any)
+      })
 
       ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: 'hashed_password',
-      } as any)
+      })
 
       const mockUser = {
         id: 'user_123',
@@ -64,7 +64,7 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
-      } as any)
+      })
 
       // Act
       const result = await registerUseCase.execute(input)
@@ -91,12 +91,12 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
-      } as any)
+      })
 
       ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: 'hashed_password',
-      } as any)
+      })
 
       const mockUser = {
         id: 'user_123',
@@ -107,7 +107,7 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: mockUser,
-      } as any)
+      })
 
       // Act
       const result = await registerUseCase.execute(input)
@@ -127,7 +127,7 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: { id: 'existing_user', email: 'existing@example.com' },
-      } as any)
+      })
 
       // Act
       const result = await registerUseCase.execute(input)
@@ -149,7 +149,7 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: { id: 'existing_user', phone: '13800138000' },
-      } as any)
+      })
 
       // Act
       const result = await registerUseCase.execute(input)
@@ -169,12 +169,12 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
-      } as any)
+      })
 
       ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: false,
         error: new Error('Hash failed'),
-      } as any)
+      })
 
       // Act
       const result = await registerUseCase.execute(input)
@@ -194,17 +194,17 @@ describe('RegisterUseCase', () => {
       ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: null,
-      } as any)
+      })
 
       ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
         isSuccess: true,
         value: 'hashed_password',
-      } as any)
+      })
 
       ;(mockUserRepository.create as jest.Mock).mockResolvedValue({
         isSuccess: false,
         error: new Error('Database error'),
-      } as any)
+      })
 
       // Act
       const result = await registerUseCase.execute(input)

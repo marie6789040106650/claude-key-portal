@@ -74,4 +74,5 @@ export interface UpdateUserProps {
   avatarUrl?: string
   email?: string
   phone?: string
+  passwordHash?: string
 }
