@@ -13,7 +13,7 @@
 import { AlertRuleEngine } from '@/lib/infrastructure/monitoring/alert-rule-engine'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { SendNotificationUseCase } from '@/lib/application/notification/send-notification.usecase'
-import { AlertCondition, AlertSeverity, MetricType } from '@prisma/client'
+import { AlertCondition, AlertSeverity, MetricType, NotificationType } from '@prisma/client'
 
 // Mock Prisma
 jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
@@ -183,7 +183,7 @@ describe('AlertRuleEngine', () => {
         },
       })
       expect(mockSendNotification.execute).toHaveBeenCalledWith({
-        type: 'ALERT',
+        type: NotificationType.ERROR_SPIKE,
         title: '[HIGH] High Error Rate',
         message: expect.any(String),
         channels: ['email', 'webhook'],
@@ -273,7 +273,7 @@ describe('AlertRuleEngine', () => {
         },
       })
       expect(mockSendNotification.execute).toHaveBeenCalledWith({
-        type: 'ALERT_RESOLVED',
+        type: NotificationType.SYSTEM_ANNOUNCEMENT,
         title: '[RESOLVED] High Error Rate',
         message: expect.stringContaining('resolved'),
         channels: ['email'],
