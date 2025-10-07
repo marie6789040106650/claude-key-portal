@@ -19,6 +19,14 @@ export type {
   MemoryTrend,
 } from './metrics-collector-service'
 
+// 导出过期检查服务
+export { ExpirationCheckService } from './expiration-check-service'
+
+// 导出告警规则引擎
+export { AlertRuleEngine } from './alert-rule-engine'
+
 // 导出单例实例（用于生产）
 export const healthCheckService = new HealthCheckService()
 export const metricsCollectorService = new MetricsCollectorService()
+export const expirationCheckService = new ExpirationCheckService()
+export const alertRuleEngine = new AlertRuleEngine()
