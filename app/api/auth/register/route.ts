@@ -4,8 +4,9 @@
  */
 
 import { NextResponse } from 'next/server'
-import { registerSchema } from '@/lib/validation/auth'
-import { checkUserExists, createUser } from '@/lib/services/auth.service'
+import { RegisterUseCase } from '@/lib/application/user'
+import { userRepository } from '@/lib/infrastructure/persistence/repositories'
+import { passwordService } from '@/lib/infrastructure/auth'
 import { z } from 'zod'
 
 export async function POST(request: Request) {
@@ -13,38 +14,29 @@ export async function POST(request: Request) {
     // 1. 解析请求体
     const body = await request.json()
 
-    // 2. 验证输入
-    let validatedData
-    try {
-      validatedData = registerSchema.parse(body)
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const firstError = error.errors[0]
-        return NextResponse.json(
-          { error: firstError.message },
-          { status: 400 }
-        )
+    // 2. 创建UseCase实例
+    const registerUseCase = new RegisterUseCase(userRepository, passwordService)
+
+    // 3. 执行注册流程
+    const result = await registerUseCase.execute(body)
+
+    // 4. 处理结果
+    if (result.isSuccess) {
+      return NextResponse.json({ user: result.value }, { status: 201 })
+    } else {
+      // 根据错误类型返回不同状态码
+      const error = result.error!
+
+      if (error.name === 'ValidationError') {
+        return NextResponse.json({ error: error.message }, { status: 400 })
       }
-      throw error
+
+      if (error.name === 'ConflictError') {
+        return NextResponse.json({ error: error.message }, { status: 409 })
+      }
+
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-
-    const { email, phone } = validatedData
-
-    // 3. 检查用户是否已存在
-    const existingUser = await checkUserExists(email, phone)
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: email ? '该邮箱已被注册' : '该手机号已被注册' },
-        { status: 409 }
-      )
-    }
-
-    // 4. 创建用户
-    const user = await createUser(validatedData)
-
-    // 5. 返回成功响应
-    return NextResponse.json({ user }, { status: 201 })
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(
