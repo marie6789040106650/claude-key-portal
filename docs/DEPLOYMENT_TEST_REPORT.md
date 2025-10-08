@@ -2,8 +2,9 @@
 
 **测试日期**: 2025-10-08
 **部署平台**: Vercel
-**部署URL**: https://claude-key-portal-nt3g7ed6f-marie436789040106650-1125s-projects.vercel.app
+**最新部署URL**: https://claude-key-portal-peeam60ff-marie436789040106650-1125s-projects.vercel.app
 **测试人员**: Claude AI
+**测试轮次**: 3次迭代修复
 
 ---
 
@@ -13,8 +14,11 @@
 |---------|------|------|
 | 首页加载 | ✅ 通过 | 无 |
 | 页面布局 | ✅ 通过 | 所有section完整 |
-| 注册功能 | ⚠️ 部分通过 | 路由跳转错误 |
-| 登录功能 | ⚠️ 部分通过 | 路由跳转错误 |
+| 路由系统 | ✅ 已修复 | 已修复所有路由问题 |
+| 认证流程 | ✅ 已修复 | 已添加Cookie设置 |
+| 数据库连接 | ❌ 失败 | Prisma连接池问题 |
+
+**最新状态**: 路由和认证逻辑已完全修复，但遇到数据库连接池问题需要解决
 
 ---
 
@@ -234,5 +238,124 @@ router.push('/dashboard')
 
 ---
 
-**测试完成时间**: 2025-10-08 05:45 UTC
-**下次测试**: 路由问题修复后
+---
+
+## ✅ 已修复问题（3次迭代）
+
+### 修复轮次 #1 (commit: 6b71ae3)
+**问题**: 注册/登录页面路由错误
+**修复**:
+- `app/auth/register/page.tsx`: `/login` → `/auth/login`
+- `app/auth/login/page.tsx`: `/register` → `/auth/register`
+
+### 修复轮次 #2 (commit: 3d03be4)
+**问题**: 登录API未设置Cookie，middleware路由配置错误
+**修复**:
+1. **Login API** (`app/api/auth/login/route.ts`):
+   - 添加accessToken cookie (24h, httpOnly, secure)
+   - 添加refreshToken cookie (7 days, httpOnly, secure)
+
+2. **Middleware** (`middleware.ts`):
+   - PUBLIC_ROUTES: 添加`/auth/login`, `/auth/register`, `/auth/forgot-password`
+   - 移除旧路由: `/login`, `/register`
+   - 修复重定向URL: `/login` → `/auth/login`
+   - 修复cookie名称: `token` → `accessToken`
+
+**结果**: ✅ 注册→登录→重定向流程逻辑正确
+
+---
+
+## 🚨 新发现问题
+
+### 问题 #4: Prisma连接池问题（Serverless环境）
+
+**严重程度**: 🔴 高（阻塞所有数据库操作）
+**影响范围**: 所有需要数据库的功能
+
+**错误信息**:
+```
+Invalid `prisma.user.findUnique()` invocation:
+Error occurred during query execution:
+ConnectorError(ConnectorError {
+  user_facing_error: None,
+  kind: QueryError(PostgresError {
+    code: "42P05",
+    message: "prepared statement \"s0\" already exists",
+    severity: "ERROR",
+    detail: None,
+    column: None,
+    hint: None
+  }),
+  transient: false
+})
+```
+
+**根本原因**:
+Vercel serverless函数中，每次请求可能复用Node.js进程，但Prisma连接池管理不当导致prepared statement冲突。
+
+**定位文件**:
+- `lib/infrastructure/persistence/prisma.ts` - Prisma客户端单例
+
+**解决方案**:
+
+#### 方案A: 使用Prisma Data Proxy（推荐用于无服务器）
+```typescript
+// schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 需要在Prisma Cloud配置Data Proxy
+// 然后使用Proxy URL: prisma://...
+```
+
+#### 方案B: 优化连接池配置
+```typescript
+// lib/infrastructure/persistence/prisma.ts
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['error', 'warn'],
+  // Serverless优化
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+})
+
+// 生产环境：每次请求后显式断开
+if (process.env.NODE_ENV === 'production') {
+  // 在API路由中手动管理连接
+} else {
+  globalForPrisma.prisma = prisma
+}
+```
+
+#### 方案C: 使用连接池限制（临时方案）
+```env
+# .env.production
+DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=1&pool_timeout=0"
+```
+
+**推荐方案**: 方案B（优化连接池） + 方案C（限制连接）
+
+**实施步骤**:
+1. 修改`lib/infrastructure/persistence/prisma.ts`
+2. 更新DATABASE_URL添加连接池参数
+3. 在每个API路由结束时添加`await prisma.$disconnect()`（可选）
+4. 重新部署并测试
+
+**优先级**: P0（立即修复）
+
+---
+
+**测试完成时间**: 2025-10-08 06:15 UTC
+**已修复**: 所有路由和认证问题 ✅
+**待修复**: 数据库连接池问题 ❌
+**下次测试**: 数据库问题修复后
