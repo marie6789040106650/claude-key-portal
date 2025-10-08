@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-10-08T15:04:22.046Z",
+  "baseUrl": "https://claude.just-play.fun",
+  "summary": {
+    "success": 4,
+    "failed": 0,
+    "error": 0,
+    "total": 4
+  },
+  "results": [
+    {
+      "endpoint": "/web/auth/login",
+      "method": "POST",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 2263,
+      "data": {
+        "success": true,
+        "hasToken": true,
+        "expiresIn": 86400000,
+        "username": "cr_admin_4ce18cd2"
+      }
+    },
+    {
+      "endpoint": "/web/auth/user",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 547,
+      "data": {
+        "success": true,
+        "username": "cr_admin_4ce18cd2",
+        "loginTime": "2025-10-08T15:04:18.799Z",
+        "lastActivity": "2025-10-08T15:04:18.799Z"
+      }
+    },
+    {
+      "endpoint": "/web/auth/refresh",
+      "method": "POST",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 465,
+      "data": {
+        "success": true,
+        "hasToken": true,
+        "expiresIn": 86400000
+      }
+    },
+    {
+      "endpoint": "/web/auth/logout",
+      "method": "POST",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 821,
+      "data": {
+        "success": true,
+        "message": "Logout successful"
+      }
+    }
+  ]
+}

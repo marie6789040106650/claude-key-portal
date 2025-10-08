@@ -441,4 +441,93 @@ feature/<phase>-<feature-name>
 
 ---
 
+## 📋 P2阶段 - CRS API验证和功能规划 (新增 2025-10-08)
+
+### CRS API完整验证结果
+
+**验证时间**: 2025-10-08
+**验证方法**: 自动化脚本验证 + 速率限制保护
+
+#### ✅ 验证成功的API (13个端点)
+
+**认证API** (`/web/auth/*`):
+- POST /web/auth/login ✅ (2263ms)
+- GET /web/auth/user ✅ (547ms)
+- POST /web/auth/refresh ✅ (465ms)
+- POST /web/auth/logout ✅ (821ms)
+
+**Admin API** (`/admin/*`):
+- GET /admin/dashboard ✅ (770ms)
+- GET /admin/api-keys ✅ (960ms, 51 keys)
+- GET /admin/api-keys-usage-trend ✅ (728ms, 7天数据)
+- GET /admin/usage-stats ✅ (654ms)
+- GET /admin/model-stats ✅ (452ms, 2模型)
+- GET /admin/usage-trend ✅ (807ms, 7天数据)
+- GET /admin/claude-accounts ✅ (1094ms, 2账户)
+- GET /admin/gemini-accounts ✅ (473ms, 3账户)
+- GET /admin/users ✅ (454ms, 1用户)
+
+**验证结论**: ✅ 核心Admin API全面可用，性能良好
+
+#### ❌ 验证失败的API (5个端点)
+
+**公开统计API** (`/apiStats/*`) - 全部404:
+- POST /apiStats/get-key-id ❌ 404
+- POST /apiStats/user-stats ❌ 404
+- POST /apiStats/user-model-stats ❌ 404
+- POST /apiStats/batch-stats ❌ 404
+- POST /apiStats/batch-model-stats ❌ 404
+
+**验证结论**: ❌ 公开统计API在生产环境中不可用
+
+### P2功能调整
+
+基于验证结果，P2功能调整如下：
+
+| 原计划功能 | 状态 | 调整方案 |
+|-----------|------|---------|
+| 调用日志查询 | ❌ 无日志API | 改为"使用统计分析" |
+| 使用统计概览 | ✅ 可用 | 保持不变 |
+| 使用趋势图表 | ✅ 可用 | 保持不变 |
+| 模型统计 | ✅ 可用 | 保持不变 |
+| 用户自查功能 | ❌ API不可用 | **暂不实现** |
+| 高级搜索筛选 | ✅ 基于P1 | 保持不变 |
+| 数据导出 | ✅ 本地实现 | 保持不变 |
+
+### P2任务清单 (预计3天)
+
+**第1天**: 使用统计分析页面 ✅ Admin API可用
+- [ ] 系统概览卡片 (dashboard)
+- [ ] API Key统计表格 (api-keys)
+- [ ] Top 10排行榜
+- [ ] 系统健康监控
+
+**第2天**: 使用趋势图表 + 高级筛选 ✅ Admin API可用
+- [ ] 7天使用趋势图 (api-keys-usage-trend)
+- [ ] 多密钥对比功能
+- [ ] 高级搜索和筛选（扩展P1功能）
+
+**第3天**: 数据导出 + 优化
+- [ ] CSV/JSON导出
+- [ ] 性能优化
+- [ ] UI/UX完善
+
+**详细计划**: 见 `docs/P2_EXECUTION_PLAN_UPDATED.md`
+
+### 验证脚本和报告
+
+**验证脚本**:
+- `scripts/verify-crs-auth.ts` - 认证API验证
+- `scripts/verify-crs-admin.ts` - Admin API验证
+- `scripts/verify-crs-public-stats.ts` - 公开统计API验证
+- `scripts/verify-crs-all.ts` - 全面验证（主脚本）
+
+**验证报告**:
+- `docs/CRS_AUTH_VERIFICATION.json` - 认证API结果
+- `docs/CRS_ADMIN_VERIFICATION.json` - Admin API结果
+- `docs/CRS_PUBLIC_STATS_VERIFICATION.json` - 公开统计API结果
+- `docs/CRS_API_ENDPOINTS_COMPLETE.md` - 完整API端点列表（136个）
+
+---
+
 _"清晰的计划 + 严格的执行 + 并行的效率 = 项目成功！"_ 🚀

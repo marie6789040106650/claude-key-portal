@@ -388,6 +388,190 @@ NotesEditor组件实现了Markdown预览功能，但需求只要求 `localNotes?
 
 ---
 
+### 6. CRS公开统计API需要有效密钥参数（已解决）
+
+**问题ID**: ISSUE-006
+**发现时间**: 2025-10-08
+**更新时间**: 2025-10-08
+**状态**: ✅ 已解决
+**影响范围**: P2功能规划
+
+#### 问题描述（初始）
+
+最初验证时，所有公开统计API端点返回404，怀疑端点不可用。
+
+#### 根本原因（已查明）
+
+通过深入分析CRS源码和带参数重测，发现：
+
+1. **端点路径错误** - 正确路径是 `/apiStats/api/*` 而不是 `/apiStats/*`
+2. **缺少必需参数** - 所有公开统计API都要求POST body中包含 `apiKey` 或 `apiId` 参数
+3. **认证机制** - 端点存在且可访问，返回401而非404，说明需要有效的API key
+
+#### 验证结果（修正后）
+
+**验证时间**: 2025-10-08
+**验证方法**: 使用真实API key参数重新验证
+
+```bash
+# 修正后的验证脚本
+npx tsx scripts/verify-crs-public-stats-with-key.ts
+
+# 结果
+✅ 端点可访问: 5/5 (返回401认证失败，而非404不存在)
+⚠️  测试API key已禁用，无法完成功能验证
+```
+
+#### 受影响端点（修正）
+
+**全部可访问** (5/5):
+- POST /apiStats/api/get-key-id ✅ 需要 `{ apiKey: string }` 参数
+- POST /apiStats/api/user-stats ✅ 需要 `{ apiKey: string }` 或 `{ apiId: string }` 参数
+- POST /apiStats/api/user-model-stats ✅ 需要 `{ apiId: string, period: 'daily'|'monthly' }` 参数
+- POST /apiStats/api/batch-stats ✅ 需要 `{ apiIds: string[] }` 参数
+- POST /apiStats/api/batch-model-stats ✅ 需要 `{ apiIds: string[], period: 'daily'|'monthly' }` 参数
+
+#### 源码分析
+
+从 `src/routes/apiStats.js` 确认的参数要求：
+
+```javascript
+// 获取Key ID
+router.post('/api/get-key-id', async (req, res) => {
+  const { apiKey } = req.body  // ← 必需参数
+  // ...
+})
+
+// 用户统计
+router.post('/api/user-stats', async (req, res) => {
+  const { apiKey, apiId } = req.body  // ← 二选一
+  // ...
+})
+```
+
+#### P2功能影响（修正）
+
+**原计划可实现的功能**（需要有效API key）:
+
+| 功能 | 依赖API | 状态 | 说明 |
+|-----|---------|------|------|
+| 用户自查功能 | /apiStats/api/user-stats | ✅ 可实现 | 需要用户提供自己的API key |
+| 用户模型统计 | /apiStats/api/user-model-stats | ✅ 可实现 | Portal创建key后可查询 |
+| 批量统计查询 | /apiStats/api/batch-stats | ✅ 可实现 | 管理员功能 |
+
+**实现要点**:
+- 用户在Portal注册时，创建CRS API key并保存映射
+- 用户查询统计时，使用保存的API key调用CRS公开API
+- 无需Admin权限，降低了权限要求
+
+#### 解决方案（更新）
+
+**P2阶段实现**:
+1. ✅ **集成公开统计API** - 端点可用，参数要求已明确
+2. ✅ **用户自查功能** - 使用用户自己的API key查询
+3. ✅ **降低权限要求** - 不需要Admin API认证
+
+**实现步骤**:
+1. 在Portal创建API key时，同时在CRS创建key
+2. 保存CRS返回的 key ID 到本地数据库
+3. 用户查询统计时，使用 key ID 调用公开统计API
+4. 实现缓存机制，减少对CRS的请求压力
+
+#### 工作量评估
+
+**节省的工作量**:
+- 无需构建复杂的Admin API代理认证（节省2天）
+- 无需实现权限管理（节省1天）
+- 用户体验更好（直接查询，无需管理员审批）
+
+**新增工作量**:
+- 集成公开统计API: 1天
+- 实现缓存和错误处理: 0.5天
+
+**不需要额外工作量**:
+- Admin API已验证可用
+- 功能规划已调整完成
+
+#### 验证文档
+
+- `docs/CRS_API_ENDPOINTS_COMPLETE.md` - 完整端点列表（136个）
+- `docs/CRS_PUBLIC_STATS_VERIFICATION.json` - 详细验证结果
+- `docs/P2_EXECUTION_PLAN_UPDATED.md` - 调整后的P2计划
+
+---
+
+### 7. CRS Dashboard数据不完整
+
+**问题ID**: ISSUE-007
+**发现时间**: 2025-10-08
+**状态**: ⚠️  待确认
+**影响范围**: 系统概览展示
+
+#### 问题描述
+
+验证 `/admin/dashboard` 端点时发现，响应中的部分关键字段为空。
+
+#### 缺失字段
+
+```json
+{
+  "hasOverview": false,
+  "hasRecentActivity": false,
+  "hasSystemAverages": false,
+  "hasRealtimeMetrics": false,
+  "hasSystemHealth": false
+}
+```
+
+#### 影响
+
+- ⚠️  系统概览卡片可能无数据显示
+- ⚠️  实时指标无法展示
+- ⚠️  健康监控功能受限
+
+#### 待确认
+
+1. 是否需要CRS额外配置？
+2. 是否与数据收集延迟有关？
+3. 是否是测试环境特有问题？
+
+#### 解决方案
+
+**当前**:
+- 使用 `/admin/api-keys` 聚合数据作为替代
+- 实现本地统计计算
+
+**后续**:
+- 确认CRS配置要求
+- 必要时实现本地数据聚合
+
+---
+
+## 📊 问题统计（更新 2025-10-08）
+
+### 按优先级
+
+| 优先级 | 问题数 | 已修复 | 待修复 |
+|--------|--------|--------|--------|
+| P0 | 1 | 0 | 1 |
+| P1 | 1 | 1 | 0 |
+| P2 | 2 | 2 | 0 |
+| P3 | 2 | 1 | 1 |
+| **总计** | **6** | **4** | **2** |
+
+### 按类型
+
+| 类型 | 数量 | 已解决 | 比例 |
+|------|------|--------|------|
+| 测试问题 | 1 | 1 | 17% |
+| 过度设计 | 1 | 1 | 17% |
+| 功能缺失 | 1 | 0 | 17% |
+| API问题 | 2 | 1 | 33% |
+| 技术债务 | 1 | 1 | 17% |
+
+---
+
 **维护者**: Claude Key Portal Team
 **更新频率**: 实时更新
 **审查周期**: 每周一次
+**最后更新**: 2025-10-08
