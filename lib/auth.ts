@@ -3,6 +3,7 @@
  */
 
 import jwt from 'jsonwebtoken'
+import { cookies } from 'next/headers'
 
 /**
  * JWT Token验证
@@ -44,5 +45,32 @@ export function verifyToken(authHeader: string | null): {
       throw new Error('Token已过期，请重新登录')
     }
     throw new Error('Token无效')
+  }
+}
+
+/**
+ * 获取当前登录用户
+ * 从 Cookie 中读取 token 并验证
+ */
+export async function getCurrentUser(): Promise<{
+  id: string
+  email: string | null
+} | null> {
+  try {
+    const cookieStore = cookies()
+    const token = cookieStore.get('accessToken')?.value
+
+    if (!token) {
+      return null
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+
+    return {
+      id: decoded.userId,
+      email: decoded.email,
+    }
+  } catch (error) {
+    return null
   }
 }
