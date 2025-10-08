@@ -162,8 +162,8 @@ async function testEndpoint(
           }
         }
 
-        // 保存完整数据（限制大小）
-        result.data = JSON.parse(JSON.stringify(data, null, 2).substring(0, 5000))
+        // 保存完整数据对象（不截断）
+        result.data = data
       } else {
         console.log(`   响应: ${String(data).substring(0, 200)}`)
         result.data = data
@@ -185,6 +185,62 @@ async function testEndpoint(
       error: String(error),
     })
   }
+}
+
+/**
+ * 智能格式化数据（控制大小）
+ */
+function formatDataForReport(data: any, maxLength: number = 10000): string {
+  const jsonString = JSON.stringify(data, null, 2)
+
+  if (jsonString.length <= maxLength) {
+    return jsonString
+  }
+
+  // 如果数据太大，提供摘要
+  let summary = '{\n'
+
+  if (data.success !== undefined) {
+    summary += `  "success": ${data.success},\n`
+  }
+
+  if (data.data) {
+    if (Array.isArray(data.data)) {
+      summary += `  "data": [\n`
+      summary += `    // Array with ${data.data.length} items\n`
+      if (data.data.length > 0) {
+        summary += `    // Sample item:\n`
+        summary += `    ${JSON.stringify(data.data[0], null, 4).split('\n').join('\n    ')}\n`
+      }
+      summary += `  ]\n`
+    } else {
+      const dataKeys = Object.keys(data.data)
+      summary += `  "data": {\n`
+      summary += `    // Object with ${dataKeys.length} keys: ${dataKeys.slice(0, 10).join(', ')}\n`
+
+      // 显示几个关键字段的值
+      for (const key of dataKeys.slice(0, 5)) {
+        const value = data.data[key]
+        if (typeof value === 'object') {
+          summary += `    "${key}": { ... },\n`
+        } else {
+          summary += `    "${key}": ${JSON.stringify(value)},\n`
+        }
+      }
+
+      if (dataKeys.length > 5) {
+        summary += `    // ... and ${dataKeys.length - 5} more fields\n`
+      }
+
+      summary += `  }\n`
+    }
+  }
+
+  summary += '}\n\n'
+  summary += `// Full response: ${jsonString.length} characters (truncated for readability)\n`
+  summary += `// See console output for complete data structure`
+
+  return summary
 }
 
 /**
@@ -219,7 +275,7 @@ ${results.filter(r => r.status === 'success').map(r => `
 
 **返回数据结构**:
 \`\`\`json
-${JSON.stringify(r.data, null, 2)}
+${formatDataForReport(r.data)}
 \`\`\`
 `).join('\n---\n')}
 
