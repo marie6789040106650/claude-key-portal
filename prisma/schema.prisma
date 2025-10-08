@@ -141,6 +141,7 @@ model ApiKey {
   name        String
   description String?  @db.Text
   tags        String[] @default([])
+  isFavorite  Boolean  @default(false)
 
   // 配置
   config Json @default("{}")

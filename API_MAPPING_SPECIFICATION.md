@@ -405,7 +405,241 @@ async deleteKey(userId: string, mappingId: string) {
 }
 ```
 
-### 2.4 统计数据接口（代理）
+### 2.4 本地扩展功能接口（完全本地）
+
+> **P1 阶段新增** - 收藏、备注、标签功能，完全本地实现，不依赖 CRS
+
+| Portal API                    | 处理方式 | CRS API | 数据源     | 缓存 |
+| ----------------------------- | -------- | ------- | ---------- | ---- |
+| `PATCH /api/keys/:id/favorite` | 本地     | -       | PostgreSQL | -    |
+| `PATCH /api/keys/:id/notes`    | 本地     | -       | PostgreSQL | -    |
+| `POST /api/keys/:id/tags`      | 本地     | -       | PostgreSQL | -    |
+| `DELETE /api/keys/:id/tags`    | 本地     | -       | PostgreSQL | -    |
+| `GET /api/tags`                | 本地     | -       | PostgreSQL | -    |
+
+#### 详细数据流程
+
+##### 2.4.1 收藏功能
+
+```typescript
+// PATCH /api/keys/:id/favorite
+async toggleFavorite(keyId: string, userId: string, isFavorite: boolean) {
+  // 1. 验证权限
+  const key = await prisma.apiKey.findUnique({
+    where: { id: keyId }
+  });
+
+  if (key.userId !== userId) {
+    throw new ForbiddenError('无权操作此密钥');
+  }
+
+  // 2. 更新收藏状态
+  const updatedKey = await prisma.apiKey.update({
+    where: { id: keyId },
+    data: { isFavorite },
+    select: {
+      id: true,
+      isFavorite: true,
+      name: true
+    }
+  });
+
+  return updatedKey;
+}
+```
+
+##### 2.4.2 备注功能
+
+```typescript
+// PATCH /api/keys/:id/notes
+async updateNotes(keyId: string, userId: string, description: string) {
+  // 1. 验证权限
+  const key = await prisma.apiKey.findUnique({
+    where: { id: keyId }
+  });
+
+  if (key.userId !== userId) {
+    throw new ForbiddenError('无权操作此密钥');
+  }
+
+  // 2. 验证长度
+  const trimmedDescription = description?.trim() || null;
+  if (trimmedDescription && trimmedDescription.length > 1000) {
+    throw new ValidationError('备注最多 1000 个字符');
+  }
+
+  // 3. 更新备注
+  const updatedKey = await prisma.apiKey.update({
+    where: { id: keyId },
+    data: { description: trimmedDescription },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      updatedAt: true
+    }
+  });
+
+  return updatedKey;
+}
+```
+
+##### 2.4.3 标签功能
+
+```typescript
+// POST /api/keys/:id/tags - 添加标签
+async addTags(keyId: string, userId: string, tags: string[]) {
+  // 1. 验证权限
+  const key = await prisma.apiKey.findUnique({
+    where: { id: keyId }
+  });
+
+  if (key.userId !== userId) {
+    throw new ForbiddenError('无权操作此密钥');
+  }
+
+  // 2. 验证标签
+  const trimmedTags = tags.map(t => t?.trim()).filter(Boolean);
+
+  for (const tag of trimmedTags) {
+    if (typeof tag !== 'string') {
+      throw new ValidationError('标签必须是字符串');
+    }
+    if (tag.length > 50) {
+      throw new ValidationError('标签最多 50 个字符');
+    }
+  }
+
+  // 3. 检查重复和数量限制
+  const existingTags = key.tags as string[];
+  const newTags = trimmedTags.filter(t => !existingTags.includes(t));
+
+  if (newTags.length === 0) {
+    return { success: true, message: '标签已存在', tags: existingTags };
+  }
+
+  const updatedTags = [...existingTags, ...newTags];
+  if (updatedTags.length > 10) {
+    throw new ValidationError('最多只能添加 10 个标签');
+  }
+
+  // 4. 更新标签
+  const updatedKey = await prisma.apiKey.update({
+    where: { id: keyId },
+    data: { tags: updatedTags },
+    select: {
+      id: true,
+      tags: true
+    }
+  });
+
+  return updatedKey;
+}
+
+// DELETE /api/keys/:id/tags - 删除标签
+async removeTag(keyId: string, userId: string, tag: string) {
+  // 1. 验证权限
+  const key = await prisma.apiKey.findUnique({
+    where: { id: keyId }
+  });
+
+  if (key.userId !== userId) {
+    throw new ForbiddenError('无权操作此密钥');
+  }
+
+  // 2. 删除标签
+  const existingTags = key.tags as string[];
+  const updatedTags = existingTags.filter(t => t !== tag);
+
+  if (updatedTags.length === existingTags.length) {
+    return { success: true, message: '标签不存在', tags: updatedTags };
+  }
+
+  const updatedKey = await prisma.apiKey.update({
+    where: { id: keyId },
+    data: { tags: updatedTags },
+    select: {
+      id: true,
+      tags: true
+    }
+  });
+
+  return updatedKey;
+}
+```
+
+##### 2.4.4 标签列表
+
+```typescript
+// GET /api/tags?search=xxx&limit=10&sort=alphabetical
+async getUserTags(userId: string, query: GetTagsQuery) {
+  // 1. 查询用户所有密钥的标签
+  const keys = await prisma.apiKey.findMany({
+    where: { userId },
+    select: { tags: true }
+  });
+
+  // 2. 收集所有标签并统计
+  const tagCounts: Record<string, number> = {};
+
+  keys.forEach(key => {
+    const tags = key.tags as string[];
+    tags.forEach(tag => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
+  });
+
+  // 3. 转换为数组
+  let tags = Object.keys(tagCounts);
+
+  // 4. 应用搜索过滤
+  if (query.search) {
+    const searchLower = query.search.toLowerCase();
+    tags = tags.filter(tag => tag.toLowerCase().includes(searchLower));
+  }
+
+  // 5. 排序
+  if (query.sort === 'alphabetical') {
+    tags.sort((a, b) => a.localeCompare(b));
+  } else {
+    // 默认按使用频率排序
+    tags.sort((a, b) => tagCounts[b] - tagCounts[a]);
+  }
+
+  // 6. 应用 limit
+  if (query.limit) {
+    tags = tags.slice(0, query.limit);
+  }
+
+  // 7. 构建统计信息
+  const stats = {
+    total: tags.length,
+    ...Object.fromEntries(
+      tags.map(tag => [tag, tagCounts[tag]])
+    )
+  };
+
+  return { tags, stats };
+}
+```
+
+**数据模型**：
+
+```typescript
+// Prisma Schema
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?   // 备注（最多1000字符）
+  tags        Json      @default("[]")  // 标签数组（最多10个，每个最多50字符）
+  isFavorite  Boolean   @default(false) // 收藏状态
+
+  user        User      @relation(fields: [userId], references: [id])
+}
+```
+
+### 2.5 统计数据接口（代理）
 
 | Portal API                   | 处理方式  | CRS API                                  | 请求转换         | 响应转换        |
 | ---------------------------- | --------- | ---------------------------------------- | ---------------- | --------------- |
@@ -417,7 +651,7 @@ async deleteKey(userId: string, mappingId: string) {
 
 #### 详细数据流程
 
-##### 2.4.1 获取仪表板数据
+##### 2.5.1 获取仪表板数据
 
 ```typescript
 // GET /api/v1/dashboard
@@ -541,7 +775,7 @@ Authorization: Bearer <crs_admin_token>
 }
 ```
 
-##### 2.4.2 获取使用趋势
+##### 2.5.2 获取使用趋势
 
 ```typescript
 // GET /api/v1/usage/trend?days=7
@@ -590,7 +824,7 @@ function mergeTrends(trends: any[]) {
 }
 ```
 
-### 2.5 安装指导接口（本地）
+### 2.6 安装指导接口（本地）
 
 | Portal API                    | 处理方式 | CRS API | 数据源   | 缓存 |
 | ----------------------------- | -------- | ------- | -------- | ---- |
