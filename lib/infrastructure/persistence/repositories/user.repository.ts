@@ -118,6 +118,22 @@ export class UserRepository {
   }
 
   /**
+   * 检查手机号是否已存在
+   */
+  async existsByPhone(phone: string): Promise<Result<boolean>> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { phone },
+        select: { id: true },
+      })
+
+      return Result.ok(user !== null)
+    } catch (error) {
+      return Result.fail(error as Error)
+    }
+  }
+
+  /**
    * 创建新用户
    */
   async create(props: CreateUserProps): Promise<Result<DomainUser>> {

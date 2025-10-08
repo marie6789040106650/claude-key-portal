@@ -1,11 +1,24 @@
+/**
+ * 首页
+ * 面向未登录用户，展示产品介绍和注册/登录入口
+ */
+
+import { Navbar } from '@/components/home/Navbar'
+import { HeroSection } from '@/components/home/HeroSection'
+import { FeaturesSection } from '@/components/home/FeaturesSection'
+import { HowItWorksSection } from '@/components/home/HowItWorksSection'
+import { CTASection } from '@/components/home/CTASection'
+import { Footer } from '@/components/home/Footer'
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Claude Key Portal</h1>
-        <p className="text-xl text-gray-600 mb-8">CRS 用户管理门户</p>
-        <p className="text-gray-500">Sprint 0 项目初始化完成 ✅</p>
-      </div>
-    </main>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <CTASection />
+      <Footer />
+    </div>
   )
 }

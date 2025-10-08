@@ -94,7 +94,7 @@ export default function RegisterPage() {
       }
 
       // 注册成功，跳转到登录页
-      router.push('/login?registered=true')
+      router.push('/auth/login?registered=true')
     } catch (err: any) {
       setError(err.message || '注册失败，请重试')
     } finally {
@@ -195,7 +195,7 @@ export default function RegisterPage() {
 
           <div className="text-center text-sm">
             <span className="text-gray-600">已有账号？</span>
-            <Link href="/login" className="text-blue-600 hover:text-blue-500 ml-1">
+            <Link href="/auth/login" className="text-blue-600 hover:text-blue-500 ml-1">
               登录
             </Link>
           </div>

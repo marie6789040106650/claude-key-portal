@@ -127,6 +127,21 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* 记住我 和 忘记密码 */}
+          <div className="flex items-center justify-between mb-6">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="remember"
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-600">记住我</span>
+            </label>
+            <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+              忘记密码？
+            </Link>
+          </div>
+
           <Button
             type="submit"
             disabled={loading}
@@ -137,7 +152,7 @@ export default function LoginPage() {
 
           <div className="text-center text-sm">
             <span className="text-gray-600">还没有账号？</span>
-            <Link href="/register" className="text-blue-600 hover:text-blue-500 ml-1">
+            <Link href="/auth/register" className="text-blue-600 hover:text-blue-500 ml-1">
               注册
             </Link>
           </div>
