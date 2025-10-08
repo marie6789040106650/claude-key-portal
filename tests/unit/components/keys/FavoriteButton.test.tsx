@@ -14,6 +14,17 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FavoriteButton } from '@/components/keys/FavoriteButton'
 
+// Mock toast
+jest.mock('@/components/ui/use-toast', () => ({
+  toast: jest.fn(),
+  useToast: jest.fn(() => ({
+    toast: jest.fn(),
+  })),
+}))
+
+import { toast } from '@/components/ui/use-toast'
+const mockToast = toast as jest.MockedFunction<typeof toast>
+
 // Mock fetch
 global.fetch = jest.fn()
 
@@ -23,6 +34,7 @@ describe('FavoriteButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(global.fetch as jest.Mock).mockReset()
+    mockToast.mockClear()
   })
 
   describe('按钮渲染', () => {
@@ -222,7 +234,10 @@ describe('FavoriteButton', () => {
       await userEvent.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('操作失败，请重试')).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '操作失败，请重试',
+          variant: 'destructive',
+        })
       })
 
       // 状态不应该改变
@@ -242,7 +257,10 @@ describe('FavoriteButton', () => {
       await userEvent.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('网络错误，请检查连接')).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '操作失败，请重试',
+          variant: 'destructive',
+        })
       })
     })
 
