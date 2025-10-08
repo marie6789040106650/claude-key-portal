@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
-import { Eye, EyeOff } from 'lucide-react'
 
 interface NotesEditorProps {
   keyId: string
@@ -20,7 +19,6 @@ interface NotesEditorProps {
   onSave: (description: string) => void
   maxLength?: number
   autoSave?: boolean
-  supportMarkdown?: boolean
 }
 
 export function NotesEditor({
@@ -29,11 +27,9 @@ export function NotesEditor({
   onSave,
   maxLength = 1000,
   autoSave = false,
-  supportMarkdown = false,
 }: NotesEditorProps) {
   const [value, setValue] = useState(initialValue)
   const [loading, setLoading] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
 
   // 自动保存
   useEffect(() => {
@@ -96,49 +92,17 @@ export function NotesEditor({
 
   return (
     <div data-testid="notes-editor" className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label htmlFor="notes-textarea">备注</Label>
-        {supportMarkdown && (
-          <Button
-            data-testid="preview-button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowPreview(!showPreview)}
-          >
-            {showPreview ? (
-              <>
-                <EyeOff className="w-4 h-4 mr-2" />
-                编辑
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4 mr-2" />
-                预览
-              </>
-            )}
-          </Button>
-        )}
-      </div>
+      <Label htmlFor="notes-textarea">备注</Label>
 
-      {showPreview ? (
-        <div
-          data-testid="markdown-preview"
-          className="p-4 border rounded-lg min-h-[200px] prose prose-sm"
-          dangerouslySetInnerHTML={{
-            __html: value.replace(/\n/g, '<br />'),
-          }}
-        />
-      ) : (
-        <Textarea
-          id="notes-textarea"
-          data-testid="notes-textarea"
-          value={value}
-          onChange={handleChange}
-          placeholder="添加备注..."
-          className="min-h-[200px] resize-none"
-          maxLength={maxLength}
-        />
-      )}
+      <Textarea
+        id="notes-textarea"
+        data-testid="notes-textarea"
+        value={value}
+        onChange={handleChange}
+        placeholder="添加备注..."
+        className="min-h-[200px] resize-none"
+        maxLength={maxLength}
+      />
 
       <div className="flex items-center justify-between">
         <span

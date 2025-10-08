@@ -372,61 +372,6 @@ describe('NotesEditor', () => {
     })
   })
 
-  describe('Markdown 支持', () => {
-    it('应该显示 Markdown 预览按钮', () => {
-      render(
-        <NotesEditor
-          keyId="key-1"
-          initialValue=""
-          supportMarkdown={true}
-          onSave={mockOnSave}
-        />
-      )
-
-      expect(screen.getByTestId('preview-button')).toBeInTheDocument()
-    })
-
-    it('点击预览按钮应该显示渲染后的 Markdown', async () => {
-      render(
-        <NotesEditor
-          keyId="key-1"
-          initialValue="# 标题\n\n这是**粗体**文本"
-          supportMarkdown={true}
-          onSave={mockOnSave}
-        />
-      )
-
-      const previewButton = screen.getByTestId('preview-button')
-      await userEvent.click(previewButton)
-
-      expect(screen.getByTestId('markdown-preview')).toBeInTheDocument()
-      expect(screen.getByText('标题')).toBeInTheDocument()
-    })
-
-    it('应该能够在编辑和预览模式间切换', async () => {
-      render(
-        <NotesEditor
-          keyId="key-1"
-          initialValue="测试"
-          supportMarkdown={true}
-          onSave={mockOnSave}
-        />
-      )
-
-      const previewButton = screen.getByTestId('preview-button')
-
-      // 切换到预览模式
-      await userEvent.click(previewButton)
-      expect(screen.getByTestId('markdown-preview')).toBeInTheDocument()
-      expect(screen.queryByTestId('notes-textarea')).not.toBeInTheDocument()
-
-      // 切换回编辑模式
-      await userEvent.click(previewButton)
-      expect(screen.getByTestId('notes-textarea')).toBeInTheDocument()
-      expect(screen.queryByTestId('markdown-preview')).not.toBeInTheDocument()
-    })
-  })
-
   describe('无障碍支持', () => {
     it('文本域应该有正确的 label', () => {
       render(<NotesEditor keyId="key-1" initialValue="" onSave={mockOnSave} />)
