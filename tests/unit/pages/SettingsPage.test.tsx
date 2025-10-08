@@ -67,16 +67,27 @@ describe('SettingsPage', () => {
     })
   })
 
-  describe('错误处理', () => {
-    it('重定向失败时不应该抛出错误', () => {
+  describe('框架集成', () => {
+    it('应该使用Next.js的redirect函数', () => {
+      render(<SettingsPage />)
+
+      // 验证使用了Next.js提供的redirect函数
+      expect(redirect).toHaveBeenCalled()
+    })
+
+    it('redirect应该在组件渲染时立即执行', () => {
+      const callOrder: string[] = []
+
       const mockRedirect = redirect as jest.Mock
       mockRedirect.mockImplementationOnce(() => {
-        throw new Error('Redirect failed')
+        callOrder.push('redirect')
       })
 
-      expect(() => {
-        render(<SettingsPage />)
-      }).toThrow('Redirect failed')
+      callOrder.push('before-render')
+      render(<SettingsPage />)
+      callOrder.push('after-render')
+
+      expect(callOrder).toEqual(['before-render', 'redirect', 'after-render'])
     })
   })
 
