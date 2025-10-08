@@ -314,6 +314,56 @@ npm run build
 }
 ```
 
+### Q3.5: Prisma连接池错误（Serverless环境）⭐ 重要
+
+**症状**: `prepared statement "s0" already exists` (错误代码: 42P05)
+
+**根本原因**:
+Vercel serverless函数可能复用Node.js进程，但Prisma连接池管理不当导致prepared statement冲突。
+
+**解决方案（已在项目中实施）**:
+
+#### 1. DATABASE_URL必须包含连接池参数
+
+```bash
+# ❌ 错误配置（会导致连接池问题）
+DATABASE_URL="postgresql://user:pass@host:5432/db"
+
+# ✅ 正确配置（包含连接池优化参数）
+DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=1&pool_timeout=0&connect_timeout=10"
+```
+
+**参数说明**:
+- `connection_limit=1`: 限制每个serverless实例的最大连接数
+- `pool_timeout=0`: 禁用连接池超时（立即获取连接或失败）
+- `connect_timeout=10`: 连接超时时间10秒
+
+#### 2. Prisma客户端单例配置（已修复）
+
+文件：`lib/infrastructure/persistence/prisma.ts`
+
+```typescript
+// ✅ 所有环境都缓存实例
+globalForPrisma.prisma = prisma
+
+// ❌ 旧代码（仅开发环境缓存，导致生产环境问题）
+// if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+```
+
+#### 3. 验证修复
+
+```bash
+# 1. 检查环境变量
+echo $DATABASE_URL  # 确保包含连接池参数
+
+# 2. 重新部署
+vercel --prod
+
+# 3. 测试数据库操作
+# 访问: https://your-app.vercel.app/auth/register
+# 注册新用户，如果成功说明问题已解决
+```
+
 ### Q4: Cron任务不执行
 
 **症状**: Cron日志为空
