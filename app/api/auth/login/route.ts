@@ -36,7 +36,26 @@ export async function POST(request: Request) {
 
     // 5. 处理结果
     if (result.isSuccess) {
-      return NextResponse.json(result.value, { status: 200 })
+      const response = NextResponse.json(result.value, { status: 200 })
+
+      // 设置 token 到 cookie
+      response.cookies.set('accessToken', result.value!.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60, // 24小时
+        path: '/',
+      })
+
+      response.cookies.set('refreshToken', result.value!.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60, // 7天
+        path: '/',
+      })
+
+      return response
     } else {
       // 根据错误类型返回不同状态码
       const error = result.error!

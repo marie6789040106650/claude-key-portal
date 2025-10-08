@@ -30,8 +30,9 @@ const PROTECTED_ROUTES = [
  */
 const PUBLIC_ROUTES = [
   '/',
-  '/login',
-  '/register',
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
   '/api/auth/login',
   '/api/auth/register',
   '/api/health',
@@ -69,7 +70,7 @@ export function middleware(request: NextRequest) {
 
   // 3. 获取 Authorization header
   const authHeader = request.headers.get('authorization')
-  const cookieToken = request.cookies.get('token')?.value
+  const cookieToken = request.cookies.get('accessToken')?.value
 
   // 使用 Authorization header 或 Cookie 中的 token
   const token = authHeader || (cookieToken ? `Bearer ${cookieToken}` : null)
@@ -97,7 +98,7 @@ export function middleware(request: NextRequest) {
     }
 
     // 页面路由：重定向到登录页
-    const loginUrl = new URL('/login', request.url)
+    const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
 
     return NextResponse.redirect(loginUrl)
