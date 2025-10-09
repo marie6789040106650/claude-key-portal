@@ -12,32 +12,38 @@
 
 ## ✅ 最新完成（2025-10-10）
 
-### P2.5 - Top 10排行榜功能 ✅
+### P2.6 - 高级搜索筛选功能 ✅
 
 **TDD流程完成**:
-- 🔴 RED: 15个测试用例（认证、排序、Top10、排名计算、错误处理）
-- 🟢 GREEN: 实现排行榜API（15/15测试通过）
-- 🔵 REFACTOR: 提取工具函数，代码精简44%（104行）
+- 🔴 RED: 18个测试用例（名称、状态、使用量、时间、组合筛选）
+- 🟢 GREEN: 实现高级搜索筛选API（18/18测试通过）
+- 🔵 REFACTOR: 提取筛选工具模块（201行）
 
 **交付物**:
-- ✅ 测试: `tests/unit/app/api/stats/leaderboard.test.ts` (+433行)
-- ✅ API实现: `app/api/stats/leaderboard/route.ts` (+104行)
-- ✅ 工具函数: `app/api/stats/leaderboard/utils.ts` (+159行)
-- ✅ 文档: `docs/P2.5_COMPLETION_SUMMARY.md`
+- ✅ Bug修复: `app/api/stats/usage/route.ts` (BigInt序列化)
+- ✅ 测试: `tests/unit/app/api/stats/usage.test.ts` (+653行)
+- ✅ API实现: `app/api/stats/usage/route.ts` (+50行, -197行)
+- ✅ 工具模块: `app/api/stats/usage/filters.ts` (+201行)
+- ✅ 文档: `docs/P2.6_COMPLETION_SUMMARY.md`
 
 **功能特性**:
-- ✅ 支持3种排序维度（tokens, requests, cost）
-- ✅ Top 10自动筛选
-- ✅ 排名和百分比计算
-- ✅ 权限隔离（仅查询用户自己的密钥）
-- ✅ 完善的错误处理
+- ✅ 支持6种筛选维度（名称、状态、Token数、请求数、时间）
+- ✅ 多条件组合（AND逻辑）
+- ✅ 完善的参数验证
+- ✅ 模块化设计（独立工具文件）
+- ✅ 类型安全（FilterParams类型）
 
 **Git提交**:
 ```
-4b4ae15 refactor(stats): extract leaderboard utils and improve code structure (🔵 REFACTOR)
-2b96f40 feat(stats): implement Top 10 leaderboard API (🟢 GREEN)
-008dda6 test(stats): add leaderboard API tests (🔴 RED)
+8f2cce2 fix(stats): fix BigInt serialization in usage API (🔧 FIX)
+e8705bd test(stats): add advanced search filter tests (🔴 RED)
+d034f9e feat(stats): implement advanced search filters (🟢 GREEN)
+7abb1d5 refactor(stats): extract filter utilities and improve code structure (🔵 REFACTOR)
 ```
+
+### P2.5 - Top 10排行榜功能 ✅
+
+**已完成** - 详见 `docs/P2.5_COMPLETION_SUMMARY.md`
 
 ### P2.4 - 多密钥对比功能 ✅
 
@@ -112,73 +118,72 @@ f31dd22 test(stats): add multi-key comparison API tests (🔴 RED)
 第2天 - 高级功能:
 - [x] P2.4: 多密钥对比功能 ✅ 已完成
 - [x] P2.5: Top 10排行榜 ✅ 已完成
-- [ ] P2.6: 高级搜索筛选 ← 下一任务
+- [x] P2.6: 高级搜索筛选 ✅ 已完成
 
 第3天 - 导出和优化:
-- [ ] P2.7: CSV/JSON导出
+- [ ] P2.7: CSV/JSON导出 ← 下一任务
 - [ ] P2.8: 性能优化
 - [ ] P2.9: UI/UX完善
 ```
 
 ---
 
-## 📋 下一任务：P2.6 - 高级搜索筛选
+## 📋 下一任务：P2.7 - CSV/JSON 导出功能
 
 ### 任务目标
 
-实现高级搜索筛选功能，支持按多个条件筛选密钥统计数据。
+实现统计数据的导出功能，支持 CSV 和 JSON 两种格式。
 
 ### 功能需求
 
-1. **筛选维度**
-   - 按密钥名称搜索
-   - 按状态筛选（Active/Inactive）
-   - 按使用量范围筛选（Token数、请求数）
-   - 按创建时间范围筛选
-   - 按最后使用时间范围筛选
+1. **导出格式**
+   - CSV 格式 - 适合 Excel 和数据分析工具
+   - JSON 格式 - 适合程序化处理和 API 集成
 
-2. **筛选组合**
-   - 支持多条件组合
-   - AND逻辑组合
-   - 实时筛选
+2. **导出内容**
+   - 单个密钥统计数据
+   - 多个密钥列表数据
+   - 支持当前筛选条件的导出
+   - 包含完整的元数据（导出时间、用户、筛选条件）
 
-3. **API设计**
-   - 扩展现有 `/api/stats/usage` API
-   - 支持多个查询参数
-   - 优化数据库查询性能
+3. **API 设计**
+   - 新增 `/api/stats/usage/export` 端点
+   - 支持 `format` 参数（csv/json）
+   - 支持所有现有的筛选参数
+   - 返回下载文件或 JSON 数据
 
-### TDD开发流程
+### TDD 开发流程
 
 #### 🔴 RED: 编写失败测试
 
-**扩展文件**: `tests/unit/app/api/stats/usage.test.ts`
+**创建文件**: `tests/unit/app/api/stats/usage/export.test.ts`
 
 **测试内容**:
-1. 测试按名称搜索
-2. 测试按状态筛选
-3. 测试按使用量范围筛选
-4. 测试按时间范围筛选
-5. 测试多条件组合
-6. 测试参数验证
+1. 测试 CSV 格式导出
+2. 测试 JSON 格式导出
+3. 测试无效格式参数
+4. 测试空数据导出
+5. 测试带筛选条件的导出
+6. 测试元数据包含
 
 #### 🟢 GREEN: 实现功能
 
-**修改文件**: `app/api/stats/usage/route.ts`
+**创建文件**: `app/api/stats/usage/export/route.ts`
 
 **实现内容**:
-1. 解析筛选参数
-2. 构建动态查询条件
-3. 执行数据库查询
-4. 返回筛选结果
-5. 错误处理
+1. 解析格式和筛选参数
+2. 查询符合条件的数据
+3. 格式化为 CSV 或 JSON
+4. 设置正确的响应头
+5. 返回文件下载响应
 
 #### 🔵 REFACTOR: 优化代码
 
 **优化内容**:
-1. 提取查询构建逻辑
-2. 优化数据库索引
-3. 添加查询缓存
-4. 优化类型定义
+1. 提取 CSV 格式化逻辑到工具函数
+2. 提取 JSON 格式化逻辑到工具函数
+3. 复用现有的筛选逻辑
+4. 优化大数据量的导出性能
 
 ### 实施步骤
 
@@ -188,20 +193,53 @@ cd /Users/bypasser/claude-project/0930/claude-key-portal
 git branch  # 应在 feature/p2-usage-analytics
 
 # 2. 🔴 RED: 创建测试
-# 扩展 tests/unit/app/api/stats/usage.test.ts
-npm test -- tests/unit/app/api/stats/usage.test.ts
+# 创建 tests/unit/app/api/stats/usage/export.test.ts
+npm test -- tests/unit/app/api/stats/usage/export.test.ts
 
 # 3. 🟢 GREEN: 实现功能
-# 修改 app/api/stats/usage/route.ts
-npm test -- tests/unit/app/api/stats/usage.test.ts
+# 创建 app/api/stats/usage/export/route.ts
+npm test -- tests/unit/app/api/stats/usage/export.test.ts
 
 # 4. 🔵 REFACTOR: 重构优化
-# 提取工具函数，优化查询性能
-npm test -- tests/unit/app/api/stats/usage.test.ts
+# 提取格式化工具函数
+npm test -- tests/unit/app/api/stats/usage/export.test.ts
 
 # 5. 提交代码（遵循TDD提交规范）
 git add .
-git commit -m "feat(stats): implement advanced search filters (🟢 GREEN)"
+git commit -m "feat(stats): implement CSV/JSON export (🟢 GREEN)"
+```
+
+### 实现参考
+
+**CSV 格式示例**:
+```csv
+密钥名称,状态,总Token数,总请求数,创建时间,最后使用时间
+Production Key,active,10000,100,2024-01-01,2024-10-10
+Test Key,inactive,500,5,2024-01-01,2024-01-02
+```
+
+**JSON 格式示例**:
+```json
+{
+  "exportedAt": "2024-10-10T10:00:00Z",
+  "userId": "user-123",
+  "filters": {
+    "status": "active",
+    "minTokens": "1000"
+  },
+  "totalCount": 10,
+  "data": [
+    {
+      "id": "key-1",
+      "name": "Production Key",
+      "status": "active",
+      "totalTokens": 10000,
+      "totalRequests": 100,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "lastUsedAt": "2024-10-10T00:00:00Z"
+    }
+  ]
+}
 ```
 
 ---
