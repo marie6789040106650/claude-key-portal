@@ -186,8 +186,31 @@ async function getAllKeysStats(
     totalRequests: Number(k.totalCalls),
   }))
 
-  return NextResponse.json({
+  // 6. 获取 CRS Dashboard 数据
+  let crsDashboard
+  let crsWarning
+
+  try {
+    crsDashboard = await crsClient.getDashboard()
+  } catch (error) {
+    // CRS 不可用时降级处理，不影响整体响应
+    console.warn('CRS Dashboard API unavailable, using local stats:', error)
+    crsWarning = 'CRS服务暂时不可用，显示本地统计数据'
+  }
+
+  // 7. 构建响应
+  const response: any = {
     summary,
     keys: keysResponse,
-  })
+  }
+
+  if (crsDashboard) {
+    response.crsDashboard = crsDashboard
+  }
+
+  if (crsWarning) {
+    response.crsWarning = crsWarning
+  }
+
+  return NextResponse.json(response)
 }
