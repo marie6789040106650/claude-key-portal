@@ -7,6 +7,11 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import { verifyToken } from '@/lib/auth'
+import {
+  type FilterParams,
+  validateAllFilters,
+  buildAdvancedFilters,
+} from './filters'
 
 /**
  * 类型定义
@@ -92,148 +97,7 @@ function buildDateRangeFilter(
   return { valid: true, where }
 }
 
-/**
- * 工具函数：验证状态参数
- */
-function validateStatus(status: string | null): {
-  valid: boolean
-  error?: string
-} {
-  if (!status) {
-    return { valid: true }
-  }
-
-  const validStatuses = ['active', 'inactive']
-  if (!validStatuses.includes(status.toLowerCase())) {
-    return { valid: false, error: '状态参数无效，只能是 active 或 inactive' }
-  }
-
-  return { valid: true }
-}
-
-/**
- * 工具函数：验证使用量范围参数
- */
-function validateUsageRange(
-  minValue: string | null,
-  maxValue: string | null,
-  fieldName: string
-): {
-  valid: boolean
-  error?: string
-} {
-  if (!minValue && !maxValue) {
-    return { valid: true }
-  }
-
-  const min = minValue ? parseInt(minValue, 10) : null
-  const max = maxValue ? parseInt(maxValue, 10) : null
-
-  if (min !== null && (isNaN(min) || min < 0)) {
-    return { valid: false, error: '使用量参数必须为非负整数' }
-  }
-
-  if (max !== null && (isNaN(max) || max < 0)) {
-    return { valid: false, error: '使用量参数必须为非负整数' }
-  }
-
-  if (min !== null && max !== null && min > max) {
-    return { valid: false, error: `${fieldName}最小值不能大于最大值` }
-  }
-
-  return { valid: true }
-}
-
-/**
- * 工具函数：验证最后使用时间参数
- */
-function validateLastUsedTime(
-  lastUsedAfter: string | null,
-  lastUsedBefore: string | null
-): {
-  valid: boolean
-  error?: string
-} {
-  if (lastUsedAfter) {
-    const date = validateDate(lastUsedAfter)
-    if (!date) {
-      return { valid: false, error: '最后使用时间参数格式不正确' }
-    }
-  }
-
-  if (lastUsedBefore) {
-    const date = validateDate(lastUsedBefore)
-    if (!date) {
-      return { valid: false, error: '最后使用时间参数格式不正确' }
-    }
-  }
-
-  return { valid: true }
-}
-
-/**
- * 工具函数：构建高级搜索筛选条件
- */
-function buildAdvancedFilters(params: {
-  name?: string | null
-  status?: string | null
-  minTokens?: string | null
-  maxTokens?: string | null
-  minRequests?: string | null
-  maxRequests?: string | null
-  lastUsedAfter?: string | null
-  lastUsedBefore?: string | null
-}): any {
-  const filters: any = {}
-
-  // 名称搜索（不区分大小写的部分匹配）
-  if (params.name) {
-    filters.name = {
-      contains: params.name,
-      mode: 'insensitive',
-    }
-  }
-
-  // 状态筛选
-  if (params.status) {
-    filters.status = params.status
-  }
-
-  // Token 使用量范围
-  if (params.minTokens || params.maxTokens) {
-    filters.totalTokens = {}
-    if (params.minTokens) {
-      filters.totalTokens.gte = BigInt(params.minTokens)
-    }
-    if (params.maxTokens) {
-      filters.totalTokens.lte = BigInt(params.maxTokens)
-    }
-  }
-
-  // 请求数范围
-  if (params.minRequests || params.maxRequests) {
-    filters.totalCalls = {}
-    if (params.minRequests) {
-      filters.totalCalls.gte = BigInt(params.minRequests)
-    }
-    if (params.maxRequests) {
-      filters.totalCalls.lte = BigInt(params.maxRequests)
-    }
-  }
-
-  // 最后使用时间范围
-  if (params.lastUsedAfter || params.lastUsedBefore) {
-    filters.lastUsedAt = {}
-    if (params.lastUsedAfter) {
-      filters.lastUsedAt.gte = new Date(params.lastUsedAfter)
-    }
-    if (params.lastUsedBefore) {
-      filters.lastUsedAt.lte = new Date(params.lastUsedBefore)
-    }
-  }
-
-  return filters
-}
+// 筛选和验证函数已移至 ./filters.ts
 
 /**
  * 工具函数：构建CRS趋势查询参数
@@ -341,53 +205,8 @@ export async function GET(request: Request) {
     const lastUsedAfter = searchParams.get('lastUsedAfter')
     const lastUsedBefore = searchParams.get('lastUsedBefore')
 
-    // 3. 验证高级搜索参数
-    const statusValidation = validateStatus(status)
-    if (!statusValidation.valid) {
-      return NextResponse.json(
-        { error: statusValidation.error },
-        { status: 400 }
-      )
-    }
-
-    const tokensValidation = validateUsageRange(minTokens, maxTokens, 'Token')
-    if (!tokensValidation.valid) {
-      return NextResponse.json(
-        { error: tokensValidation.error },
-        { status: 400 }
-      )
-    }
-
-    const requestsValidation = validateUsageRange(
-      minRequests,
-      maxRequests,
-      '请求数'
-    )
-    if (!requestsValidation.valid) {
-      return NextResponse.json(
-        { error: requestsValidation.error },
-        { status: 400 }
-      )
-    }
-
-    const lastUsedValidation = validateLastUsedTime(
-      lastUsedAfter,
-      lastUsedBefore
-    )
-    if (!lastUsedValidation.valid) {
-      return NextResponse.json(
-        { error: lastUsedValidation.error },
-        { status: 400 }
-      )
-    }
-
-    // 4. 如果指定了keyId，返回单个密钥统计
-    if (keyId) {
-      return await getSingleKeyStats(userId, keyId, realtime)
-    }
-
-    // 5. 否则返回所有密钥的聚合统计（应用高级筛选）
-    const filterParams = {
+    // 3. 构建并验证高级搜索参数
+    const filterParams: FilterParams = {
       name,
       status,
       minTokens,
@@ -398,6 +217,17 @@ export async function GET(request: Request) {
       lastUsedBefore,
     }
 
+    const validation = validateAllFilters(filterParams)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+
+    // 4. 如果指定了keyId，返回单个密钥统计
+    if (keyId) {
+      return await getSingleKeyStats(userId, keyId, realtime)
+    }
+
+    // 5. 否则返回所有密钥的聚合统计（应用高级筛选）
     return await getAllKeysStats(
       userId,
       startDate,
@@ -482,16 +312,7 @@ async function getAllKeysStats(
   startDate: string | null,
   endDate: string | null,
   includeTrend: boolean = false,
-  filterParams?: {
-    name?: string | null
-    status?: string | null
-    minTokens?: string | null
-    maxTokens?: string | null
-    minRequests?: string | null
-    maxRequests?: string | null
-    lastUsedAfter?: string | null
-    lastUsedBefore?: string | null
-  }
+  filterParams?: FilterParams
 ) {
   // 1. 验证和构建时间范围过滤
   const dateFilter = buildDateRangeFilter(startDate, endDate)
