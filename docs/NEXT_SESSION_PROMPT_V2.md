@@ -200,165 +200,263 @@ f31dd22 test(stats): add multi-key comparison API tests (🔴 RED)
 
 ---
 
-## 📋 下一任务：P2.9 - UI/UX完善
+## 📋 下一任务：P2.9 - UI/UX完善 ⭐ 当前任务
 
 ### 任务目标
 
-完善Stats页面的用户体验，包括加载状态、错误处理、空状态、响应式设计等。
+完善Stats页面用户体验，**移除所有模拟数据**，集成真实CRS趋势API，添加CRS降级提示和手动刷新功能。
 
-### 功能需求
+### 核心问题
 
-1. **Redis缓存实现**
-   - CRS Dashboard数据缓存（60秒TTL）
-   - CRS API Keys列表缓存（60秒TTL）
-   - 趋势数据缓存（300秒TTL）
-   - 缓存键命名规范（`crs:dashboard:${userId}`）
+**🔴 严重问题（P0 - 必须修复）**:
 
-2. **数据库查询优化**
-   - 添加数据库索引（userId, status, totalTokens, lastUsedAt）
-   - 使用select优化查询字段
-   - 批量查询优化
-   - 避免N+1查询
+1. **使用模拟数据** (`app/dashboard/stats/page.tsx:79-81`)
+   ```typescript
+   // TODO: 从后端获取已聚合的时间序列数据
+   // 当前使用模拟数据 ← ❌ 必须移除
+   return generateMockTimeSeriesData(7)
+   ```
+   - ❌ 趋势图显示虚假数据，与实际API使用情况无关
+   - ❌ 违反项目核心原则（数据必须来自CRS）
 
-3. **请求去重**
-   - 相同参数的并发请求合并
-   - 防抖处理
-   - 请求缓存
+2. **CRS降级状态无UI提示**
+   - API返回`crsWarning`字段，但UI完全不显示
+   - 用户不知道CRS是否可用
 
-4. **性能监控**
-   - API响应时间监控
-   - CRS调用次数统计
-   - 缓存命中率
-   - 慢查询日志
+**🟡 中等问题（P1 - 应该修复）**:
+3. 缺少手动刷新功能
+4. 错误提示使用alert（应该用Toast）
+5. 缺少加载进度指示器
 
-### 优化目标
+### 5个核心任务
 
-| 指标 | 当前值 | 目标值 |
-|------|--------|--------|
-| Dashboard API响应 | ~2000ms | <500ms |
-| API Keys列表响应 | ~960ms | <300ms |
-| 统计查询响应 | ~450ms | <200ms |
-| CRS调用频率 | 每次请求 | 60秒/次 |
-| 缓存命中率 | 0% | >80% |
+| 任务 | 优先级 | 工作量 | TDD阶段 |
+|------|--------|--------|---------|
+| Task 1: 集成CRS趋势API | 🔴 P0 | 4-6h | 🔴 🟢 🔵 |
+| Task 2: CRS降级状态提示 | 🔴 P0 | 1-2h | 🔴 🟢 |
+| Task 3: 手动刷新功能 | 🟡 P1 | 1h | 🟢 |
+| Task 4: 错误提示优化 | 🟡 P1 | 1-2h | 🟢 |
+| Task 5: 加载进度指示器 | 🟡 P1 | 1h | 🟢 |
 
-### TDD 开发流程
+**预计总工作量**: 8-11小时 (1.5-2天)
 
-#### 🔴 RED: 编写性能测试
+---
 
-**创建文件**: `tests/unit/lib/infrastructure/cache/redis-cache.test.ts`
+### Task 1: 集成CRS趋势API（核心任务）
 
-**测试内容**:
-1. 测试缓存设置和获取
-2. 测试TTL过期
-3. 测试缓存键命名
-4. 测试并发请求处理
-5. 测试缓存失效策略
+#### 目标
+移除`generateMockTimeSeriesData`，集成真实的CRS Usage Trend API。
 
-#### 🟢 GREEN: 实现缓存
+#### 🔴 RED: 编写测试
 
-**创建文件**:
-- `lib/infrastructure/cache/redis-client.ts` - Redis客户端
-- `lib/infrastructure/cache/cache-manager.ts` - 缓存管理器
-- 更新 `app/api/stats/usage/route.ts` - 集成缓存
+**创建文件**: `tests/unit/app/api/stats/usage-trend.test.ts`
 
-**实现内容**:
-1. Redis连接配置
-2. 缓存设置/获取/删除
-3. TTL管理
-4. 错误降级（Redis不可用时）
-5. 更新API使用缓存
+**测试用例** (12个):
+```typescript
+describe('Usage API - Trend Data Integration', () => {
+  it('应该返回时间序列趋势数据', async () => {
+    const mockTrend = [
+      { date: '2024-01-01', tokens: 1000, calls: 10 },
+      { date: '2024-01-02', tokens: 1500, calls: 15 },
+    ]
+    mockCrsClient.getUsageTrend.mockResolvedValue(mockTrend)
+
+    const response = await GET(mockRequest)
+    const data = await response.json()
+
+    expect(data.trend).toEqual([
+      { timestamp: '2024-01-01T00:00:00.000Z', tokens: 1000, requests: 10 },
+      { timestamp: '2024-01-02T00:00:00.000Z', tokens: 1500, requests: 15 },
+    ])
+  })
+
+  it('应该支持自定义日期范围', ...)
+  it('应该支持按密钥筛选趋势', ...)
+  it('应该缓存趋势数据5分钟', ...)
+  it('缓存命中时不应调用CRS API', ...)
+  it('CRS不可用时应返回空数组', ...)
+  // ... 更多测试
+})
+```
+
+#### 🟢 GREEN: 实现功能
+
+**文件1**: `app/api/stats/usage/route.ts` - 扩展API返回趋势数据
+
+```typescript
+interface UsageResponse {
+  summary: { ... }
+  keys: KeyStats[]
+  trend?: TrendDataPoint[]  // ← 新增
+  crsDashboard?: { ... }
+  crsWarning?: string
+}
+
+export async function GET(request: NextRequest) {
+  // ... 现有代码 ...
+
+  // 3. 获取趋势数据（新增）
+  let trendData: TrendDataPoint[] = []
+  try {
+    const trendCacheKey = cacheManager.generateKey('crs', 'trend', `${startDate}-${endDate}`)
+    const cached = await cacheManager.get<any[]>(trendCacheKey)
+
+    if (cached) {
+      trendData = cached.map(transformTrendData)
+    } else {
+      const crsTrend = await crsClient.getUsageTrend({ startDate, endDate, keyIds })
+      trendData = crsTrend.map(transformTrendData)
+      await cacheManager.set(trendCacheKey, crsTrend, cacheManager.getTTL('trend'))
+    }
+  } catch (error) {
+    console.warn('[Usage API] Failed to fetch trend data:', error)
+    warnings.push('趋势数据暂时不可用，请稍后刷新')
+  }
+
+  return NextResponse.json({
+    summary,
+    keys,
+    trend: trendData,  // ← 新增
+    crsDashboard,
+    crsWarning: warnings.length > 0 ? warnings.join('; ') : undefined,
+  })
+}
+```
+
+**文件2**: `app/dashboard/stats/page.tsx` - 使用真实数据
+
+```typescript
+// 删除
+- import { generateMockTimeSeriesData } from '@/lib/date-utils'
+
+// 修改
+const timeSeriesData = useMemo<TimeSeriesDataPoint[]>(() => {
+-  // TODO: 从后端获取已聚合的时间序列数据
+-  // 当前使用模拟数据
+-  return generateMockTimeSeriesData(7)
++  // 使用API返回的真实趋势数据
++  return data?.trend || []
+}, [data?.trend])
+```
 
 #### 🔵 REFACTOR: 优化架构
 
-**优化内容**:
-1. 提取缓存键生成逻辑
-2. 统一缓存TTL配置
-3. 添加性能监控中间件
-4. 优化数据库Schema（添加索引）
+**创建文件**: `app/api/stats/usage/trend-utils.ts` - 提取趋势数据处理逻辑
+
+```typescript
+export async function fetchTrendData(options: FetchTrendOptions): Promise<TrendDataPoint[]> {
+  const cacheKey = cacheManager.generateKey('crs', 'trend', ...)
+
+  try {
+    const cached = await cacheManager.get<any[]>(cacheKey)
+    if (cached) return cached.map(transformTrendData)
+
+    const crsTrend = await crsClient.getUsageTrend(options)
+    const transformed = crsTrend.map(transformTrendData)
+    await cacheManager.set(cacheKey, crsTrend, cacheManager.getTTL('trend'))
+
+    return transformed
+  } catch (error) {
+    console.warn('[Trend Utils] Failed to fetch trend data:', error)
+    return []
+  }
+}
+```
+
+---
+
+### Task 2: CRS降级状态UI提示
+
+#### 🔴 RED: 编写测试
+
+**创建文件**: `tests/unit/components/stats/CrsStatusAlert.test.tsx`
+
+```typescript
+describe('CrsStatusAlert', () => {
+  it('无警告时不显示', ...)
+  it('有警告时显示Alert', ...)
+  it('显示重试按钮', ...)
+  it('点击重试按钮触发回调', ...)
+  it('使用warning样式', ...)
+})
+```
+
+#### 🟢 GREEN: 实现功能
+
+**创建文件**: `components/stats/CrsStatusAlert.tsx`
+
+```typescript
+export function CrsStatusAlert({ warning, onRetry, retrying }: CrsStatusAlertProps) {
+  if (!warning) return null
+
+  return (
+    <Alert variant="warning" className="mb-6 border-warning bg-warning/10">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>CRS服务暂时不可用</AlertTitle>
+      <AlertDescription>
+        <p>{warning}</p>
+        <p className="text-sm text-muted-foreground mb-3">
+          当前显示的是本地统计数据，部分功能暂时受限。
+        </p>
+        <Button size="sm" variant="outline" onClick={onRetry} disabled={retrying}>
+          <RefreshCw className={retrying ? 'animate-spin' : ''} />
+          {retrying ? '连接中...' : '重试连接'}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  )
+}
+```
+
+**集成到**: `app/dashboard/stats/page.tsx`
+
+```typescript
+<CrsStatusAlert
+  warning={data?.crsWarning}
+  onRetry={handleRetryCrs}
+  retrying={isLoading}
+/>
+```
+
+---
+
+### Task 3-5: 快速优化
+
+**Task 3**: 手动刷新按钮（1h）
+**Task 4**: Toast替换alert（1-2h）
+**Task 5**: 加载进度指示器（1h）
+
+---
 
 ### 实施步骤
 
 ```bash
-# 1. 安装Redis依赖
-npm install ioredis @types/ioredis
+# 1. 确认环境
+cd /Users/bypasser/claude-project/0930/claude-key-portal
+git status
 
-# 2. 🔴 RED: 创建缓存测试
-# 创建 tests/unit/lib/infrastructure/cache/redis-cache.test.ts
-npm test -- tests/unit/lib/infrastructure/cache/redis-cache.test.ts
+# 2. Task 1.1 - 🔴 RED: 创建趋势测试
+mkdir -p tests/unit/app/api/stats
+touch tests/unit/app/api/stats/usage-trend.test.ts
+# 编写12个测试用例
+npm test -- usage-trend.test.ts
+# 预期: 全部失败（RED状态）
 
-# 3. 🟢 GREEN: 实现缓存
-# 创建 lib/infrastructure/cache/redis-client.ts
-# 创建 lib/infrastructure/cache/cache-manager.ts
+# 3. Task 1.2-1.4 - 🟢 GREEN: 实现趋势功能
+# 修改 app/api/stats/usage/route.ts
+# 修改 hooks/use-stats.ts
+# 修改 app/dashboard/stats/page.tsx
+npm test -- usage-trend.test.ts
+# 预期: 全部通过（GREEN状态）
+git commit -m "feat(stats): integrate CRS trend data and remove mock data (🟢 GREEN)"
+
+# 4. Task 1.5-1.6 - 🔵 REFACTOR: 重构工具
+# 创建 app/api/stats/usage/trend-utils.ts
 npm test
+git commit -m "refactor(stats): extract trend data utilities (🔵 REFACTOR)"
 
-# 4. 🔵 REFACTOR: 优化集成
-# 更新所有stats API使用缓存
-npm test
-
-# 5. 添加数据库索引
-npx prisma migrate dev --name add_performance_indexes
-
-# 6. 性能测试
-npm run dev
-# 使用Apache Bench或k6进行压力测试
-
-# 7. 提交代码
-git add .
-git commit -m "perf(stats): implement Redis caching and query optimization (🟢 GREEN)"
-```
-
-### 缓存实现参考
-
-**Redis Client**:
-```typescript
-// lib/infrastructure/cache/redis-client.ts
-import Redis from 'ioredis'
-
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  retryStrategy: (times) => Math.min(times * 50, 2000),
-})
-
-export { redis }
-```
-
-**Cache Manager**:
-```typescript
-// lib/infrastructure/cache/cache-manager.ts
-import { redis } from './redis-client'
-
-export class CacheManager {
-  async get<T>(key: string): Promise<T | null> {
-    const value = await redis.get(key)
-    return value ? JSON.parse(value) : null
-  }
-
-  async set<T>(key: string, value: T, ttl: number): Promise<void> {
-    await redis.setex(key, ttl, JSON.stringify(value))
-  }
-
-  async delete(key: string): Promise<void> {
-    await redis.del(key)
-  }
-}
-```
-
-**API集成示例**:
-```typescript
-// app/api/stats/usage/route.ts
-const cacheKey = `stats:usage:${userId}`
-const cached = await cacheManager.get(cacheKey)
-
-if (cached) {
-  return NextResponse.json(cached)
-}
-
-const data = await fetchFromDatabase()
-await cacheManager.set(cacheKey, data, 60) // 60秒TTL
-
-return NextResponse.json(data)
+# 5. Task 2 - CRS降级提示
+# ... 继续后续任务
 ```
 
 ---
