@@ -12,33 +12,36 @@
 
 ## ✅ 最新完成（2025-10-10）
 
-### P2.2 - CRS API Keys列表集成 ✅
+### P2.3 - CRS 时间序列趋势图集成 ✅
 
 **TDD流程完成**:
-- 🔴 RED: 9个测试用例（全部失败）
-- 🟢 GREEN: 实现CRS getApiKeys集成和数据合并（9/9测试通过）
-- 🔵 REFACTOR: 提取密钥合并工具函数（9/9测试保持通过）
+- 🔴 RED: 10个测试用例（7个失败，22个旧测试保持通过）
+- 🟢 GREEN: 实现CRS getUsageTrend集成（29/29测试通过）
+- 🔵 REFACTOR: 提取日期过滤和趋势参数工具函数（29/29测试保持通过）
 
 **交付物**:
-- ✅ 测试: `tests/unit/app/api/keys/list.test.ts` (+288行)
-- ✅ CRS Client: `lib/infrastructure/external/crs-client.ts` (新增getApiKeys方法)
-- ✅ UseCase增强: `lib/application/key/list-keys.usecase.ts` (集成CRS数据合并)
-- ✅ 工具函数: `lib/application/key/key-merge.utils.ts` (+151行)
-- ✅ 文档: `docs/P2.2_COMPLETION_SUMMARY.md`
+- ✅ 测试: `tests/unit/stats/usage.test.ts` (+267行)
+- ✅ API增强: `app/api/stats/usage/route.ts` (+59 -33行)
+- ✅ 工具函数: `buildDateRangeFilter()`, `buildTrendParams()`, `fetchCrsUsageTrendSafely()`
+- ✅ 文档: `docs/P2.3_COMPLETION_SUMMARY.md`
 
 **功能特性**:
-- ✅ 合并Portal本地数据和CRS实时数据
-- ✅ 检测并报告状态不一致
-- ✅ 自动发现CRS新密钥
-- ✅ CRS错误时降级到本地数据
+- ✅ 集成CRS `/admin/api-keys-usage-trend` API
+- ✅ 支持可选时间范围过滤（startDate, endDate）
+- ✅ 返回每日使用趋势（请求数、Token数、成本）
+- ✅ CRS错误时降级处理（返回警告而非失败）
 
 **Git提交**:
 ```
-d527888 docs(p2): document P2.2 completion (📝 DOCS)
-86a071d refactor(keys): extract key merging utilities (🔵 REFACTOR)
-fd93d9f feat(keys): integrate CRS API Keys list (🟢 GREEN)
-6ab732f test(keys): add CRS API Keys integration tests (🔴 RED)
+09b0308 docs(p2): document P2.3 completion (📝 DOCS)
+3839cb3 refactor(stats): extract date filtering and trend params utilities (🔵 REFACTOR)
+f5053a4 feat(stats): integrate CRS usage trend API (🟢 GREEN)
+f1b4222 test(stats): add CRS usage trend API integration tests (🔴 RED)
 ```
+
+### P2.2 - CRS API Keys列表集成 ✅
+
+**已完成** - 详见 `docs/P2.2_COMPLETION_SUMMARY.md`
 
 ### P2.1 - CRS Dashboard API集成 ✅
 
@@ -73,10 +76,10 @@ fd93d9f feat(keys): integrate CRS API Keys list (🟢 GREEN)
 第1天 - CRS集成和Dashboard增强:
 - [x] P2.1: 集成CRS Dashboard API (/admin/dashboard) ✅ 已完成
 - [x] P2.2: 集成CRS API Keys列表 (/admin/api-keys) ✅ 已完成
-- [ ] P2.3: 实现时间序列趋势图 (/admin/api-keys-usage-trend) ← 下一任务
+- [x] P2.3: 实现时间序列趋势图 (/admin/api-keys-usage-trend) ✅ 已完成
 
 第2天 - 高级功能:
-- [ ] P2.4: 多密钥对比功能
+- [ ] P2.4: 多密钥对比功能 ← 下一任务
 - [ ] P2.5: Top 10排行榜
 - [ ] P2.6: 高级搜索筛选
 
@@ -88,76 +91,59 @@ fd93d9f feat(keys): integrate CRS API Keys list (🟢 GREEN)
 
 ---
 
-## 📋 下一任务：P2.3 - 实现时间序列趋势图
+## 📋 下一任务：P2.4 - 多密钥对比功能
 
 ### 任务目标
 
-集成CRS时间序列趋势API，为统计页面提供使用量趋势数据，替换当前的模拟数据。
+实现多个密钥的使用量对比功能，允许用户选择2-5个密钥进行并排对比分析。
 
-### CRS API信息
+### 功能需求
 
-**端点**: `GET /admin/api-keys-usage-trend`
+1. **密钥选择器**
+   - 多选下拉框（最多5个密钥）
+   - 支持搜索密钥名称
+   - 显示密钥状态（Active/Disabled）
 
-**查询参数**:
-```typescript
-{
-  startDate?: string  // ISO 8601格式 (可选)
-  endDate?: string    // ISO 8601格式 (可选)
-}
-```
+2. **对比数据展示**
+   - 并排趋势图（使用量、Token数、成本）
+   - 数据表格对比
+   - 差异百分比计算
 
-**响应格式**:
-```typescript
-{
-  data: Array<{
-    date: string           // YYYY-MM-DD
-    totalRequests: number
-    totalTokens: number
-    cost: number
-  }>
-}
-```
-
-**CRS Client方法**（已存在）:
-```typescript
-// lib/infrastructure/external/crs-client.ts
-async getUsageTrend(params?: {
-  startDate?: string
-  endDate?: string
-}): Promise<any[]>
-```
+3. **CRS API集成**
+   - 批量获取多个密钥的统计数据
+   - 可能需要多次调用 `/admin/api-keys/:id/stats`
+   - 或使用现有的 `/admin/api-keys` 数据
 
 ### TDD开发流程
 
 #### 🔴 RED: 编写失败测试
 
-**修改文件**: `tests/unit/stats/usage.test.ts` （扩展P2.1测试）
+**创建文件**: `tests/unit/app/api/stats/compare.test.ts`
 
-**新增测试内容**:
-1. 测试调用CRS getUsageTrend API
-2. 测试时间范围参数传递
-3. 测试趋势数据格式转换
-4. 测试错误降级处理
-5. 测试缓存策略
+**测试内容**:
+1. 测试密钥选择验证（2-5个）
+2. 测试批量获取密钥统计
+3. 测试数据格式转换
+4. 测试差异计算
+5. 测试错误处理
 
 #### 🟢 GREEN: 实现功能
 
-**修改文件**: `app/api/stats/usage/route.ts`
+**新建文件**: `app/api/stats/compare/route.ts`
 
 **实现内容**:
-1. 添加时间范围参数解析（startDate, endDate）
-2. 调用 `crsClient.getUsageTrend(params)`
-3. 转换CRS趋势数据格式
-4. 实现错误降级（返回空数组或缓存数据）
-5. 添加数据缓存（Redis或内存）
+1. 参数验证（keyIds数组，2-5个）
+2. 批量调用CRS API获取统计
+3. 数据格式化和差异计算
+4. 错误降级处理
 
 #### 🔵 REFACTOR: 优化代码
 
 **优化内容**:
-1. 提取趋势数据获取和转换逻辑
-2. 统一时间范围验证
-3. 优化缓存策略
-4. 改进类型定义
+1. 提取对比计算逻辑
+2. 并行化CRS API调用
+3. 添加缓存支持
+4. 优化类型定义
 
 ### 实施步骤
 
@@ -166,21 +152,21 @@ async getUsageTrend(params?: {
 cd /Users/bypasser/claude-project/0930/claude-key-portal
 git branch  # 应在 feature/p2-usage-analytics
 
-# 2. 🔴 RED: 扩展测试
-# 在 tests/unit/stats/usage.test.ts 中添加趋势API测试
-npm test -- tests/unit/stats/usage.test.ts
+# 2. 🔴 RED: 创建测试
+# 创建 tests/unit/app/api/stats/compare.test.ts
+npm test -- tests/unit/app/api/stats/compare.test.ts
 
 # 3. 🟢 GREEN: 实现功能
-# 修改 app/api/stats/usage/route.ts 添加趋势支持
-npm test -- tests/unit/stats/usage.test.ts
+# 创建 app/api/stats/compare/route.ts
+npm test -- tests/unit/app/api/stats/compare.test.ts
 
 # 4. 🔵 REFACTOR: 重构优化
 # 提取工具函数，优化代码结构
-npm test -- tests/unit/stats/usage.test.ts
+npm test -- tests/unit/app/api/stats/compare.test.ts
 
 # 5. 提交代码（遵循TDD提交规范）
 git add .
-git commit -m "feat(stats): integrate CRS usage trend API (🟢 GREEN)"
+git commit -m "feat(stats): implement multi-key comparison (🟢 GREEN)"
 ```
 
 ---
