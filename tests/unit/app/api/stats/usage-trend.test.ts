@@ -97,9 +97,9 @@ describe('GET /api/stats/usage - Trend Data Integration', () => {
     it('应该返回时间序列趋势数据', async () => {
       // Arrange: 模拟CRS返回趋势数据
       const mockCrsTrend = [
-        { date: '2024-01-01', tokens: 1000, calls: 10 },
-        { date: '2024-01-02', tokens: 1500, calls: 15 },
-        { date: '2024-01-03', tokens: 2000, calls: 20 },
+        { date: '2024-01-01', tokens: 1000, requests: 10 },
+        { date: '2024-01-02', tokens: 1500, requests: 15 },
+        { date: '2024-01-03', tokens: 2000, requests: 20 },
       ]
       ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
 
@@ -153,7 +153,7 @@ describe('GET /api/stats/usage - Trend Data Integration', () => {
 
     it('应该处理时区转换正确', async () => {
       // Arrange: 测试不同时区的日期
-      const mockCrsTrend = [{ date: '2024-06-15', tokens: 1000, calls: 10 }]
+      const mockCrsTrend = [{ date: '2024-06-15', tokens: 1000, requests: 10 }]
       ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
 
       // Act
@@ -233,7 +233,7 @@ describe('GET /api/stats/usage - Trend Data Integration', () => {
   describe('趋势数据缓存', () => {
     it('应该缓存趋势数据5分钟', async () => {
       // Arrange
-      const mockCrsTrend = [{ date: '2024-01-01', tokens: 1000, calls: 10 }]
+      const mockCrsTrend = [{ date: '2024-01-01', tokens: 1000, requests: 10 }]
       ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
 
       // Act
@@ -252,7 +252,7 @@ describe('GET /api/stats/usage - Trend Data Integration', () => {
 
     it('缓存命中时不应调用CRS API', async () => {
       // Arrange: 模拟缓存命中
-      const cachedTrend = [{ date: '2024-01-01', tokens: 1000, calls: 10 }]
+      const cachedTrend = [{ date: '2024-01-01', tokens: 1000, requests: 10 }]
       mockCacheManager.get.mockImplementation((key) => {
         if (key.includes('trend')) {
           return Promise.resolve(cachedTrend)

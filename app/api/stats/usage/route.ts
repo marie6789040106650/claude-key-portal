@@ -29,9 +29,16 @@ interface CrsDashboardData {
 
 interface CrsTrendData {
   date: string // YYYY-MM-DD
-  totalRequests: number
-  totalTokens: number
-  cost: number
+  requests: number
+  tokens: number
+  cost?: number
+}
+
+// 趋势数据点（前端格式）
+interface TrendDataPoint {
+  timestamp: string // ISO 8601 格式
+  tokens: number
+  requests: number
 }
 
 interface StatsResponse {
@@ -52,8 +59,19 @@ interface StatsResponse {
   }>
   crsDashboard?: CrsDashboardData
   crsWarning?: string
-  trend?: CrsTrendData[]
+  trend?: TrendDataPoint[] // 使用前端格式
   trendWarning?: string
+}
+
+/**
+ * 工具函数：转换CRS趋势数据为前端格式
+ */
+function transformTrendData(item: CrsTrendData): TrendDataPoint {
+  return {
+    timestamp: new Date(item.date).toISOString(),
+    tokens: item.tokens || 0,
+    requests: item.requests || 0,
+  }
 }
 
 /**
@@ -105,15 +123,21 @@ function buildDateRangeFilter(
 
 /**
  * 工具函数：构建CRS趋势查询参数
+ * 默认返回最近7天的数据
  */
 function buildTrendParams(
   startDate: string | null,
   endDate: string | null
-): { startDate?: string; endDate?: string } {
-  const params: { startDate?: string; endDate?: string } = {}
-  if (startDate) params.startDate = startDate
-  if (endDate) params.endDate = endDate
-  return params
+): { startDate: string; endDate: string } {
+  // 如果没有提供日期，使用默认的最近7天
+  const now = new Date()
+  const sevenDaysAgo = new Date(now)
+  sevenDaysAgo.setDate(now.getDate() - 7)
+
+  return {
+    startDate: startDate || sevenDaysAgo.toISOString().split('T')[0],
+    endDate: endDate || now.toISOString().split('T')[0],
+  }
 }
 
 /**
@@ -188,7 +212,7 @@ async function fetchCrsUsageTrendSafely(params?: {
 
     return { data }
   } catch (error) {
-    console.warn('CRS Usage Trend API unavailable:', error)
+    console.warn('Failed to fetch trend data from CRS:', error)
     return { warning: '趋势数据暂时不可用' }
   }
 }
@@ -201,7 +225,7 @@ async function fetchCrsUsageTrendSafely(params?: {
  * - realtime: 是否从CRS获取实时统计（可选）
  * - startDate: 开始日期（可选）
  * - endDate: 结束日期（可选）
- * - includeTrend: 是否包含趋势数据（可选）
+ * - 注：趋势数据默认包含在响应中
  *
  * 高级搜索筛选参数:
  * - name: 按名称搜索（可选）
@@ -230,7 +254,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const keyId = searchParams.get('keyId')
     const realtime = searchParams.get('realtime') === 'true'
-    const includeTrend = searchParams.get('includeTrend') === 'true'
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
 
@@ -267,13 +290,7 @@ export async function GET(request: Request) {
     }
 
     // 5. 否则返回所有密钥的聚合统计（应用高级筛选）
-    return await getAllKeysStats(
-      userId,
-      startDate,
-      endDate,
-      includeTrend,
-      filterParams
-    )
+    return await getAllKeysStats(userId, startDate, endDate, filterParams)
   } catch (error: any) {
     console.error('Usage stats error:', error)
     return NextResponse.json(
@@ -435,37 +452,34 @@ async function getAllKeysStats(
   const { data: crsDashboard, warning: crsWarning } =
     await fetchCrsDashboardSafely()
 
-  // 7. 可选：获取 CRS Usage Trend 数据
-  let crsTrend: CrsTrendData[] | undefined
-  let trendWarning: string | undefined
+  // 7. 获取 CRS Usage Trend 数据（默认获取）
+  const trendParams = buildTrendParams(startDate, endDate)
+  const { data: crsTrendData, warning: trendWarning } =
+    await fetchCrsUsageTrendSafely(trendParams)
 
-  if (includeTrend) {
-    const trendParams = buildTrendParams(startDate, endDate)
-    const { data, warning } = await fetchCrsUsageTrendSafely(trendParams)
-    crsTrend = data
-    trendWarning = warning
-  }
+  // 8. 转换趋势数据为前端格式
+  const trendData: TrendDataPoint[] = crsTrendData
+    ? crsTrendData.map(transformTrendData)
+    : []
 
-  // 8. 构建响应
+  // 9. 构建响应
   const response: StatsResponse = {
     summary,
     keys: keysResponse,
+    trend: trendData, // 始终包含趋势数据（可能为空数组）
   }
 
   if (crsDashboard) {
     response.crsDashboard = crsDashboard
   }
 
-  if (crsWarning) {
-    response.crsWarning = crsWarning
-  }
+  // 10. 合并所有警告消息
+  const warnings: string[] = []
+  if (crsWarning) warnings.push(crsWarning)
+  if (trendWarning) warnings.push(trendWarning)
 
-  if (crsTrend) {
-    response.trend = crsTrend
-  }
-
-  if (trendWarning) {
-    response.trendWarning = trendWarning
+  if (warnings.length > 0) {
+    response.crsWarning = warnings.join('; ')
   }
 
   return NextResponse.json(response)
