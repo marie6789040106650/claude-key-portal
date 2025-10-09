@@ -7,11 +7,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import { verifyToken } from '@/lib/auth'
+import { getCacheManager } from '@/lib/infrastructure/cache/cache-manager'
 import {
   type FilterParams,
   validateAllFilters,
   buildAdvancedFilters,
 } from './filters'
+
+// 初始化缓存管理器
+const cacheManager = getCacheManager()
 
 /**
  * 类型定义
@@ -120,14 +124,29 @@ function bigIntToNumber(value: bigint | null | undefined): number {
 }
 
 /**
- * 工具函数：获取CRS Dashboard数据（带降级处理）
+ * 工具函数：获取CRS Dashboard数据（带缓存和降级处理）
  */
 async function fetchCrsDashboardSafely(): Promise<{
   data?: CrsDashboardData
   warning?: string
 }> {
+  // 1. 尝试从缓存获取
+  const cacheKey = cacheManager.generateKey('crs', 'dashboard', 'global')
+  const cached = await cacheManager.get<CrsDashboardData>(cacheKey)
+
+  if (cached) {
+    console.log('[Cache] Dashboard cache hit')
+    return { data: cached }
+  }
+
+  // 2. 缓存未命中，从CRS获取
   try {
     const data = await crsClient.getDashboard()
+
+    // 3. 缓存结果（60秒TTL）
+    await cacheManager.set(cacheKey, data, cacheManager.getTTL('dashboard'))
+    console.log('[Cache] Dashboard cached for 60s')
+
     return { data }
   } catch (error) {
     console.warn('CRS Dashboard API unavailable, using local stats:', error)
@@ -136,7 +155,7 @@ async function fetchCrsDashboardSafely(): Promise<{
 }
 
 /**
- * 工具函数：获取CRS Usage Trend数据（带降级处理）
+ * 工具函数：获取CRS Usage Trend数据（带缓存和降级处理）
  */
 async function fetchCrsUsageTrendSafely(params?: {
   startDate?: string
@@ -145,8 +164,28 @@ async function fetchCrsUsageTrendSafely(params?: {
   data?: CrsTrendData[]
   warning?: string
 }> {
+  // 1. 生成缓存键（包含日期参数）
+  const dateRange = params
+    ? `${params.startDate || 'start'}-${params.endDate || 'end'}`
+    : 'all'
+  const cacheKey = cacheManager.generateKey('crs', 'trend', dateRange)
+
+  // 2. 尝试从缓存获取
+  const cached = await cacheManager.get<CrsTrendData[]>(cacheKey)
+
+  if (cached) {
+    console.log('[Cache] Trend cache hit')
+    return { data: cached }
+  }
+
+  // 3. 缓存未命中，从CRS获取
   try {
     const data = await crsClient.getUsageTrend(params)
+
+    // 4. 缓存结果（300秒TTL = 5分钟）
+    await cacheManager.set(cacheKey, data, cacheManager.getTTL('trend'))
+    console.log('[Cache] Trend cached for 300s')
+
     return { data }
   } catch (error) {
     console.warn('CRS Usage Trend API unavailable:', error)
@@ -291,13 +330,31 @@ async function getSingleKeyStats(
     },
   }
 
-  // 5. 可选：从CRS获取实时统计
+  // 5. 可选：从CRS获取实时统计（带缓存）
   if (realtime && key.crsKey) {
-    try {
-      const realtimeStats = await crsClient.getKeyStats(key.crsKey)
-      response.key.realtimeStats = realtimeStats
-    } catch (error) {
-      response.crsWarning = '实时统计暂时不可用，显示缓存数据'
+    // 5.1 尝试从缓存获取
+    const statsCacheKey = cacheManager.generateKey('crs', 'key-stats', key.id)
+    const cachedStats = await cacheManager.get(statsCacheKey)
+
+    if (cachedStats) {
+      console.log('[Cache] Key stats cache hit')
+      response.key.realtimeStats = cachedStats
+    } else {
+      // 5.2 缓存未命中，从CRS获取
+      try {
+        const realtimeStats = await crsClient.getKeyStats(key.crsKey)
+        response.key.realtimeStats = realtimeStats
+
+        // 5.3 缓存结果（60秒TTL）
+        await cacheManager.set(
+          statsCacheKey,
+          realtimeStats,
+          cacheManager.getTTL('stats')
+        )
+        console.log('[Cache] Key stats cached for 60s')
+      } catch (error) {
+        response.crsWarning = '实时统计暂时不可用，显示缓存数据'
+      }
     }
   }
 

@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyToken } from '@/lib/auth'
+import { getCacheManager } from '@/lib/infrastructure/cache/cache-manager'
 import {
   type SortBy,
   type LeaderboardResponse,
@@ -16,6 +17,9 @@ import {
   sortKeysByDimension,
   generateLeaderboard,
 } from './utils'
+
+// 初始化缓存管理器
+const cacheManager = getCacheManager()
 
 /**
  * GET /api/stats/leaderboard - 获取排行榜
@@ -50,7 +54,21 @@ export async function GET(request: Request) {
 
     const sortBy = sortByParam
 
-    // 4. 查询当前用户的所有密钥
+    // 4. 尝试从缓存获取
+    const cacheKey = cacheManager.generateKey(
+      'stats',
+      'leaderboard',
+      userId,
+      sortBy
+    )
+    const cached = await cacheManager.get<LeaderboardResponse>(cacheKey)
+
+    if (cached) {
+      console.log('[Cache] Leaderboard cache hit')
+      return NextResponse.json(cached)
+    }
+
+    // 5. 缓存未命中，查询数据库
     const keys = await prisma.apiKey.findMany({
       where: {
         userId,
@@ -92,6 +110,10 @@ export async function GET(request: Request) {
         displayedKeys: leaderboard.length,
       },
     }
+
+    // 9. 缓存结果（60秒TTL）
+    await cacheManager.set(cacheKey, response, cacheManager.getTTL('stats'))
+    console.log('[Cache] Leaderboard cached for 60s')
 
     return NextResponse.json(response)
   } catch (error: any) {

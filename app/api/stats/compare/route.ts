@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
+import { getCacheManager } from '@/lib/infrastructure/cache/cache-manager'
 import {
   validateKeyIdsParam,
   calculateComparison,
@@ -14,8 +15,11 @@ import {
   type CompareResponse,
 } from './utils'
 
+// 初始化缓存管理器
+const cacheManager = getCacheManager()
+
 /**
- * 获取多个密钥的CRS统计（并行调用）
+ * 获取多个密钥的CRS统计（并行调用，带缓存）
  */
 async function fetchKeyStatsInParallel(
   keys: Array<{ id: string; name: string; crsKey: string }>
@@ -25,7 +29,26 @@ async function fetchKeyStatsInParallel(
 }> {
   const results = await Promise.allSettled(
     keys.map(async (key) => {
+      // 1. 尝试从缓存获取
+      const cacheKey = cacheManager.generateKey('crs', 'key-stats', key.id)
+      const cached = await cacheManager.get(cacheKey)
+
+      if (cached) {
+        console.log(`[Cache] Key stats cache hit for ${key.id}`)
+        return {
+          id: key.id,
+          name: key.name,
+          stats: cached,
+        }
+      }
+
+      // 2. 缓存未命中，从CRS获取
       const stats = await crsClient.getKeyStats(key.crsKey)
+
+      // 3. 缓存结果（60秒TTL）
+      await cacheManager.set(cacheKey, stats, cacheManager.getTTL('stats'))
+      console.log(`[Cache] Key stats cached for ${key.id}`)
+
       return {
         id: key.id,
         name: key.name,
