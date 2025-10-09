@@ -18,6 +18,13 @@ interface CrsDashboardData {
   totalRequests: number
 }
 
+interface CrsTrendData {
+  date: string // YYYY-MM-DD
+  totalRequests: number
+  totalTokens: number
+  cost: number
+}
+
 interface StatsResponse {
   summary: {
     totalTokens: number
@@ -36,6 +43,8 @@ interface StatsResponse {
   }>
   crsDashboard?: CrsDashboardData
   crsWarning?: string
+  trend?: CrsTrendData[]
+  trendWarning?: string
 }
 
 /**
@@ -70,6 +79,25 @@ async function fetchCrsDashboardSafely(): Promise<{
 }
 
 /**
+ * 工具函数：获取CRS Usage Trend数据（带降级处理）
+ */
+async function fetchCrsUsageTrendSafely(params?: {
+  startDate?: string
+  endDate?: string
+}): Promise<{
+  data?: CrsTrendData[]
+  warning?: string
+}> {
+  try {
+    const data = await crsClient.getUsageTrend(params)
+    return { data }
+  } catch (error) {
+    console.warn('CRS Usage Trend API unavailable:', error)
+    return { warning: '趋势数据暂时不可用' }
+  }
+}
+
+/**
  * GET /api/stats/usage - 获取使用统计
  *
  * 查询参数:
@@ -95,6 +123,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const keyId = searchParams.get('keyId')
     const realtime = searchParams.get('realtime') === 'true'
+    const includeTrend = searchParams.get('includeTrend') === 'true'
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
 
@@ -104,7 +133,7 @@ export async function GET(request: Request) {
     }
 
     // 4. 否则返回所有密钥的聚合统计
-    return await getAllKeysStats(userId, startDate, endDate)
+    return await getAllKeysStats(userId, startDate, endDate, includeTrend)
   } catch (error: any) {
     console.error('Usage stats error:', error)
     return NextResponse.json(
@@ -180,7 +209,8 @@ async function getSingleKeyStats(
 async function getAllKeysStats(
   userId: string,
   startDate: string | null,
-  endDate: string | null
+  endDate: string | null,
+  includeTrend: boolean = false
 ) {
   // 1. 构建查询条件
   const where: any = {
@@ -257,7 +287,22 @@ async function getAllKeysStats(
   const { data: crsDashboard, warning: crsWarning } =
     await fetchCrsDashboardSafely()
 
-  // 7. 构建响应
+  // 7. 可选：获取 CRS Usage Trend 数据
+  let crsTrend: CrsTrendData[] | undefined
+  let trendWarning: string | undefined
+
+  if (includeTrend) {
+    // 构建时间范围参数
+    const trendParams: { startDate?: string; endDate?: string } = {}
+    if (startDate) trendParams.startDate = startDate
+    if (endDate) trendParams.endDate = endDate
+
+    const { data, warning } = await fetchCrsUsageTrendSafely(trendParams)
+    crsTrend = data
+    trendWarning = warning
+  }
+
+  // 8. 构建响应
   const response: StatsResponse = {
     summary,
     keys: keysResponse,
@@ -269,6 +314,14 @@ async function getAllKeysStats(
 
   if (crsWarning) {
     response.crsWarning = crsWarning
+  }
+
+  if (crsTrend) {
+    response.trend = crsTrend
+  }
+
+  if (trendWarning) {
+    response.trendWarning = trendWarning
   }
 
   return NextResponse.json(response)
