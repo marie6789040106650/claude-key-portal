@@ -162,11 +162,29 @@ export class CrsClient {
   }
 
   /**
-   * 列出API密钥
+   * 列出API密钥（简单版本）
    */
   async listKeys(userId?: string): Promise<any[]> {
     const query = userId ? `?userId=${userId}` : ''
     return this.request<any[]>(`/api-keys${query}`)
+  }
+
+  /**
+   * 获取所有API密钥的完整数据
+   * 用于密钥列表页面，包含使用统计等详细信息
+   */
+  async getApiKeys(): Promise<Array<{
+    id: string
+    apiKey: string
+    name: string
+    permissions: string[]
+    monthlyLimit: number
+    currentUsage: number
+    status: 'active' | 'inactive'
+    createdAt: string
+    updatedAt: string
+  }>> {
+    return this.request<any[]>('/api-keys')
   }
 
   /**

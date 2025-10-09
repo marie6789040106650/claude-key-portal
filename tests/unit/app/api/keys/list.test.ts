@@ -212,7 +212,14 @@ describe('GET /api/keys - CRS Integration', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(data.keys).toEqual(mockLocalKeys)
+      // Date会被序列化为字符串，所以需要转换后比较
+      expect(data.keys).toEqual(
+        mockLocalKeys.map(k => ({
+          ...k,
+          createdAt: k.createdAt.toISOString(),
+          updatedAt: k.updatedAt.toISOString(),
+        }))
+      )
       expect(data.syncWarning).toBe('CRS同步失败，显示本地数据')
     })
 
@@ -227,7 +234,14 @@ describe('GET /api/keys - CRS Integration', () => {
 
       expect(response.status).toBe(200)
       expect(crsClient.getApiKeys).not.toHaveBeenCalled()
-      expect(data.keys).toEqual(mockLocalKeys)
+      // Date会被序列化为字符串，所以需要转换后比较
+      expect(data.keys).toEqual(
+        mockLocalKeys.map(k => ({
+          ...k,
+          createdAt: k.createdAt.toISOString(),
+          updatedAt: k.updatedAt.toISOString(),
+        }))
+      )
     })
   })
 

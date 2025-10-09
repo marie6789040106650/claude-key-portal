@@ -96,22 +96,75 @@ export class ListKeysUseCase {
       // 5. CRS同步（可选）
       if (input.sync) {
         try {
-          const crsKeys = await this.crsClient.listKeys(input.userId)
+          // 调用CRS getApiKeys获取完整密钥数据
+          const crsKeys = await this.crsClient.getApiKeys()
           response.syncedAt = new Date().toISOString()
 
-          // 检查数据一致性
+          // 创建一个Map存储CRS密钥，方便查找
+          const crsKeyMap = new Map(crsKeys.map(k => [k.id, k]))
+
+          // 合并本地密钥和CRS数据
+          const mergedKeys: DomainKey[] = []
           const syncIssues: any[] = []
+
+          // 1. 合并本地已有的密钥
           for (const localKey of keys) {
-            const crsKey = crsKeys.find((k: any) => k.id === localKey.crsKeyId)
-            if (crsKey && crsKey.status !== localKey.status) {
-              syncIssues.push({
-                keyId: localKey.id,
-                issue: 'status_mismatch',
-                local: localKey.status,
-                crs: crsKey.status,
-              })
+            const crsKey = crsKeyMap.get(localKey.crsKeyId)
+
+            if (crsKey) {
+              // 合并Portal和CRS数据
+              mergedKeys.push({
+                ...localKey,
+                // 添加CRS字段
+                apiKey: crsKey.apiKey,
+                monthlyLimit: crsKey.monthlyLimit,
+                currentUsage: crsKey.currentUsage,
+                permissions: crsKey.permissions,
+              } as any)
+
+              // 检查状态不一致
+              if (crsKey.status !== localKey.status) {
+                syncIssues.push({
+                  keyId: localKey.id,
+                  issue: 'status_mismatch',
+                  local: localKey.status,
+                  crs: crsKey.status,
+                })
+              }
+
+              // 从Map中移除已处理的CRS密钥
+              crsKeyMap.delete(localKey.crsKeyId)
+            } else {
+              // CRS中不存在此密钥
+              mergedKeys.push(localKey)
             }
           }
+
+          // 2. 添加CRS中存在但Portal本地不存在的密钥
+          for (const [crsKeyId, crsKey] of crsKeyMap) {
+            mergedKeys.push({
+              id: crsKey.id, // 使用CRS ID
+              crsKeyId: crsKey.id,
+              userId: input.userId,
+              name: crsKey.name,
+              status: crsKey.status as any,
+              isFavorite: false,
+              notes: null,
+              tags: [],
+              createdAt: new Date(crsKey.createdAt),
+              updatedAt: new Date(crsKey.updatedAt),
+              // CRS特有字段
+              apiKey: crsKey.apiKey,
+              monthlyLimit: crsKey.monthlyLimit,
+              currentUsage: crsKey.currentUsage,
+              permissions: crsKey.permissions,
+            } as any)
+          }
+
+          // 更新响应数据
+          response.keys = mergedKeys
+          response.total = mergedKeys.length
+          response.totalPages = Math.ceil(mergedKeys.length / limit)
 
           if (syncIssues.length > 0) {
             response.syncIssues = syncIssues
