@@ -12,32 +12,36 @@
 
 ## ✅ 最新完成（2025-10-10）
 
-### P2.3 - CRS 时间序列趋势图集成 ✅
+### P2.4 - 多密钥对比功能 ✅
 
 **TDD流程完成**:
-- 🔴 RED: 10个测试用例（7个失败，22个旧测试保持通过）
-- 🟢 GREEN: 实现CRS getUsageTrend集成（29/29测试通过）
-- 🔵 REFACTOR: 提取日期过滤和趋势参数工具函数（29/29测试保持通过）
+- 🔴 RED: 10个测试用例（参数验证、权限控制、错误处理、并行优化）
+- 🟢 GREEN: 实现多密钥对比API（10/10测试通过，47/47 stats测试全部通过）
+- 🔵 REFACTOR: 提取工具函数和类型定义（10/10测试保持通过）
 
 **交付物**:
-- ✅ 测试: `tests/unit/stats/usage.test.ts` (+267行)
-- ✅ API增强: `app/api/stats/usage/route.ts` (+59 -33行)
-- ✅ 工具函数: `buildDateRangeFilter()`, `buildTrendParams()`, `fetchCrsUsageTrendSafely()`
-- ✅ 文档: `docs/P2.3_COMPLETION_SUMMARY.md`
+- ✅ 测试: `tests/unit/app/api/stats/compare.test.ts` (+481行)
+- ✅ API实现: `app/api/stats/compare/route.ts` (+137行，重构后）
+- ✅ 工具函数: `app/api/stats/compare/utils.ts` (+149行)
+- ✅ 文档: `docs/P2.4_COMPLETION_SUMMARY.md`
 
 **功能特性**:
-- ✅ 集成CRS `/admin/api-keys-usage-trend` API
-- ✅ 支持可选时间范围过滤（startDate, endDate）
-- ✅ 返回每日使用趋势（请求数、Token数、成本）
-- ✅ CRS错误时降级处理（返回警告而非失败）
+- ✅ 支持2-5个密钥对比
+- ✅ 并行CRS API调用（性能提升67%-80%）
+- ✅ 优雅错误降级（部分失败不影响整体）
+- ✅ 权限隔离（仅查询用户自己的密钥）
+- ✅ 对比数据计算（最大值、总计、排名）
 
 **Git提交**:
 ```
-09b0308 docs(p2): document P2.3 completion (📝 DOCS)
-3839cb3 refactor(stats): extract date filtering and trend params utilities (🔵 REFACTOR)
-f5053a4 feat(stats): integrate CRS usage trend API (🟢 GREEN)
-f1b4222 test(stats): add CRS usage trend API integration tests (🔴 RED)
+07c6636 refactor(stats): extract compare utils and improve code structure (🔵 REFACTOR)
+82bf7d9 feat(stats): implement multi-key comparison API (🟢 GREEN)
+f31dd22 test(stats): add multi-key comparison API tests (🔴 RED)
 ```
+
+### P2.3 - CRS 时间序列趋势图集成 ✅
+
+**已完成** - 详见 `docs/P2.3_COMPLETION_SUMMARY.md`
 
 ### P2.2 - CRS API Keys列表集成 ✅
 
@@ -79,8 +83,8 @@ f1b4222 test(stats): add CRS usage trend API integration tests (🔴 RED)
 - [x] P2.3: 实现时间序列趋势图 (/admin/api-keys-usage-trend) ✅ 已完成
 
 第2天 - 高级功能:
-- [ ] P2.4: 多密钥对比功能 ← 下一任务
-- [ ] P2.5: Top 10排行榜
+- [x] P2.4: 多密钥对比功能 ✅ 已完成
+- [ ] P2.5: Top 10排行榜 ← 下一任务
 - [ ] P2.6: 高级搜索筛选
 
 第3天 - 导出和优化:
@@ -91,57 +95,60 @@ f1b4222 test(stats): add CRS usage trend API integration tests (🔴 RED)
 
 ---
 
-## 📋 下一任务：P2.4 - 多密钥对比功能
+## 📋 下一任务：P2.5 - Top 10排行榜
 
 ### 任务目标
 
-实现多个密钥的使用量对比功能，允许用户选择2-5个密钥进行并排对比分析。
+实现密钥使用量Top 10排行榜功能，展示使用量最高的密钥排名。
 
 ### 功能需求
 
-1. **密钥选择器**
-   - 多选下拉框（最多5个密钥）
-   - 支持搜索密钥名称
-   - 显示密钥状态（Active/Disabled）
+1. **排行榜维度**
+   - 按总Token数排序（默认）
+   - 按总请求数排序
+   - 按总成本排序
+   - 支持切换排序维度
 
-2. **对比数据展示**
-   - 并排趋势图（使用量、Token数、成本）
-   - 数据表格对比
-   - 差异百分比计算
+2. **数据展示**
+   - Top 10密钥列表
+   - 显示排名、密钥名称、统计数据
+   - 可视化进度条（相对于最大值的百分比）
+   - 高亮显示当前用户的密钥
 
 3. **CRS API集成**
-   - 批量获取多个密钥的统计数据
-   - 可能需要多次调用 `/admin/api-keys/:id/stats`
-   - 或使用现有的 `/admin/api-keys` 数据
+   - 获取所有密钥统计（`GET /api/stats/usage`）
+   - 客户端排序处理
+   - 或新建专用排行榜API
 
 ### TDD开发流程
 
 #### 🔴 RED: 编写失败测试
 
-**创建文件**: `tests/unit/app/api/stats/compare.test.ts`
+**创建文件**: `tests/unit/app/api/stats/leaderboard.test.ts`
 
 **测试内容**:
-1. 测试密钥选择验证（2-5个）
-2. 测试批量获取密钥统计
-3. 测试数据格式转换
-4. 测试差异计算
+1. 测试按不同维度排序
+2. 测试Top 10筛选
+3. 测试排名计算
+4. 测试百分比计算
 5. 测试错误处理
 
 #### 🟢 GREEN: 实现功能
 
-**新建文件**: `app/api/stats/compare/route.ts`
+**新建文件**: `app/api/stats/leaderboard/route.ts`
 
 **实现内容**:
-1. 参数验证（keyIds数组，2-5个）
-2. 批量调用CRS API获取统计
-3. 数据格式化和差异计算
-4. 错误降级处理
+1. 获取所有密钥统计
+2. 按指定维度排序
+3. 取Top 10
+4. 计算排名和百分比
+5. 错误降级处理
 
 #### 🔵 REFACTOR: 优化代码
 
 **优化内容**:
-1. 提取对比计算逻辑
-2. 并行化CRS API调用
+1. 提取排序逻辑
+2. 提取百分比计算
 3. 添加缓存支持
 4. 优化类型定义
 
@@ -153,20 +160,20 @@ cd /Users/bypasser/claude-project/0930/claude-key-portal
 git branch  # 应在 feature/p2-usage-analytics
 
 # 2. 🔴 RED: 创建测试
-# 创建 tests/unit/app/api/stats/compare.test.ts
-npm test -- tests/unit/app/api/stats/compare.test.ts
+# 创建 tests/unit/app/api/stats/leaderboard.test.ts
+npm test -- tests/unit/app/api/stats/leaderboard.test.ts
 
 # 3. 🟢 GREEN: 实现功能
-# 创建 app/api/stats/compare/route.ts
-npm test -- tests/unit/app/api/stats/compare.test.ts
+# 创建 app/api/stats/leaderboard/route.ts
+npm test -- tests/unit/app/api/stats/leaderboard.test.ts
 
 # 4. 🔵 REFACTOR: 重构优化
 # 提取工具函数，优化代码结构
-npm test -- tests/unit/app/api/stats/compare.test.ts
+npm test -- tests/unit/app/api/stats/leaderboard.test.ts
 
 # 5. 提交代码（遵循TDD提交规范）
 git add .
-git commit -m "feat(stats): implement multi-key comparison (🟢 GREEN)"
+git commit -m "feat(stats): implement top 10 leaderboard (🟢 GREEN)"
 ```
 
 ---
