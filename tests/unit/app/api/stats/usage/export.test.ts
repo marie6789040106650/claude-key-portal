@@ -8,16 +8,29 @@
  * 4. 空数据导出
  * 5. 带筛选条件的导出
  * 6. 元数据包含
+ *
+ * @jest-environment node
  */
 
 import { GET } from '@/app/api/stats/usage/export/route'
-import { NextRequest } from 'next/server'
-import { prismaMock } from '@/tests/setup'
+import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { verifyAuth } from '@/lib/auth'
 
 // Mock依赖
-jest.mock('@/lib/auth')
+jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
+  prisma: {
+    apiKey: {
+      findMany: jest.fn(),
+    },
+  },
+}))
+
+jest.mock('@/lib/auth', () => ({
+  verifyAuth: jest.fn(),
+}))
+
 const mockVerifyAuth = verifyAuth as jest.MockedFunction<typeof verifyAuth>
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
 describe('GET /api/stats/usage/export', () => {
   const mockUserId = 'user-123'
@@ -37,7 +50,7 @@ describe('GET /api/stats/usage/export', () => {
           crsKey: 'sk-xxx',
           status: 'active',
           totalTokens: BigInt(10000),
-          totalRequests: BigInt(100),
+          totalCalls: BigInt(100),
           createdAt: new Date('2024-01-01'),
           lastUsedAt: new Date('2024-10-10'),
           userId: mockUserId,
@@ -48,16 +61,16 @@ describe('GET /api/stats/usage/export', () => {
           crsKey: 'sk-yyy',
           status: 'inactive',
           totalTokens: BigInt(500),
-          totalRequests: BigInt(5),
+          totalCalls: BigInt(5),
           createdAt: new Date('2024-01-01'),
           lastUsedAt: new Date('2024-01-02'),
           userId: mockUserId,
         },
       ]
 
-      prismaMock.apiKey.findMany.mockResolvedValue(mockData as any)
+      mockPrisma.apiKey.findMany.mockResolvedValue(mockData as any)
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=csv'
       )
 
@@ -86,16 +99,16 @@ describe('GET /api/stats/usage/export', () => {
           crsKey: 'sk-xxx',
           status: 'active',
           totalTokens: BigInt(1000),
-          totalRequests: BigInt(10),
+          totalCalls: BigInt(10),
           createdAt: new Date('2024-01-01'),
           lastUsedAt: new Date('2024-10-10'),
           userId: mockUserId,
         },
       ]
 
-      prismaMock.apiKey.findMany.mockResolvedValue(mockData as any)
+      mockPrisma.apiKey.findMany.mockResolvedValue(mockData as any)
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=csv'
       )
 
@@ -118,16 +131,16 @@ describe('GET /api/stats/usage/export', () => {
           crsKey: 'sk-xxx',
           status: 'active',
           totalTokens: BigInt(10000),
-          totalRequests: BigInt(100),
+          totalCalls: BigInt(100),
           createdAt: new Date('2024-01-01'),
           lastUsedAt: new Date('2024-10-10'),
           userId: mockUserId,
         },
       ]
 
-      prismaMock.apiKey.findMany.mockResolvedValue(mockData as any)
+      mockPrisma.apiKey.findMany.mockResolvedValue(mockData as any)
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
@@ -158,9 +171,9 @@ describe('GET /api/stats/usage/export', () => {
 
     it('应该在JSON中包含筛选条件元数据', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json&status=active&minTokens=1000'
       )
 
@@ -179,7 +192,7 @@ describe('GET /api/stats/usage/export', () => {
   describe('参数验证', () => {
     it('应该拒绝无效的格式参数', async () => {
       // Arrange
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=xml'
       )
 
@@ -194,9 +207,9 @@ describe('GET /api/stats/usage/export', () => {
 
     it('应该在缺少format参数时默认为CSV', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export'
       )
 
@@ -212,9 +225,9 @@ describe('GET /api/stats/usage/export', () => {
   describe('空数据处理', () => {
     it('应该正确导出空数据集（CSV）', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=csv'
       )
 
@@ -231,9 +244,9 @@ describe('GET /api/stats/usage/export', () => {
 
     it('应该正确导出空数据集（JSON）', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
@@ -251,9 +264,9 @@ describe('GET /api/stats/usage/export', () => {
   describe('筛选条件支持', () => {
     it('应该支持状态筛选', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json&status=active'
       )
 
@@ -261,7 +274,7 @@ describe('GET /api/stats/usage/export', () => {
       await GET(request)
 
       // Assert
-      expect(prismaMock.apiKey.findMany).toHaveBeenCalledWith(
+      expect(mockPrisma.apiKey.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             status: 'active',
@@ -272,9 +285,9 @@ describe('GET /api/stats/usage/export', () => {
 
     it('应该支持Token数量筛选', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json&minTokens=1000&maxTokens=10000'
       )
 
@@ -282,7 +295,7 @@ describe('GET /api/stats/usage/export', () => {
       await GET(request)
 
       // Assert
-      expect(prismaMock.apiKey.findMany).toHaveBeenCalledWith(
+      expect(mockPrisma.apiKey.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             totalTokens: {
@@ -296,9 +309,9 @@ describe('GET /api/stats/usage/export', () => {
 
     it('应该支持多条件组合筛选', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json&status=active&minTokens=1000&nameContains=test'
       )
 
@@ -306,7 +319,7 @@ describe('GET /api/stats/usage/export', () => {
       await GET(request)
 
       // Assert
-      expect(prismaMock.apiKey.findMany).toHaveBeenCalledWith(
+      expect(mockPrisma.apiKey.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             userId: mockUserId,
@@ -327,9 +340,9 @@ describe('GET /api/stats/usage/export', () => {
   describe('权限控制', () => {
     it('应该只导出当前用户的数据', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
@@ -337,7 +350,7 @@ describe('GET /api/stats/usage/export', () => {
       await GET(request)
 
       // Assert
-      expect(prismaMock.apiKey.findMany).toHaveBeenCalledWith(
+      expect(mockPrisma.apiKey.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             userId: mockUserId,
@@ -350,7 +363,7 @@ describe('GET /api/stats/usage/export', () => {
       // Arrange
       mockVerifyAuth.mockRejectedValue(new Error('未认证'))
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
@@ -362,9 +375,9 @@ describe('GET /api/stats/usage/export', () => {
   describe('文件名生成', () => {
     it('应该生成包含时间戳的文件名（CSV）', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=csv'
       )
 
@@ -378,9 +391,9 @@ describe('GET /api/stats/usage/export', () => {
 
     it('应该生成包含时间戳的文件名（JSON）', async () => {
       // Arrange
-      prismaMock.apiKey.findMany.mockResolvedValue([])
+      mockPrisma.apiKey.findMany.mockResolvedValue([])
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
@@ -403,16 +416,16 @@ describe('GET /api/stats/usage/export', () => {
           crsKey: 'sk-xxx',
           status: 'active',
           totalTokens: BigInt('999999999999999'),
-          totalRequests: BigInt('888888888888'),
+          totalCalls: BigInt('888888888888'),
           createdAt: new Date('2024-01-01'),
           lastUsedAt: new Date('2024-10-10'),
           userId: mockUserId,
         },
       ]
 
-      prismaMock.apiKey.findMany.mockResolvedValue(mockData as any)
+      mockPrisma.apiKey.findMany.mockResolvedValue(mockData as any)
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
@@ -436,16 +449,16 @@ describe('GET /api/stats/usage/export', () => {
           crsKey: 'sk-xxx',
           status: 'active',
           totalTokens: BigInt(1000),
-          totalRequests: BigInt(10),
+          totalCalls: BigInt(10),
           createdAt: new Date('2024-01-01T00:00:00Z'),
           lastUsedAt: new Date('2024-10-10T12:34:56Z'),
           userId: mockUserId,
         },
       ]
 
-      prismaMock.apiKey.findMany.mockResolvedValue(mockData as any)
+      mockPrisma.apiKey.findMany.mockResolvedValue(mockData as any)
 
-      const request = new NextRequest(
+      const request = new Request(
         'http://localhost:3000/api/stats/usage/export?format=json'
       )
 
