@@ -12,26 +12,37 @@
 
 ## ✅ 最新完成（2025-10-10）
 
-### P2.1 - CRS Dashboard API集成 ✅
+### P2.2 - CRS API Keys列表集成 ✅
 
 **TDD流程完成**:
-- 🔴 RED: 8个测试用例（全部失败）
-- 🟢 GREEN: 实现功能（19/19测试通过）
-- 🔵 REFACTOR: 提取工具函数，改进类型安全（19/19测试保持通过）
+- 🔴 RED: 9个测试用例（全部失败）
+- 🟢 GREEN: 实现CRS getApiKeys集成和数据合并（9/9测试通过）
+- 🔵 REFACTOR: 提取密钥合并工具函数（9/9测试保持通过）
 
 **交付物**:
-- ✅ 测试: `tests/unit/stats/usage.test.ts` (+199行)
-- ✅ 实现: `app/api/stats/usage/route.ts` (集成CRS Dashboard)
-- ✅ 重构: 提取3个工具函数，添加TypeScript类型
-- ✅ 文档: `docs/EXECUTION_PLAN.md` 更新
+- ✅ 测试: `tests/unit/app/api/keys/list.test.ts` (+288行)
+- ✅ CRS Client: `lib/infrastructure/external/crs-client.ts` (新增getApiKeys方法)
+- ✅ UseCase增强: `lib/application/key/list-keys.usecase.ts` (集成CRS数据合并)
+- ✅ 工具函数: `lib/application/key/key-merge.utils.ts` (+151行)
+- ✅ 文档: `docs/P2.2_COMPLETION_SUMMARY.md`
+
+**功能特性**:
+- ✅ 合并Portal本地数据和CRS实时数据
+- ✅ 检测并报告状态不一致
+- ✅ 自动发现CRS新密钥
+- ✅ CRS错误时降级到本地数据
 
 **Git提交**:
 ```
-cdf8996 test(stats): add CRS Dashboard integration tests (🔴 RED)
-29b3aa5 feat(stats): integrate CRS Dashboard API (🟢 GREEN)
-69c5365 refactor(stats): extract utility functions (🔵 REFACTOR)
-03afa4d docs(p2): document P2.1 completion (📝 DOCS)
+d527888 docs(p2): document P2.2 completion (📝 DOCS)
+86a071d refactor(keys): extract key merging utilities (🔵 REFACTOR)
+fd93d9f feat(keys): integrate CRS API Keys list (🟢 GREEN)
+6ab732f test(keys): add CRS API Keys integration tests (🔴 RED)
 ```
+
+### P2.1 - CRS Dashboard API集成 ✅
+
+**已完成** - 详见之前提交记录
 
 ---
 
@@ -61,8 +72,8 @@ cdf8996 test(stats): add CRS Dashboard integration tests (🔴 RED)
 ```markdown
 第1天 - CRS集成和Dashboard增强:
 - [x] P2.1: 集成CRS Dashboard API (/admin/dashboard) ✅ 已完成
-- [ ] P2.2: 集成CRS API Keys列表 (/admin/api-keys) ← 下一任务
-- [ ] P2.3: 实现时间序列趋势图 (/admin/api-keys-usage-trend)
+- [x] P2.2: 集成CRS API Keys列表 (/admin/api-keys) ✅ 已完成
+- [ ] P2.3: 实现时间序列趋势图 (/admin/api-keys-usage-trend) ← 下一任务
 
 第2天 - 高级功能:
 - [ ] P2.4: 多密钥对比功能
@@ -77,29 +88,32 @@ cdf8996 test(stats): add CRS Dashboard integration tests (🔴 RED)
 
 ---
 
-## 📋 下一任务：P2.2 - 集成CRS API Keys列表
+## 📋 下一任务：P2.3 - 实现时间序列趋势图
 
 ### 任务目标
 
-在密钥管理页面集成CRS API Keys列表数据，替换当前的模拟数据。
+集成CRS时间序列趋势API，为统计页面提供使用量趋势数据，替换当前的模拟数据。
 
 ### CRS API信息
 
-**端点**: `GET /admin/api-keys`
+**端点**: `GET /admin/api-keys-usage-trend`
+
+**查询参数**:
+```typescript
+{
+  startDate?: string  // ISO 8601格式 (可选)
+  endDate?: string    // ISO 8601格式 (可选)
+}
+```
 
 **响应格式**:
 ```typescript
 {
   data: Array<{
-    id: string           // UUID
-    apiKey: string       // cr_xxx格式
-    name: string
-    permissions: string[]
-    monthlyLimit: number
-    currentUsage: number
-    status: 'active' | 'inactive'
-    createdAt: string
-    // ... 其他30+字段
+    date: string           // YYYY-MM-DD
+    totalRequests: number
+    totalTokens: number
+    cost: number
   }>
 }
 ```
@@ -107,62 +121,66 @@ cdf8996 test(stats): add CRS Dashboard integration tests (🔴 RED)
 **CRS Client方法**（已存在）:
 ```typescript
 // lib/infrastructure/external/crs-client.ts
-async getApiKeys(): Promise<ApiKey[]>
+async getUsageTrend(params?: {
+  startDate?: string
+  endDate?: string
+}): Promise<any[]>
 ```
 
 ### TDD开发流程
 
 #### 🔴 RED: 编写失败测试
 
-**创建文件**: `tests/unit/app/api/keys/list.test.ts` （如果不存在）
+**修改文件**: `tests/unit/stats/usage.test.ts` （扩展P2.1测试）
 
-**测试内容**:
-1. 测试调用CRS getApiKeys API
-2. 测试合并本地和CRS数据
-3. 测试错误降级处理
-4. 测试数据格式转换
+**新增测试内容**:
+1. 测试调用CRS getUsageTrend API
+2. 测试时间范围参数传递
+3. 测试趋势数据格式转换
+4. 测试错误降级处理
+5. 测试缓存策略
 
 #### 🟢 GREEN: 实现功能
 
-**修改文件**: `app/api/keys/route.ts` 或相关API路由
+**修改文件**: `app/api/stats/usage/route.ts`
 
 **实现内容**:
-1. 调用 `crsClient.getApiKeys()`
-2. 合并Portal用户数据和CRS密钥数据
-3. 实现错误降级（CRS不可用时显示本地数据）
-4. 转换数据格式匹配前端需求
+1. 添加时间范围参数解析（startDate, endDate）
+2. 调用 `crsClient.getUsageTrend(params)`
+3. 转换CRS趋势数据格式
+4. 实现错误降级（返回空数组或缓存数据）
+5. 添加数据缓存（Redis或内存）
 
 #### 🔵 REFACTOR: 优化代码
 
 **优化内容**:
-1. 提取CRS数据获取逻辑
-2. 统一数据转换逻辑
-3. 添加日志记录
-4. 优化类型定义
+1. 提取趋势数据获取和转换逻辑
+2. 统一时间范围验证
+3. 优化缓存策略
+4. 改进类型定义
 
 ### 实施步骤
 
 ```bash
-# 1. 创建测试文件（如果不存在）
-mkdir -p tests/unit/app/api/stats
-touch tests/unit/app/api/stats/usage.test.ts
+# 1. 确认位置和分支
+cd /Users/bypasser/claude-project/0930/claude-key-portal
+git branch  # 应在 feature/p2-usage-analytics
 
-# 2. 🔴 RED: 编写测试
-# 运行测试确保失败
-npm test -- usage.test.ts
+# 2. 🔴 RED: 扩展测试
+# 在 tests/unit/stats/usage.test.ts 中添加趋势API测试
+npm test -- tests/unit/stats/usage.test.ts
 
 # 3. 🟢 GREEN: 实现功能
-# 修改 app/api/stats/usage/route.ts
-# 运行测试确保通过
-npm test -- usage.test.ts
+# 修改 app/api/stats/usage/route.ts 添加趋势支持
+npm test -- tests/unit/stats/usage.test.ts
 
 # 4. 🔵 REFACTOR: 重构优化
-# 保持测试通过的前提下优化代码
-npm test -- usage.test.ts
+# 提取工具函数，优化代码结构
+npm test -- tests/unit/stats/usage.test.ts
 
-# 5. 提交代码
+# 5. 提交代码（遵循TDD提交规范）
 git add .
-git commit -m "feat(stats): integrate CRS dashboard API (🟢 GREEN)"
+git commit -m "feat(stats): integrate CRS usage trend API (🟢 GREEN)"
 ```
 
 ---
