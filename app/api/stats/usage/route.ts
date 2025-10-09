@@ -307,11 +307,14 @@ async function getAllKeysStats(
   }
 
   // 5. 转换响应中的 BigInt（使用工具函数）
-  const keysResponse = keys.map(k => ({
-    ...k,
-    totalTokens: bigIntToNumber(k.totalTokens),
-    totalRequests: bigIntToNumber(k.totalCalls),
-  }))
+  const keysResponse = keys.map(k => {
+    const { totalCalls, ...rest } = k // 解构移除 totalCalls
+    return {
+      ...rest,
+      totalTokens: bigIntToNumber(k.totalTokens),
+      totalRequests: bigIntToNumber(k.totalCalls),
+    }
+  })
 
   // 6. 获取 CRS Dashboard 数据（使用工具函数处理降级）
   const { data: crsDashboard, warning: crsWarning } =
