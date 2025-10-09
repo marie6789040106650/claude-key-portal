@@ -9,6 +9,67 @@ import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import { verifyToken } from '@/lib/auth'
 
 /**
+ * 类型定义
+ */
+interface CrsDashboardData {
+  totalKeys: number
+  activeKeys: number
+  totalTokens: number
+  totalRequests: number
+}
+
+interface StatsResponse {
+  summary: {
+    totalTokens: number
+    totalRequests: number
+    averageTokensPerRequest: number
+    keyCount: number
+  }
+  keys: Array<{
+    id: string
+    name: string
+    status: string
+    totalTokens: number
+    totalRequests: number
+    createdAt: Date
+    lastUsedAt: Date | null
+  }>
+  crsDashboard?: CrsDashboardData
+  crsWarning?: string
+}
+
+/**
+ * 工具函数：验证日期字符串
+ */
+function validateDate(dateString: string): Date | null {
+  const date = new Date(dateString)
+  return isNaN(date.getTime()) ? null : date
+}
+
+/**
+ * 工具函数：安全地将BigInt转换为Number
+ */
+function bigIntToNumber(value: bigint | null | undefined): number {
+  return value ? Number(value) : 0
+}
+
+/**
+ * 工具函数：获取CRS Dashboard数据（带降级处理）
+ */
+async function fetchCrsDashboardSafely(): Promise<{
+  data?: CrsDashboardData
+  warning?: string
+}> {
+  try {
+    const data = await crsClient.getDashboard()
+    return { data }
+  } catch (error) {
+    console.warn('CRS Dashboard API unavailable, using local stats:', error)
+    return { warning: 'CRS服务暂时不可用，显示本地统计数据' }
+  }
+}
+
+/**
  * GET /api/stats/usage - 获取使用统计
  *
  * 查询参数:
@@ -87,14 +148,14 @@ async function getSingleKeyStats(
     return NextResponse.json({ error: '无权访问此密钥' }, { status: 403 })
   }
 
-  // 4. 构建响应
+  // 4. 构建响应（使用工具函数转换 BigInt）
   const response: any = {
     key: {
       id: key.id,
       name: key.name,
       status: key.status,
-      totalTokens: Number(key.totalTokens), // BigInt -> Number
-      totalRequests: Number(key.totalCalls), // 映射字段名
+      totalTokens: bigIntToNumber(key.totalTokens),
+      totalRequests: bigIntToNumber(key.totalCalls),
       createdAt: key.createdAt,
       lastUsedAt: key.lastUsedAt,
     },
@@ -131,8 +192,8 @@ async function getAllKeysStats(
     where.createdAt = {}
 
     if (startDate) {
-      const start = new Date(startDate)
-      if (isNaN(start.getTime())) {
+      const start = validateDate(startDate)
+      if (!start) {
         return NextResponse.json(
           { error: '时间范围参数格式不正确' },
           { status: 400 }
@@ -142,8 +203,8 @@ async function getAllKeysStats(
     }
 
     if (endDate) {
-      const end = new Date(endDate)
-      if (isNaN(end.getTime())) {
+      const end = validateDate(endDate)
+      if (!end) {
         return NextResponse.json(
           { error: '时间范围参数格式不正确' },
           { status: 400 }
@@ -167,9 +228,15 @@ async function getAllKeysStats(
     },
   })
 
-  // 4. 聚合统计（转换 BigInt）
-  const totalTokens = keys.reduce((sum, k) => sum + Number(k.totalTokens || BigInt(0)), 0)
-  const totalRequests = keys.reduce((sum, k) => sum + Number(k.totalCalls || BigInt(0)), 0)
+  // 4. 聚合统计（使用工具函数转换 BigInt）
+  const totalTokens = keys.reduce(
+    (sum, k) => sum + bigIntToNumber(k.totalTokens),
+    0
+  )
+  const totalRequests = keys.reduce(
+    (sum, k) => sum + bigIntToNumber(k.totalCalls),
+    0
+  )
 
   const summary = {
     totalTokens,
@@ -179,27 +246,19 @@ async function getAllKeysStats(
     keyCount: keys.length,
   }
 
-  // 5. 转换响应中的 BigInt
+  // 5. 转换响应中的 BigInt（使用工具函数）
   const keysResponse = keys.map(k => ({
     ...k,
-    totalTokens: Number(k.totalTokens),
-    totalRequests: Number(k.totalCalls),
+    totalTokens: bigIntToNumber(k.totalTokens),
+    totalRequests: bigIntToNumber(k.totalCalls),
   }))
 
-  // 6. 获取 CRS Dashboard 数据
-  let crsDashboard
-  let crsWarning
-
-  try {
-    crsDashboard = await crsClient.getDashboard()
-  } catch (error) {
-    // CRS 不可用时降级处理，不影响整体响应
-    console.warn('CRS Dashboard API unavailable, using local stats:', error)
-    crsWarning = 'CRS服务暂时不可用，显示本地统计数据'
-  }
+  // 6. 获取 CRS Dashboard 数据（使用工具函数处理降级）
+  const { data: crsDashboard, warning: crsWarning } =
+    await fetchCrsDashboardSafely()
 
   // 7. 构建响应
-  const response: any = {
+  const response: StatsResponse = {
     summary,
     keys: keysResponse,
   }
