@@ -498,6 +498,54 @@ router.post('/api/user-stats', async (req, res) => {
 - `docs/CRS_PUBLIC_STATS_VERIFICATION.json` - 详细验证结果
 - `docs/P2_EXECUTION_PLAN_UPDATED.md` - 调整后的P2计划
 
+#### 集成测试验证 (2025-10-09)
+
+**测试脚本**: `scripts/integration-test-crs-api.ts`
+
+**完整流程验证**: 6/6步骤成功 ✅
+
+```
+认证 → 创建密钥 → 获取ID → 查询统计 → 查询模型 → 删除清理
+2s     482ms     452ms     455ms      454ms      447ms
+```
+
+**关键发现**:
+
+1. **API Key字段映射**:
+   ```typescript
+   // CRS返回的字段
+   response.data.apiKey  // ✅ 正确（不是key）
+   response.data.id      // UUID格式的密钥ID
+   ```
+
+2. **完整数据结构验证**:
+   - ✅ 创建密钥返回30+字段
+   - ✅ 用户统计包含usage/limits/accounts/restrictions
+   - ✅ 模型统计支持daily/monthly周期
+   - ✅ 所有金额字段有formattedCost版本
+
+3. **Portal集成要点**:
+   ```typescript
+   // 保存映射关系
+   {
+     crsKeyId: response.data.id,      // CRS的UUID
+     crsKey: response.data.apiKey,    // 实际密钥
+     userId: user.id                  // Portal用户ID
+   }
+
+   // 查询统计（使用apiId）
+   await crsClient.getUserStats(crsKeyId)
+   ```
+
+4. **性能表现**:
+   - 平均响应时间: 691ms
+   - Stats API: ~450ms（查询快速）
+   - 适合实时查询，建议缓存1分钟
+
+**详细报告**:
+- `docs/CRS_INTEGRATION_TEST_REPORT.json` - 完整请求/响应日志
+- `docs/CRS_API_INTEGRATION_SPECIFICATION.md` - 32KB API对接规范
+
 ---
 
 ### 7. CRS Dashboard数据不完整
