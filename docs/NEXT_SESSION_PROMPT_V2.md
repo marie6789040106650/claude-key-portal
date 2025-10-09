@@ -12,6 +12,35 @@
 
 ## ✅ 最新完成（2025-10-10）
 
+### P2.7 - CSV/JSON 导出功能 ✅
+
+**TDD流程完成**:
+- 🔴 RED: 17个测试用例（CSV导出、JSON导出、参数验证、筛选支持）
+- 🟢 GREEN: 实现导出功能（17/17测试通过，60/60 stats测试全部通过）
+- 🔵 REFACTOR: 提取格式化工具模块（131行）
+
+**交付物**:
+- ✅ 测试: `tests/unit/app/api/stats/usage/export.test.ts` (+461行)
+- ✅ API实现: `app/api/stats/usage/export/route.ts` (+96行)
+- ✅ 工具模块: `app/api/stats/usage/export/formatters.ts` (+131行)
+- ✅ 文档: `docs/P2.7_COMPLETION_SUMMARY.md`
+
+**功能特性**:
+- ✅ 支持CSV和JSON两种格式
+- ✅ 支持所有筛选参数（名称、状态、Token数、请求数、时间）
+- ✅ CSV特殊字符转义（逗号、引号、换行符）
+- ✅ JSON元数据完整（导出时间、用户ID、筛选条件）
+- ✅ 自动时间戳文件名
+- ✅ BigInt安全序列化
+- ✅ 权限隔离
+
+**Git提交**:
+```
+d0b43cb refactor(stats): extract export formatters to separate module (🔵 REFACTOR)
+c5ea1d1 feat(stats): implement CSV/JSON export functionality (🟢 GREEN)
+f7023bc test(stats): add CSV/JSON export tests (🔴 RED)
+```
+
 ### P2.6 - 高级搜索筛选功能 ✅
 
 **TDD流程完成**:
@@ -121,125 +150,172 @@ f31dd22 test(stats): add multi-key comparison API tests (🔴 RED)
 - [x] P2.6: 高级搜索筛选 ✅ 已完成
 
 第3天 - 导出和优化:
-- [ ] P2.7: CSV/JSON导出 ← 下一任务
-- [ ] P2.8: 性能优化
+- [x] P2.7: CSV/JSON导出 ✅ 已完成
+- [ ] P2.8: 性能优化 ← 下一任务
 - [ ] P2.9: UI/UX完善
 ```
 
 ---
 
-## 📋 下一任务：P2.7 - CSV/JSON 导出功能
+## 📋 下一任务：P2.8 - 性能优化
 
 ### 任务目标
 
-实现统计数据的导出功能，支持 CSV 和 JSON 两种格式。
+优化统计API的性能，实现缓存、查询优化和性能监控。
 
 ### 功能需求
 
-1. **导出格式**
-   - CSV 格式 - 适合 Excel 和数据分析工具
-   - JSON 格式 - 适合程序化处理和 API 集成
+1. **Redis缓存实现**
+   - CRS Dashboard数据缓存（60秒TTL）
+   - CRS API Keys列表缓存（60秒TTL）
+   - 趋势数据缓存（300秒TTL）
+   - 缓存键命名规范（`crs:dashboard:${userId}`）
 
-2. **导出内容**
-   - 单个密钥统计数据
-   - 多个密钥列表数据
-   - 支持当前筛选条件的导出
-   - 包含完整的元数据（导出时间、用户、筛选条件）
+2. **数据库查询优化**
+   - 添加数据库索引（userId, status, totalTokens, lastUsedAt）
+   - 使用select优化查询字段
+   - 批量查询优化
+   - 避免N+1查询
 
-3. **API 设计**
-   - 新增 `/api/stats/usage/export` 端点
-   - 支持 `format` 参数（csv/json）
-   - 支持所有现有的筛选参数
-   - 返回下载文件或 JSON 数据
+3. **请求去重**
+   - 相同参数的并发请求合并
+   - 防抖处理
+   - 请求缓存
+
+4. **性能监控**
+   - API响应时间监控
+   - CRS调用次数统计
+   - 缓存命中率
+   - 慢查询日志
+
+### 优化目标
+
+| 指标 | 当前值 | 目标值 |
+|------|--------|--------|
+| Dashboard API响应 | ~2000ms | <500ms |
+| API Keys列表响应 | ~960ms | <300ms |
+| 统计查询响应 | ~450ms | <200ms |
+| CRS调用频率 | 每次请求 | 60秒/次 |
+| 缓存命中率 | 0% | >80% |
 
 ### TDD 开发流程
 
-#### 🔴 RED: 编写失败测试
+#### 🔴 RED: 编写性能测试
 
-**创建文件**: `tests/unit/app/api/stats/usage/export.test.ts`
+**创建文件**: `tests/unit/lib/infrastructure/cache/redis-cache.test.ts`
 
 **测试内容**:
-1. 测试 CSV 格式导出
-2. 测试 JSON 格式导出
-3. 测试无效格式参数
-4. 测试空数据导出
-5. 测试带筛选条件的导出
-6. 测试元数据包含
+1. 测试缓存设置和获取
+2. 测试TTL过期
+3. 测试缓存键命名
+4. 测试并发请求处理
+5. 测试缓存失效策略
 
-#### 🟢 GREEN: 实现功能
+#### 🟢 GREEN: 实现缓存
 
-**创建文件**: `app/api/stats/usage/export/route.ts`
+**创建文件**:
+- `lib/infrastructure/cache/redis-client.ts` - Redis客户端
+- `lib/infrastructure/cache/cache-manager.ts` - 缓存管理器
+- 更新 `app/api/stats/usage/route.ts` - 集成缓存
 
 **实现内容**:
-1. 解析格式和筛选参数
-2. 查询符合条件的数据
-3. 格式化为 CSV 或 JSON
-4. 设置正确的响应头
-5. 返回文件下载响应
+1. Redis连接配置
+2. 缓存设置/获取/删除
+3. TTL管理
+4. 错误降级（Redis不可用时）
+5. 更新API使用缓存
 
-#### 🔵 REFACTOR: 优化代码
+#### 🔵 REFACTOR: 优化架构
 
 **优化内容**:
-1. 提取 CSV 格式化逻辑到工具函数
-2. 提取 JSON 格式化逻辑到工具函数
-3. 复用现有的筛选逻辑
-4. 优化大数据量的导出性能
+1. 提取缓存键生成逻辑
+2. 统一缓存TTL配置
+3. 添加性能监控中间件
+4. 优化数据库Schema（添加索引）
 
 ### 实施步骤
 
 ```bash
-# 1. 确认位置和分支
-cd /Users/bypasser/claude-project/0930/claude-key-portal
-git branch  # 应在 feature/p2-usage-analytics
+# 1. 安装Redis依赖
+npm install ioredis @types/ioredis
 
-# 2. 🔴 RED: 创建测试
-# 创建 tests/unit/app/api/stats/usage/export.test.ts
-npm test -- tests/unit/app/api/stats/usage/export.test.ts
+# 2. 🔴 RED: 创建缓存测试
+# 创建 tests/unit/lib/infrastructure/cache/redis-cache.test.ts
+npm test -- tests/unit/lib/infrastructure/cache/redis-cache.test.ts
 
-# 3. 🟢 GREEN: 实现功能
-# 创建 app/api/stats/usage/export/route.ts
-npm test -- tests/unit/app/api/stats/usage/export.test.ts
+# 3. 🟢 GREEN: 实现缓存
+# 创建 lib/infrastructure/cache/redis-client.ts
+# 创建 lib/infrastructure/cache/cache-manager.ts
+npm test
 
-# 4. 🔵 REFACTOR: 重构优化
-# 提取格式化工具函数
-npm test -- tests/unit/app/api/stats/usage/export.test.ts
+# 4. 🔵 REFACTOR: 优化集成
+# 更新所有stats API使用缓存
+npm test
 
-# 5. 提交代码（遵循TDD提交规范）
+# 5. 添加数据库索引
+npx prisma migrate dev --name add_performance_indexes
+
+# 6. 性能测试
+npm run dev
+# 使用Apache Bench或k6进行压力测试
+
+# 7. 提交代码
 git add .
-git commit -m "feat(stats): implement CSV/JSON export (🟢 GREEN)"
+git commit -m "perf(stats): implement Redis caching and query optimization (🟢 GREEN)"
 ```
 
-### 实现参考
+### 缓存实现参考
 
-**CSV 格式示例**:
-```csv
-密钥名称,状态,总Token数,总请求数,创建时间,最后使用时间
-Production Key,active,10000,100,2024-01-01,2024-10-10
-Test Key,inactive,500,5,2024-01-01,2024-01-02
+**Redis Client**:
+```typescript
+// lib/infrastructure/cache/redis-client.ts
+import Redis from 'ioredis'
+
+const redis = new Redis({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  password: process.env.REDIS_PASSWORD,
+  retryStrategy: (times) => Math.min(times * 50, 2000),
+})
+
+export { redis }
 ```
 
-**JSON 格式示例**:
-```json
-{
-  "exportedAt": "2024-10-10T10:00:00Z",
-  "userId": "user-123",
-  "filters": {
-    "status": "active",
-    "minTokens": "1000"
-  },
-  "totalCount": 10,
-  "data": [
-    {
-      "id": "key-1",
-      "name": "Production Key",
-      "status": "active",
-      "totalTokens": 10000,
-      "totalRequests": 100,
-      "createdAt": "2024-01-01T00:00:00Z",
-      "lastUsedAt": "2024-10-10T00:00:00Z"
-    }
-  ]
+**Cache Manager**:
+```typescript
+// lib/infrastructure/cache/cache-manager.ts
+import { redis } from './redis-client'
+
+export class CacheManager {
+  async get<T>(key: string): Promise<T | null> {
+    const value = await redis.get(key)
+    return value ? JSON.parse(value) : null
+  }
+
+  async set<T>(key: string, value: T, ttl: number): Promise<void> {
+    await redis.setex(key, ttl, JSON.stringify(value))
+  }
+
+  async delete(key: string): Promise<void> {
+    await redis.del(key)
+  }
 }
+```
+
+**API集成示例**:
+```typescript
+// app/api/stats/usage/route.ts
+const cacheKey = `stats:usage:${userId}`
+const cached = await cacheManager.get(cacheKey)
+
+if (cached) {
+  return NextResponse.json(cached)
+}
+
+const data = await fetchFromDatabase()
+await cacheManager.set(cacheKey, data, 60) // 60秒TTL
+
+return NextResponse.json(data)
 ```
 
 ---
