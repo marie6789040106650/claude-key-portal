@@ -36,6 +36,11 @@ describe('GET /api/stats/leaderboard', () => {
 
   describe('认证验证', () => {
     it('应该拒绝无认证令牌的请求', async () => {
+      // 覆盖 beforeEach 的模拟，让 verifyToken 抛出错误
+      ;(verifyToken as jest.Mock).mockImplementation(() => {
+        throw new Error('No authorization token provided')
+      })
+
       const request = new Request('http://localhost/api/stats/leaderboard')
 
       const response = await GET(request)
