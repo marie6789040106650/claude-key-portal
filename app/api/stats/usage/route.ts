@@ -56,6 +56,56 @@ function validateDate(dateString: string): Date | null {
 }
 
 /**
+ * 工具函数：构建时间范围过滤条件
+ * @returns { valid: boolean, where?: object, error?: string }
+ */
+function buildDateRangeFilter(
+  startDate: string | null,
+  endDate: string | null
+): {
+  valid: boolean
+  where?: { createdAt: { gte?: Date; lte?: Date } }
+  error?: string
+} {
+  if (!startDate && !endDate) {
+    return { valid: true }
+  }
+
+  const where: { createdAt: { gte?: Date; lte?: Date } } = { createdAt: {} }
+
+  if (startDate) {
+    const start = validateDate(startDate)
+    if (!start) {
+      return { valid: false, error: '时间范围参数格式不正确' }
+    }
+    where.createdAt.gte = start
+  }
+
+  if (endDate) {
+    const end = validateDate(endDate)
+    if (!end) {
+      return { valid: false, error: '时间范围参数格式不正确' }
+    }
+    where.createdAt.lte = end
+  }
+
+  return { valid: true, where }
+}
+
+/**
+ * 工具函数：构建CRS趋势查询参数
+ */
+function buildTrendParams(
+  startDate: string | null,
+  endDate: string | null
+): { startDate?: string; endDate?: string } {
+  const params: { startDate?: string; endDate?: string } = {}
+  if (startDate) params.startDate = startDate
+  if (endDate) params.endDate = endDate
+  return params
+}
+
+/**
  * 工具函数：安全地将BigInt转换为Number
  */
 function bigIntToNumber(value: bigint | null | undefined): number {
@@ -212,36 +262,16 @@ async function getAllKeysStats(
   endDate: string | null,
   includeTrend: boolean = false
 ) {
-  // 1. 构建查询条件
-  const where: any = {
-    userId,
+  // 1. 验证和构建时间范围过滤
+  const dateFilter = buildDateRangeFilter(startDate, endDate)
+  if (!dateFilter.valid) {
+    return NextResponse.json({ error: dateFilter.error }, { status: 400 })
   }
 
-  // 2. 添加时间范围过滤
-  if (startDate || endDate) {
-    where.createdAt = {}
-
-    if (startDate) {
-      const start = validateDate(startDate)
-      if (!start) {
-        return NextResponse.json(
-          { error: '时间范围参数格式不正确' },
-          { status: 400 }
-        )
-      }
-      where.createdAt.gte = start
-    }
-
-    if (endDate) {
-      const end = validateDate(endDate)
-      if (!end) {
-        return NextResponse.json(
-          { error: '时间范围参数格式不正确' },
-          { status: 400 }
-        )
-      }
-      where.createdAt.lte = end
-    }
+  // 2. 构建查询条件
+  const where: any = {
+    userId,
+    ...dateFilter.where,
   }
 
   // 3. 查询所有密钥
@@ -292,11 +322,7 @@ async function getAllKeysStats(
   let trendWarning: string | undefined
 
   if (includeTrend) {
-    // 构建时间范围参数
-    const trendParams: { startDate?: string; endDate?: string } = {}
-    if (startDate) trendParams.startDate = startDate
-    if (endDate) trendParams.endDate = endDate
-
+    const trendParams = buildTrendParams(startDate, endDate)
     const { data, warning } = await fetchCrsUsageTrendSafely(trendParams)
     crsTrend = data
     trendWarning = warning
