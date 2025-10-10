@@ -48,7 +48,15 @@ export async function GET(request: Request) {
 
     // 5. 处理结果
     if (result.isSuccess) {
-      return NextResponse.json(result.value, { status: 200 })
+      // 字段映射：添加totalRequests别名（前端兼容性）
+      const response = {
+        ...result.value,
+        keys: result.value!.keys.map(key => ({
+          ...key,
+          totalRequests: key.totalCalls,  // 添加别名字段
+        })),
+      }
+      return NextResponse.json(response, { status: 200 })
     } else {
       const error = result.error!
 

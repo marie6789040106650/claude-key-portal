@@ -49,6 +49,7 @@ export async function GET(
       crsKey: crsKey ? `${crsKey.substring(0, 12)}...${crsKey.substring(crsKey.length - 8)}` : null, // 只显示部分密钥
       totalCalls: Number(totalCalls),
       totalTokens: Number(totalTokens),
+      totalRequests: Number(totalCalls),  // 添加别名字段（前端兼容性）
     }, { status: 200 })
   } catch (error: any) {
     console.error('Get key error:', error)
@@ -95,7 +96,14 @@ export async function PUT(
 
     // 5. 处理结果
     if (result.isSuccess) {
-      return NextResponse.json({ key: result.value }, { status: 200 })
+      // 字段映射：添加totalRequests别名（前端兼容性）
+      const key = result.value!
+      return NextResponse.json({
+        key: {
+          ...key,
+          totalRequests: key.totalCalls,
+        }
+      }, { status: 200 })
     } else {
       const error = result.error!
 
@@ -162,7 +170,14 @@ export async function PATCH(
 
     // 5. 处理结果
     if (result.isSuccess) {
-      return NextResponse.json({ key: result.value }, { status: 200 })
+      // 字段映射：添加totalRequests别名（前端兼容性）
+      const key = result.value!
+      return NextResponse.json({
+        key: {
+          ...key,
+          totalRequests: key.totalCalls,
+        }
+      }, { status: 200 })
     } else {
       const error = result.error!
 
