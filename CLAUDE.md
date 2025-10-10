@@ -110,7 +110,7 @@ Claude Key Portal = CRS 的用户管理门户
 3. **CRS 集成规范**
 
    ```
-   阅读: API_MAPPING_SPECIFICATION.md
+   阅读: docs/reference/API_MAPPING_SPECIFICATION.md
    目的: 了解如何与 CRS 交互
    关键:
    - Section 2.4: 统计数据接口（代理）
@@ -121,7 +121,7 @@ Claude Key Portal = CRS 的用户管理门户
 4. **数据库设计**
 
    ```
-   阅读: DATABASE_SCHEMA.md
+   阅读: docs/reference/DATABASE_SCHEMA.md
    目的: 理解数据模型
    关键:
    - User 表（本地用户）
@@ -131,14 +131,14 @@ Claude Key Portal = CRS 的用户管理门户
 
 5. **TDD 工作流**
    ```
-   阅读: TDD_GIT_WORKFLOW.md
+   阅读: docs/development/TDD_GIT_WORKFLOW.md
    目的: 遵循开发流程
    关键: 🔴 RED → 🟢 GREEN → 🔵 REFACTOR
    ```
 
 6. **🆕 DDD + TDD + Git 综合开发标准** ⭐ 最重要！
    ```
-   阅读: DDD_TDD_GIT_STANDARD.md
+   阅读: docs/development/DDD_TDD_GIT_STANDARD.md
    目的: 理解项目的完整开发标准和架构设计
    关键:
    - DDD Lite 分层架构（domain/application/infrastructure）
@@ -178,7 +178,7 @@ prototypes/
 
 ### ⚠️ 首要规范：必须遵循 DDD_TDD_GIT_STANDARD.md
 
-**铁律**: 开始任何开发工作前，必须完整阅读并遵循 `DDD_TDD_GIT_STANDARD.md`
+**铁律**: 开始任何开发工作前，必须完整阅读并遵循 `docs/development/DDD_TDD_GIT_STANDARD.md`
 
 **核心要求**:
 ```
@@ -209,7 +209,7 @@ prototypes/
 - ❌ Pre-commit Hook阻止提交
 - ❌ CI构建失败
 
-详见: `DDD_TDD_GIT_STANDARD.md` (1,246行完整标准)
+详见: `docs/development/DDD_TDD_GIT_STANDARD.md` (1,246行完整标准)
 
 ---
 
@@ -245,7 +245,7 @@ git commit -m "fix: adjust API format to match CRS"
 - ✅ 集成测试通过才能合并到develop
 - ❌ 不允许跳过集成验证环节
 
-详见: `docs/CRS_INTEGRATION_STANDARD.md`
+详见: `docs/development/CRS_INTEGRATION_STANDARD.md`
 
 ### CRS 集成规范
 
@@ -334,7 +334,7 @@ chore(infra): configure pre-commit hooks
 - ✅ TypeScript类型检查通过
 - ✅ ESLint检查通过
 
-详见: `DDD_TDD_GIT_STANDARD.md` Section "Git工作流规范"
+详见: `docs/development/DDD_TDD_GIT_STANDARD.md` Section "Git工作流规范"
 
 ---
 
@@ -744,7 +744,7 @@ if (result.isSuccess) {
 }
 ```
 
-详见: `DDD_TDD_GIT_STANDARD.md` Section "DDD Lite方案"
+详见: `docs/development/DDD_TDD_GIT_STANDARD.md` Section "DDD Lite方案"
 
 ---
 
@@ -864,7 +864,7 @@ NODE_ENV=production
 
 - ❌ Workers 不支持 TCP 连接，Prisma 需要 Data Proxy（$25/月额外成本）
 - ❌ 需要重写大量代码（340+ 小时工作量）
-- 详见: [部署平台分析](./DEPLOYMENT_PLATFORM_ANALYSIS.md)
+- 详见: [部署平台分析](./docs/deployment/DEPLOYMENT_PLATFORM_ANALYSIS.md)
 
 ---
 
@@ -1036,7 +1036,7 @@ NODE_ENV=production
 - `GET /admin/api-keys-usage-trend` - 获取使用趋势
 - `GET /admin/api-keys/:id/stats` - 获取密钥统计
 
-详见: `CRS_API_VERIFICATION.md`
+详见: `docs/reference/CRS_API_VERIFICATION.md`
 
 ---
 
@@ -1124,7 +1124,7 @@ claude-key-portal
 文档: docs/P3.1_TEST_FIX_PLAN.md
 ```
 
-详见: `docs/NEW_WINDOW_PROMPT_TEMPLATE.md`
+详见: `docs/archive/old-plans/NEW_WINDOW_PROMPT_TEMPLATE.md`
 
 ### Claude 必须执行的收尾步骤
 

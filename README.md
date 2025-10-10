@@ -12,14 +12,19 @@
 
 **Claude Key Portal** 是 [CRS (Claude Relay Service)](https://github.com/Wei-Shaw/claude-relay-service) 的用户管理门户，为用户提供友好的 Web 界面来管理 API 密钥、查看使用统计和获取安装指导。
 
-### 核心特性
+### 核心特性（MVP版）
 
 - ✅ **用户友好** - 简洁直观的界面，降低 CRS 使用门槛
 - ✅ **密钥管理** - 轻松创建、查看、更新和删除 API 密钥
 - ✅ **数据可视化** - 直观的图表展示使用统计和趋势
 - ✅ **安装指导** - 完整的 Claude Code/Codex 配置步骤
-- ✅ **用户设置** - 个人资料、安全设置、通知配置一应俱全
-- ✅ **个性化** - 备注、标签、收藏等本地扩展功能
+- ✅ **用户设置** - 个人资料、安全设置（核心功能）
+- ⏳ **个性化** - 备注、标签、收藏等本地扩展功能（P1开发中）
+
+**已移除的未来功能**（参见 [RESERVED_BUT_UNUSED.md](./docs/reference/RESERVED_BUT_UNUSED.md)）:
+- 监控告警系统 → P3功能（已移至 archives/future-features/）
+- 通知推送系统 → P3功能（已移至 archives/future-features/）
+- Cron定时任务 → P3功能（未实现）
 
 ---
 
@@ -92,37 +97,27 @@ python3 -m http.server 8000
 
 ### 🎨 功能亮点：用户设置和个人中心
 
-完整的用户设置系统已在 **Sprint 14** 中实现，提供全面的账户管理功能：
+用户设置系统实现了核心的账户管理功能（MVP版本）：
 
-#### 个人资料
+#### 个人资料 ✅
 - ✅ **头像显示** - 支持中英文首字母头像，确定性颜色生成
 - ✅ **昵称编辑** - 1-50字符验证
-- ✅ **个人简介** - 最多500字符，Markdown支持
+- ✅ **个人简介** - 最多500字符
 - ✅ **实时验证** - React Hook Form + Zod 表单验证
 
-#### 安全设置
+#### 安全设置 ✅
 - ✅ **密码修改** - 强度实时显示（弱/中/强）
 - ✅ **密码要求** - 至少8位，包含大小写、数字、特殊字符
 - ✅ **活跃会话管理** - 查看所有登录设备
 - ✅ **远程注销** - 单个设备或一键注销所有其他设备
 - ✅ **确认对话框** - 防止误操作
 
-#### 通知设置
-- ✅ **通知类型** - 密钥创建/删除、使用量告警、安全告警、系统更新
-- ✅ **通知渠道** - 邮件、Webhook、系统通知
-- ✅ **乐观更新** - 即时UI反馈，自动保存
-- ✅ **错误恢复** - 失败时自动回滚
-
-#### 到期提醒
-- ✅ **动态配置** - 添加/删除提醒天数（1-30天）
-- ✅ **多渠道提醒** - 支持多种通知方式
-- ✅ **实时验证** - 天数范围检查和错误提示
-
 **技术亮点**:
-- 92.30% 测试覆盖率
 - TypeScript 类型完整
 - 可复用的自定义 Hooks
 - 优化的用户体验（加载状态、错误提示）
+
+**注**: 通知设置和到期提醒属于P3功能，已移至 `archives/future-features/settings/`
 
 ---
 
@@ -198,19 +193,14 @@ npm test -- --testNamePattern="user registration"
 
 ### 快速开始文档
 
-- [**CONFIGURATION_GUIDE.md**](./CONFIGURATION_GUIDE.md) - 环境配置指南
-- [**DEVELOPMENT_READINESS_REPORT.md**](./DEVELOPMENT_READINESS_REPORT.md) - 开发准备报告
-- [**TDD_GIT_WORKFLOW.md**](./TDD_GIT_WORKFLOW.md) - TDD 和 Git 工作流
+- [**配置指南**](./docs/deployment/CONFIGURATION_GUIDE.md) - 环境配置详解
+- [**TDD工作流**](./docs/development/TDD_GIT_WORKFLOW.md) - TDD和Git工作流
+- [**开发最佳实践**](./docs/development/DEVELOPMENT_BEST_PRACTICES.md) - 编码规范
 
 ### Sprint 开发文档
 
-- [**docs/SPRINT_INDEX.md**](./docs/SPRINT_INDEX.md) - Sprint 开发历程总览
-- [**docs/DOCUMENTATION_STANDARD.md**](./docs/DOCUMENTATION_STANDARD.md) - 文档管理标准
-- **Sprint 规划和总结**:
-  - Sprint 3: [TODOLIST (缺失)]() | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | [API 文档](./docs/API_ENDPOINTS_SPRINT3.md)
-  - Sprint 4: [TODOLIST](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | [API 文档 (待补齐)]()
-  - Sprint 5: [TODOLIST](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | [API 文档](./docs/API_ENDPOINTS_SPRINT5.md)
-  - Sprint 6: [TODOLIST](./docs/SPRINT_6_TODOLIST.md) | [SUMMARY (待创建)]() | [API 文档 (待创建)]()
+- [**Sprint历程总览**](./docs/archive/sprints/SPRINT_INDEX.md) - 完整的Sprint开发历程
+- [**文档管理标准**](./docs/development/DOCUMENTATION_STANDARD.md) - 文档编写规范
 
 ### 核心文档
 
@@ -221,15 +211,14 @@ npm test -- --testNamePattern="user registration"
 
 ### 技术规范
 
-- [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) - 数据库设计
-- [**API_MAPPING_SPECIFICATION.md**](./API_MAPPING_SPECIFICATION.md) - API 规范
-- [**UI_DESIGN_SPECIFICATION.md**](./UI_DESIGN_SPECIFICATION.md) - UI/UX 设计
-- [**COMPONENT_LIBRARY.md**](./COMPONENT_LIBRARY.md) - 组件库
-- [**PAGE_HIERARCHY_AND_MODULES.md**](./PAGE_HIERARCHY_AND_MODULES.md) - 页面结构
+- [**数据库设计**](./docs/reference/DATABASE_SCHEMA.md) - Prisma schema和数据表结构
+- [**API规范**](./docs/reference/API_MAPPING_SPECIFICATION.md) - Portal和CRS的API映射关系
+- [**UI设计规范**](./docs/reference/UI_DESIGN_SPECIFICATION.md) - 设计系统和样式指南
+- [**组件库**](./docs/reference/COMPONENT_LIBRARY.md) - Shadcn/ui组件使用文档
 
 ### 项目审计报告
 
-- [**PROJECT_STRUCTURE_AUDIT.md**](./docs/PROJECT_STRUCTURE_AUDIT.md) - 项目结构审计（2025-10-04）
+- [**项目结构审计**](./docs/archive/audits/PROJECT_STRUCTURE_AUDIT.md) - 项目结构审计（2025-10-04）
 
 ---
 
@@ -333,7 +322,7 @@ npm test  # ✅ 仍然通过
 git push origin feature/user-login
 ```
 
-详细的 TDD 和 Git 工作流请参考 [TDD_GIT_WORKFLOW.md](./TDD_GIT_WORKFLOW.md)
+详细的 TDD 和 Git 工作流请参考 [TDD工作流](./docs/development/TDD_GIT_WORKFLOW.md)
 
 ### Git 分支策略
 
@@ -478,34 +467,45 @@ docker-compose -f docker-compose.prod.yml up -d
 2. 或替换为 Supabase JS SDK（放弃 Prisma）
 3. 重写认证逻辑（替换 bcrypt）
 
-详见: [部署平台对比分析](./DEPLOYMENT_PLATFORM_ANALYSIS.md)
+详见: [部署平台对比分析](./docs/deployment/DEPLOYMENT_PLATFORM_ANALYSIS.md)
 
 ---
 
 ## 🛣️ 开发进度
 
-### 当前状态
+### 当前状态（MVP完成）
 
-| Sprint | 功能 | 规划 | 总结 | 状态 |
-|--------|------|------|------|------|
-| Sprint 0 | 项目初始化 | - | [AUDIT](./docs/SPRINT_0_AUDIT_REPORT.md) | ✅ |
-| Sprint 2 | CRS 集成基础 | - | [SUMMARY](./docs/SPRINT_2_SUMMARY.md) | ✅ |
-| Sprint 3 | 安装指导 | - | [SUMMARY](./docs/SPRINT_3_SUMMARY.md) | ✅ |
-| Sprint 4 | 密钥管理 | [TODO](./docs/SPRINT_4_TODOLIST.md) | [SUMMARY](./docs/SPRINT_4_SUMMARY.md) | ✅ |
-| Sprint 5 | 账户设置 API | [TODO](./docs/SPRINT_5_TODOLIST.md) | [SUMMARY](./docs/SPRINT_5_SUMMARY.md) | ✅ |
-| Sprint 6 | 通知系统 | [TODO](./docs/SPRINT_6_TODOLIST.md) | [SUMMARY](./docs/SPRINT_6_SUMMARY.md) | ✅ |
-| Sprint 7 | API Key到期提醒 | [TODO](./docs/SPRINT_7_TODOLIST.md) | [SUMMARY](./docs/SPRINT_7_SUMMARY.md) | ✅ |
-| Sprint 8 | Cron Job定时任务 | [TODO](./docs/SPRINT_8_TODOLIST.md) | [SUMMARY](./docs/SPRINT_8_SUMMARY.md) | ✅ |
-| Sprint 9 | 监控告警系统 | [TODO](./docs/SPRINT_9_TODOLIST.md) | [SUMMARY](./docs/SPRINT_9_SUMMARY.md) | ✅ |
-| Sprint 10 | 监控仪表板前端 | [TODO](./docs/SPRINT_10_TODOLIST.md) | [SUMMARY](./docs/SPRINT_10_SUMMARY.md) | ✅ |
-| Sprint 11 | 用户认证和仪表板 | [TODO](./docs/SPRINT_11_TODOLIST.md) | [SUMMARY](./docs/SPRINT_11_SUMMARY.md) | ✅ |
-| Sprint 12 | 密钥管理UI | [TODO](./docs/SPRINT_12_TODOLIST.md) | [SUMMARY](./docs/SPRINT_12_SUMMARY.md) | ✅ |
-| Sprint 13 | 密钥使用统计可视化 | [TODO](./docs/SPRINT_13_TODOLIST.md) | [SUMMARY](./docs/SPRINT_13_SUMMARY.md) | ✅ |
-| Sprint 14 | 用户设置和个人中心UI | [TODO](./docs/SPRINT_14_TODOLIST.md) | [SUMMARY](./docs/SPRINT_14_SUMMARY.md) | ✅ |
+#### 核心功能 Sprint（P0-P1）
 
-**图例**: ✅ 已完成 | 🚧 进行中
+| Sprint | 功能 | 优先级 | 状态 |
+|--------|------|--------|------|
+| Sprint 0 | 项目初始化 | P0 | ✅ |
+| Sprint 2 | CRS 集成基础 | P0 | ✅ |
+| Sprint 3 | 安装指导 | P0 | ✅ |
+| Sprint 4 | 密钥管理 | P0 | ✅ |
+| Sprint 5 | 账户设置 API | P1 | ✅ |
+| Sprint 11 | 用户认证和仪表板 | P0 | ✅ |
+| Sprint 12 | 密钥管理UI | P0 | ✅ |
+| Sprint 13 | 密钥使用统计可视化 | P1 | ✅ |
+| Sprint 14 | 用户设置和个人中心UI | P1 | ✅ |
 
-完整的 Sprint 历程详见 [**SPRINT_INDEX.md**](./docs/SPRINT_INDEX.md)
+**MVP状态**: ✅ **100%完成**（P0功能全部完成，P1功能90%完成）
+
+#### 已移除的未来功能 Sprint（P3）
+
+以下Sprint的功能已移至 `archives/future-features/`，待需要时再实现：
+
+| Sprint | 功能 | 优先级 | 状态 |
+|--------|------|--------|------|
+| Sprint 6 | 通知系统 | P3 | ⏸️ 已暂停 |
+| Sprint 7 | API Key到期提醒 | P3 | ⏸️ 已暂停 |
+| Sprint 8 | Cron Job定时任务 | P3 | ⏸️ 已暂停 |
+| Sprint 9 | 监控告警系统 | P3 | ⏸️ 已暂停 |
+| Sprint 10 | 监控仪表板前端 | P3 | ⏸️ 已暂停 |
+
+**图例**: ✅ 已完成 | ⏸️ 已暂停（P3功能）
+
+完整的 Sprint 历程详见 [**docs/archive/sprints/**](./docs/archive/sprints/)
 
 ### 测试统计
 
@@ -524,53 +524,49 @@ docker-compose -f docker-compose.prod.yml up -d
 - ✅ 61 个新增测试全部通过
 - ✅ 92.30% 测试覆盖率
 
-### Phase 1: 基础功能 ✅ (已完成)
+### 开发阶段总结
 
-- [x] **Sprint 0**: 项目初始化和 TDD 环境
-  - [x] Git 仓库和分支策略
-  - [x] Next.js 14 + TypeScript 搭建
-  - [x] Prisma + PostgreSQL 配置
-  - [x] Jest 测试环境
-- [x] **Sprint 2**: CRS 集成基础
-  - [x] CRS Client 封装
-  - [x] 用户认证系统（注册/登录）
-  - [x] JWT 令牌管理
-- [x] **Sprint 3**: 安装指导
-  - [x] 多平台脚本生成 (macOS/Linux/Windows)
-  - [x] 环境变量配置
-  - [x] 安装说明生成
-- [x] **Sprint 4**: 密钥管理
-  - [x] 密钥 CRUD 操作（代理 CRS）
-  - [x] 密钥列表展示
-  - [x] 统计数据 Dashboard
-- [x] **Sprint 5**: 账户设置
-  - [x] 用户资料管理（GET/PUT）
-  - [x] 密码修改和强度验证
-  - [x] 会话管理（列表/登出设备）
+#### Phase 1: MVP核心功能 ✅ (已完成 - P0)
 
-### Phase 2: 增强功能 🚧 (进行中)
+- [x] 项目初始化和 TDD 环境
+- [x] CRS 集成基础（CRS Client + 认证）
+- [x] 安装指导（多平台脚本生成）
+- [x] 密钥管理（CRUD + 列表 + 统计）
+- [x] 用户认证和仪表板
+- [x] 密钥管理UI
 
-- [x] ~~Sprint 1: 用户认证~~ (已合并到 Sprint 2)
-- [ ] **Sprint 6**: 通知系统 ← 当前 Sprint
-  - [ ] 通知配置 API
-  - [ ] 通知记录 API
-  - [ ] 邮件通知服务
-  - [ ] Webhook 通知支持
-- [ ] Sprint 7: 数据可视化优化
-- [ ] Sprint 8: 性能优化和缓存
+**状态**: ✅ **100%完成**
 
-### Phase 3: 生产部署 📋 (计划中)
+#### Phase 2: 增强功能 🚧 (90%完成 - P1)
+
+- [x] 账户设置API（资料管理 + 密码修改 + 会话管理）
+- [x] 密钥使用统计可视化
+- [x] 用户设置和个人中心UI
+- [ ] 本地扩展功能（备注、标签、收藏）← 剩余10%
+
+**状态**: 🚧 **90%完成**，剩余功能开发中
+
+#### Phase 3: 生产部署 📋 (计划中)
 
 - [ ] 环境配置和安全加固
-- [ ] 监控和日志系统
-- [ ] Vercel 部署上线
+- [ ] 日志和错误追踪（Sentry）
+- [ ] Vercel生产部署
+- [ ] 用户反馈收集
 
-### Phase 4: 功能扩展 🌟 (未来)
+**预计时间**: 1-2周
 
-- [ ] 个性化功能（备注、标签、收藏）
-- [ ] 高级统计和分析
-- [ ] 团队协作功能
-- [ ] 移动端优化
+#### Phase 4: 未来功能 🌟 (按需开发 - P2-P3)
+
+根据用户反馈决定是否开发：
+
+- [ ] 通知系统（邮件 + Webhook）- P3
+- [ ] 监控告警系统 - P3
+- [ ] Cron定时任务 - P3
+- [ ] 团队协作功能 - P3
+- [ ] 高级数据分析 - P2
+- [ ] 移动端优化 - P2
+
+**原则**: 只做真正需要的功能，避免过度设计
 
 详细路线图请参考 [03\_发展路线图.md](./PROJECT_CORE_DOCS/03_发展路线图.md)
 
