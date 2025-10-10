@@ -56,7 +56,7 @@ function TopNavComponent({
   const handleLogout = useCallback(async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
-      router.push('/login')
+      router.push('/auth/login')
     } catch (error) {
       console.error('Logout failed:', error)
     }
@@ -194,7 +194,7 @@ function TopNavComponent({
               )}
             </div>
           ) : (
-            <Button onClick={() => router.push('/login')}>登录</Button>
+            <Button onClick={() => router.push('/auth/login')}>登录</Button>
           )}
         </div>
       </div>

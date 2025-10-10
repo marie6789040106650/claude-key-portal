@@ -21,7 +21,13 @@ import { Card } from '@/components/ui/card'
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') || '/dashboard'
+
+  // 安全的重定向路径处理
+  // 如果redirect参数是认证相关路径，使用默认的/dashboard
+  const rawRedirect = searchParams.get('redirect') || '/dashboard'
+  const redirectTo = rawRedirect.startsWith('/auth') || rawRedirect === '/login'
+    ? '/dashboard'
+    : rawRedirect
 
   // 自动跳转：已登录用户直接跳转到 dashboard
   useEffect(() => {

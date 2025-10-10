@@ -49,7 +49,7 @@ export function DashboardPageClient() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          router.push('/login')
+          router.push('/auth/login')
           return
         }
         throw new Error('获取数据失败')
