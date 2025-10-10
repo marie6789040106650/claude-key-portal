@@ -10,6 +10,7 @@ import { DateRangePicker } from '@/components/stats/DateRangePicker'
 import { KeyFilter } from '@/components/stats/KeyFilter'
 import { ExportDialog } from '@/components/stats/ExportDialog'
 import { CrsStatusAlert } from '@/components/stats/CrsStatusAlert'
+import { StatsSkeleton } from '@/components/stats/StatsSkeleton'
 import { useUsageStats } from '@/hooks/use-stats'
 import { useToast } from '@/components/ui/use-toast'
 import { formatNumber } from '@/lib/ui-utils'
@@ -193,22 +194,9 @@ export default function UsageStatsPage() {
     )
   }
 
-  // 骨架屏
+  // 骨架屏 - 使用优化的 StatsSkeleton 组件
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div data-testid="stats-skeleton" className="space-y-6">
-          <div className="h-8 bg-muted animate-pulse rounded w-48" />
-          <div className="grid gap-6 md:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-muted animate-pulse rounded" />
-            ))}
-          </div>
-          <div className="h-64 bg-muted animate-pulse rounded" />
-          <div className="h-96 bg-muted animate-pulse rounded" />
-        </div>
-      </div>
-    )
+    return <StatsSkeleton />
   }
 
   const summary = data?.summary || {
