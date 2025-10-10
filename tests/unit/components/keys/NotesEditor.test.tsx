@@ -14,6 +14,17 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NotesEditor } from '@/components/keys/NotesEditor'
 
+// Mock toast
+jest.mock('@/components/ui/use-toast', () => ({
+  toast: jest.fn(),
+  useToast: jest.fn(() => ({
+    toast: jest.fn(),
+  })),
+}))
+
+import { toast } from '@/components/ui/use-toast'
+const mockToast = toast as jest.MockedFunction<typeof toast>
+
 // Mock fetch
 global.fetch = jest.fn()
 
@@ -23,6 +34,7 @@ describe('NotesEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(global.fetch as jest.Mock).mockReset()
+    mockToast.mockClear()
   })
 
   describe('编辑器渲染', () => {
@@ -170,7 +182,9 @@ describe('NotesEditor', () => {
       await userEvent.click(saveButton)
 
       await waitFor(() => {
-        expect(screen.getByText('保存成功')).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '保存成功',
+        })
       })
     })
 
@@ -347,7 +361,10 @@ describe('NotesEditor', () => {
       await userEvent.click(saveButton)
 
       await waitFor(() => {
-        expect(screen.getByText('保存失败，请重试')).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '保存失败，请重试',
+          variant: 'destructive',
+        })
       })
 
       expect(mockOnSave).not.toHaveBeenCalled()
@@ -367,7 +384,10 @@ describe('NotesEditor', () => {
       await userEvent.click(saveButton)
 
       await waitFor(() => {
-        expect(screen.getByText('网络错误，请检查连接')).toBeInTheDocument()
+        expect(mockToast).toHaveBeenCalledWith({
+          title: '保存失败，请重试',
+          variant: 'destructive',
+        })
       })
     })
   })

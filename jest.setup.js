@@ -4,13 +4,17 @@ import '@testing-library/jest-dom'
 // Import CRS Client Mock (必须在所有测试前导入)
 import './tests/mocks/crs-client.mock'
 
-// Polyfill for Next.js Server APIs
+// Import统一的Mock配置
+import './tests/setup/fetch-mock'
+import './tests/setup/clipboard-mock'
+import './tests/setup/redis-mock'
+
+// Polyfill for Next.js Server APIs (only TextEncoder/TextDecoder needed)
 import { TextEncoder, TextDecoder } from 'util'
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder
 
-// Mock fetch API
-global.fetch = jest.fn()
+// Node 18+ has built-in fetch/Request/Response, no need for polyfill
 
 // Mock environment variables for testing
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db'

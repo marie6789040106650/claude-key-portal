@@ -52,6 +52,37 @@ Claude Key Portal = CRS 的用户管理门户
 - ❌ 速率限制实施
 - ❌ Claude API 直接调用
 
+### 开发原则：避免过度设计 ⚠️
+
+**铁律**: CRS已实现的功能，Portal直接调用，不要重新实现
+
+```
+✅ 正确做法：
+- 密钥启用/禁用 → 调用 CrsClient.updateKey({ status: 'active'/'inactive' })
+- 密钥重命名 → 调用 CrsClient.updateKey({ name: 'new name' })
+- 密钥更新 → 调用 CrsClient.updateKey({ ...fields })
+
+❌ 错误做法：
+- 在Portal实现密钥状态管理逻辑
+- 在本地数据库添加isActive字段（CRS已有）
+- 创建复杂的状态同步机制
+- 实现任何CRS已有的业务逻辑
+```
+
+**CrsClient已实现的方法**（lib/infrastructure/external/crs-client.ts）:
+- ✅ `createKey(data)` - 创建密钥
+- ✅ `updateKey(keyId, data)` - 更新密钥（支持name, description, status）
+- ✅ `deleteKey(keyId)` - 删除密钥
+- ✅ `listKeys(userId)` - 列出密钥
+- ✅ `getKeyStats(apiKey)` - 获取统计
+- ✅ `getDashboard()` - 获取仪表板
+
+**开发流程**:
+1. 检查CrsClient是否已有对应方法
+2. 如果有，直接使用（只需实现Portal API代理 + UI）
+3. 如果没有，先确认CRS API是否支持
+4. 只在CRS完全不支持的功能上才考虑本地实现
+
 ---
 
 ## 📚 开发上下文引用 / Development Context Reference
@@ -1043,6 +1074,122 @@ NODE_ENV=production
 **最后更新**: 2025-10-06 (添加DDD+TDD+Git标准)
 **维护者**: Claude Key Portal Team
 **下次更新**: 标准执行1个月后评估
+
+---
+
+## 🔄 自动化开发监控 / Automated Development Monitoring
+
+### Claude Monitor 集成
+
+本项目已集成 **Claude Auto-Dev Monitor** 工具实现自动化开发流程。
+
+### 工作流程
+
+```
+用户启动监控（设置提示词）
+  ↓
+Claude 开发任务
+  ↓
+完成后执行: claude-monitor done
+  ↓
+10秒后自动打开新终端继续下一阶段
+```
+
+### 新窗口通用提示词 ⭐ 推荐
+
+**最简洁的启动方式**:
+
+```
+claude-key-portal
+```
+
+Claude会自动：
+- ✅ 定位项目路径
+- ✅ 检查Git状态
+- ✅ 读取最新任务文档
+- ✅ 展示下一步行动
+
+**带意图的启动**:
+
+```
+claude-key-portal
+[你的意图，如: 继续测试修复 / 开始新功能]
+```
+
+**指定任务的启动**:
+
+```
+claude-key-portal
+任务: P3.1测试修复
+文档: docs/P3.1_TEST_FIX_PLAN.md
+```
+
+详见: `docs/NEW_WINDOW_PROMPT_TEMPLATE.md`
+
+### Claude 必须执行的收尾步骤
+
+**每次完成任务后，必须执行以下命令标记完成：**
+
+```bash
+claude-monitor done
+```
+
+**或者更新下一阶段提示词：**
+
+```bash
+claude-monitor done "下一阶段任务描述"
+```
+
+### 使用示例
+
+```bash
+# 场景1: 保持当前提示词继续
+claude-monitor done
+
+# 场景2: 切换到新任务
+claude-monitor done "开始P3.1测试修复 - 提升测试通过率"
+
+# 场景3: 详细的阶段切换
+claude-monitor done "任务: P3.1测试修复
+参考文档: docs/NEXT_SESSION_PROMPT_V5.md"
+```
+
+### 强制执行规则
+
+```markdown
+✅ **必须执行**:
+- 所有开发任务完成后
+- 所有测试通过后
+- 所有代码提交后（如需要）
+- 准备结束当前开发会话时
+
+❌ **禁止跳过**:
+- 不允许忘记执行 claude-monitor done
+- 不允许手动关闭会话而不标记
+- 不允许在任务未完成时执行
+```
+
+### 自动化标准检查清单
+
+完成任务前必须确认：
+
+```markdown
+- [ ] ✅ 所有测试通过（TDD流程完整）
+- [ ] ✅ 代码已提交（如需要）
+- [ ] ✅ 文档已更新（如需要）
+- [ ] ✅ **执行 `claude-monitor done` 标记完成** 👈 关键步骤！
+```
+
+### 监控工具说明
+
+- **工具**: claude-monitor
+- **安装**: 全局安装（已配置）
+- **监控文件**: `.automation/task_completed`
+- **延迟时间**: 10 秒
+- **自动化**: 打开新终端继续开发
+- **新窗口提示词**: `claude-key-portal` (极简启动)
+
+**注意**: `.automation/` 目录已添加到 `.gitignore`，不会提交到版本控制。
 
 ---
 

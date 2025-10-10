@@ -1,0 +1,412 @@
+{
+  "timestamp": "2025-10-09T14:17:27.703Z",
+  "baseUrl": "https://claude.just-play.fun",
+  "summary": {
+    "total": 6,
+    "success": 6,
+    "failed": 0,
+    "avgResponseTime": 691
+  },
+  "steps": [
+    {
+      "step": "1. Admin认证",
+      "method": "POST",
+      "url": "https://claude.just-play.fun/web/auth/login",
+      "requestHeaders": {
+        "Content-Type": "application/json"
+      },
+      "requestBody": {
+        "username": "cr_admin_4ce18cd2",
+        "password": "HCTBMoiK3PZD0eDC"
+      },
+      "responseStatus": 200,
+      "responseHeaders": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key, api-key, x-admin-token, anthropic-version, anthropic-dangerous-direct-browser-access",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Request-ID, Content-Type",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "143",
+        "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.bootcdn.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.bootcdn.net; font-src 'self' https://cdnjs.cloudflare.com https://cdn.bootcdn.net; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+        "content-type": "application/json; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "date": "Thu, 09 Oct 2025 14:17:20 GMT",
+        "etag": "W/\"8f-yvS4jJOC9GQZnfIX5KLGGhs7lOA\"",
+        "expires": "0",
+        "origin-agent-cluster": "?1",
+        "pragma": "no-cache",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "vary": "Accept-Encoding",
+        "via": "1.1 Caddy",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "DENY",
+        "x-permitted-cross-domain-policies": "none",
+        "x-request-id": "c6h5obwyccv",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseBody": {
+        "success": true,
+        "token": "ea856b890cbc22ca08ae4b2c97f3989ae2af2a2be119f2bd534c1680c3948758",
+        "expiresIn": 86400000,
+        "username": "cr_admin_4ce18cd2"
+      },
+      "responseTime": 1855,
+      "success": true
+    },
+    {
+      "step": "2. 创建API Key",
+      "method": "POST",
+      "url": "https://claude.just-play.fun/admin/api-keys",
+      "requestHeaders": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ea856b890cbc22ca08ae4b2c97f3989ae2af2a2be119f2bd534c1680c3948758"
+      },
+      "requestBody": {
+        "name": "Portal-Integration-Test-1760019441405",
+        "description": "Portal API集成测试用密钥（自动创建，测试完成后自动删除）",
+        "tokenLimit": null,
+        "expiresAt": null,
+        "permissions": [
+          "claude"
+        ],
+        "tags": [
+          "portal-test",
+          "auto-cleanup"
+        ]
+      },
+      "responseStatus": 200,
+      "responseHeaders": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key, api-key, x-admin-token, anthropic-version, anthropic-dangerous-direct-browser-access",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Request-ID, Content-Type",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "974",
+        "content-type": "application/json; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "date": "Thu, 09 Oct 2025 14:17:21 GMT",
+        "etag": "W/\"3ce-NDvErNG9cvwI6YxkUb1ilAFk5wk\"",
+        "expires": "0",
+        "origin-agent-cluster": "?1",
+        "pragma": "no-cache",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "vary": "Accept-Encoding",
+        "via": "1.1 Caddy",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "DENY",
+        "x-permitted-cross-domain-policies": "none",
+        "x-request-id": "61cap4ut378",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseBody": {
+        "success": true,
+        "data": {
+          "id": "fbb20fe2-2dae-42ce-9061-5786a4aa5067",
+          "apiKey": "cr_7183f5b1628102bf1cdfc8d3cfb71e87895f07f451b62690af7f47586b7e3c65",
+          "name": "Portal-Integration-Test-1760019441405",
+          "description": "Portal API集成测试用密钥（自动创建，测试完成后自动删除）",
+          "tokenLimit": 0,
+          "concurrencyLimit": 0,
+          "rateLimitWindow": 0,
+          "rateLimitRequests": 0,
+          "rateLimitCost": 0,
+          "isActive": true,
+          "claudeAccountId": "",
+          "claudeConsoleAccountId": "",
+          "geminiAccountId": "",
+          "openaiAccountId": "",
+          "azureOpenaiAccountId": "",
+          "bedrockAccountId": "",
+          "permissions": [
+            "claude"
+          ],
+          "enableModelRestriction": false,
+          "restrictedModels": [],
+          "enableClientRestriction": false,
+          "allowedClients": [],
+          "dailyCostLimit": 0,
+          "totalCostLimit": 0,
+          "weeklyOpusCostLimit": 0,
+          "tags": [
+            "portal-test",
+            "auto-cleanup"
+          ],
+          "activationDays": 0,
+          "activationUnit": "days",
+          "expirationMode": "fixed",
+          "isActivated": true,
+          "activatedAt": "2025-10-09T14:17:21.944Z",
+          "createdAt": "2025-10-09T14:17:21.944Z",
+          "expiresAt": "",
+          "createdBy": "admin"
+        }
+      },
+      "responseTime": 482,
+      "success": true
+    },
+    {
+      "step": "3. 获取Key ID",
+      "method": "POST",
+      "url": "https://claude.just-play.fun/apiStats/api/get-key-id",
+      "requestHeaders": {
+        "Content-Type": "application/json"
+      },
+      "requestBody": {
+        "apiKey": "cr_7183f5b1628102bf1..."
+      },
+      "responseStatus": 200,
+      "responseHeaders": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key, api-key, x-admin-token, anthropic-version, anthropic-dangerous-direct-browser-access",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Request-ID, Content-Type",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "69",
+        "content-type": "application/json; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "date": "Thu, 09 Oct 2025 14:17:23 GMT",
+        "etag": "W/\"45-RLbu9aM7E5eo7vpxi2+zBpmq+SE\"",
+        "expires": "0",
+        "origin-agent-cluster": "?1",
+        "pragma": "no-cache",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "vary": "Accept-Encoding",
+        "via": "1.1 Caddy",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "DENY",
+        "x-permitted-cross-domain-policies": "none",
+        "x-request-id": "57ytfd0fh18",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseBody": {
+        "success": true,
+        "data": {
+          "id": "fbb20fe2-2dae-42ce-9061-5786a4aa5067"
+        }
+      },
+      "responseTime": 452,
+      "success": true
+    },
+    {
+      "step": "4. 查询用户统计",
+      "method": "POST",
+      "url": "https://claude.just-play.fun/apiStats/api/user-stats",
+      "requestHeaders": {
+        "Content-Type": "application/json"
+      },
+      "requestBody": {
+        "apiId": "fbb20fe2-2dae-42ce-9061-5786a4aa5067"
+      },
+      "responseStatus": 200,
+      "responseHeaders": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key, api-key, x-admin-token, anthropic-version, anthropic-dangerous-direct-browser-access",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Request-ID, Content-Type",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-encoding": "br",
+        "content-type": "application/json; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "date": "Thu, 09 Oct 2025 14:17:24 GMT",
+        "etag": "W/\"496-ZKzNfqQAuP9wgCp3AHy9olTQG5Y\"",
+        "expires": "0",
+        "origin-agent-cluster": "?1",
+        "pragma": "no-cache",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding",
+        "via": "1.1 Caddy",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "DENY",
+        "x-permitted-cross-domain-policies": "none",
+        "x-request-id": "prn73wreu8n",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseBody": {
+        "success": true,
+        "data": {
+          "id": "fbb20fe2-2dae-42ce-9061-5786a4aa5067",
+          "name": "Portal-Integration-Test-1760019441405",
+          "description": "Portal API集成测试用密钥（自动创建，测试完成后自动删除）",
+          "isActive": true,
+          "createdAt": "2025-10-09T14:17:21.944Z",
+          "expiresAt": "",
+          "expirationMode": "fixed",
+          "isActivated": true,
+          "activationDays": 0,
+          "activatedAt": "2025-10-09T14:17:21.944Z",
+          "permissions": "claude",
+          "usage": {
+            "total": {
+              "tokens": 0,
+              "inputTokens": 0,
+              "outputTokens": 0,
+              "cacheCreateTokens": 0,
+              "cacheReadTokens": 0,
+              "allTokens": 0,
+              "requests": 0,
+              "cost": 0,
+              "formattedCost": "$0.000000"
+            }
+          },
+          "limits": {
+            "tokenLimit": 0,
+            "concurrencyLimit": 0,
+            "rateLimitWindow": 0,
+            "rateLimitRequests": 0,
+            "rateLimitCost": 0,
+            "dailyCostLimit": 0,
+            "totalCostLimit": 0,
+            "weeklyOpusCostLimit": 0,
+            "currentWindowRequests": 0,
+            "currentWindowTokens": 0,
+            "currentWindowCost": 0,
+            "currentDailyCost": 0,
+            "currentTotalCost": 0,
+            "weeklyOpusCost": 0,
+            "windowStartTime": null,
+            "windowEndTime": null,
+            "windowRemainingSeconds": null
+          },
+          "accounts": {
+            "claudeAccountId": null,
+            "geminiAccountId": null,
+            "openaiAccountId": null,
+            "details": null
+          },
+          "restrictions": {
+            "enableModelRestriction": false,
+            "restrictedModels": [],
+            "enableClientRestriction": false,
+            "allowedClients": []
+          }
+        }
+      },
+      "responseTime": 455,
+      "success": true
+    },
+    {
+      "step": "5. 查询模型统计",
+      "method": "POST",
+      "url": "https://claude.just-play.fun/apiStats/api/user-model-stats",
+      "requestHeaders": {
+        "Content-Type": "application/json"
+      },
+      "requestBody": {
+        "apiId": "fbb20fe2-2dae-42ce-9061-5786a4aa5067",
+        "period": "daily"
+      },
+      "responseStatus": 200,
+      "responseHeaders": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key, api-key, x-admin-token, anthropic-version, anthropic-dangerous-direct-browser-access",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Request-ID, Content-Type",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "43",
+        "content-type": "application/json; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "date": "Thu, 09 Oct 2025 14:17:26 GMT",
+        "etag": "W/\"2b-Z26uhrpxd4gqFvuPeQEgq66Efak\"",
+        "expires": "0",
+        "origin-agent-cluster": "?1",
+        "pragma": "no-cache",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "vary": "Accept-Encoding",
+        "via": "1.1 Caddy",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "DENY",
+        "x-permitted-cross-domain-policies": "none",
+        "x-request-id": "dsd5c6yh41",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseBody": {
+        "success": true,
+        "data": [],
+        "period": "daily"
+      },
+      "responseTime": 454,
+      "success": true
+    },
+    {
+      "step": "6. 删除API Key",
+      "method": "DELETE",
+      "url": "https://claude.just-play.fun/admin/api-keys/fbb20fe2-2dae-42ce-9061-5786a4aa5067",
+      "requestHeaders": {
+        "Authorization": "Bearer ea856b890cbc22ca08ae4b2c97f3989ae2af2a2be119f2bd534c1680c3948758"
+      },
+      "responseStatus": 200,
+      "responseHeaders": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key, api-key, x-admin-token, anthropic-version, anthropic-dangerous-direct-browser-access",
+        "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Request-ID, Content-Type",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "57",
+        "content-type": "application/json; charset=utf-8",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-origin",
+        "date": "Thu, 09 Oct 2025 14:17:27 GMT",
+        "etag": "W/\"39-lEBy79jWoGgqKl/Zk2jaRnb+xP4\"",
+        "expires": "0",
+        "origin-agent-cluster": "?1",
+        "pragma": "no-cache",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "vary": "Accept-Encoding",
+        "via": "1.1 Caddy",
+        "x-content-type-options": "nosniff",
+        "x-dns-prefetch-control": "off",
+        "x-download-options": "noopen",
+        "x-frame-options": "DENY",
+        "x-permitted-cross-domain-policies": "none",
+        "x-request-id": "6g4wbbcuab",
+        "x-xss-protection": "1; mode=block"
+      },
+      "responseBody": {
+        "success": true,
+        "message": "API key deleted successfully"
+      },
+      "responseTime": 447,
+      "success": true
+    }
+  ]
+}

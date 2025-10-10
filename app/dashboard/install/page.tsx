@@ -82,7 +82,7 @@ export default function InstallPage() {
   }, [keysData, selectedKeyId])
 
   // 生成安装脚本
-  const { data: scriptData, isLoading: scriptLoading, mutate: generateScript } = useMutation({
+  const { data: scriptData, isPending: scriptLoading, mutate: generateScript } = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem('accessToken')
       const response = await fetch('/api/install/generate', {

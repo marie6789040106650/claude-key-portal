@@ -5,7 +5,11 @@
  */
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query'
-import type { DateRangePreset, KeyStats } from '@/types/stats'
+import type {
+  DateRangePreset,
+  KeyStats,
+  TimeSeriesDataPoint,
+} from '@/types/stats'
 import { buildDateRangeParams } from '@/lib/date-utils'
 
 /**
@@ -19,6 +23,14 @@ export interface UsageStatsResponse {
     keyCount: number
   }
   keys: KeyStats[]
+  trend?: TimeSeriesDataPoint[] // CRS趋势数据
+  crsDashboard?: {
+    totalKeys: number
+    activeKeys: number
+    totalTokens: number
+    totalRequests: number
+  }
+  crsWarning?: string // CRS服务降级警告
 }
 
 /**

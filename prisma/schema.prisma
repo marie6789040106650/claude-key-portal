@@ -1,5 +1,6 @@
-// Claude Key Portal - Prisma Schema
+// Claude Key Portal - Prisma Schema (简化版)
 // 数据库: PostgreSQL 15+
+// 版本: v2.0 - MVP清理版
 
 generator client {
   provider = "prisma-client-js"
@@ -19,8 +20,7 @@ model User {
   id String @id @default(uuid())
 
   // 认证信息
-  email        String? @unique
-  phone        String? @unique
+  email        String  @unique
   passwordHash String
 
   // 个人信息
@@ -28,20 +28,11 @@ model User {
   avatar   String?
   bio      String?
 
-  // CRS关联
-  crsAdminToken String? @db.Text
-
-  // 偏好设置
+  // 偏好设置（主题、语言等）
   preferences Json @default("{}")
 
   // 状态
-  status        UserStatus @default(ACTIVE)
-  emailVerified Boolean    @default(false)
-  phoneVerified Boolean    @default(false)
-
-  // 邀请信息
-  invitedBy  String?
-  inviteCode String? @unique
+  status UserStatus @default(ACTIVE)
 
   // 时间戳
   createdAt   DateTime  @default(now())
@@ -49,20 +40,12 @@ model User {
   lastLoginAt DateTime?
 
   // 关系
-  apiKeys              ApiKey[]
-  sessions             Session[]
-  notifications        Notification[]
-  auditLogs            AuditLog[]
-  passwordHistory      PasswordHistory[]
-  invitees             User[]              @relation("UserInvites")
-  inviter              User?               @relation("UserInvites", fields: [invitedBy], references: [id])
-  expirationSetting    ExpirationSetting?
-  notificationConfig   NotificationConfig? @relation(fields: [notificationConfigId], references: [id])
-  notificationConfigId String?
+  apiKeys         ApiKey[]
+  sessions        Session[]
+  auditLogs       AuditLog[]
+  passwordHistory PasswordHistory[]
 
   @@index([email])
-  @@index([phone])
-  @@index([inviteCode])
   @@index([createdAt])
   @@map("users")
 }
@@ -105,7 +88,7 @@ model Session {
   @@map("sessions")
 }
 
-// 密码历史表（记录密码修改历史）
+// 密码历史表（防止重复使用旧密码）
 model PasswordHistory {
   id     String @id @default(uuid())
   userId String
@@ -140,10 +123,12 @@ model ApiKey {
   // 基本信息
   name        String
   description String?  @db.Text
-  tags        String[] @default([])
-  isFavorite  Boolean  @default(false)
 
-  // 配置
+  // 本地扩展字段（P1功能）
+  tags       String[] @default([])
+  isFavorite Boolean  @default(false)
+
+  // 配置（额外的JSON配置）
   config Json @default("{}")
 
   // 状态
@@ -160,16 +145,20 @@ model ApiKey {
   expiresAt DateTime?
 
   // 关系
-  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  usageRecords        UsageRecord[]
-  expirationReminders ExpirationReminder[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageRecords UsageRecord[]
 
   @@index([userId])
   @@index([crsKeyId])
   @@index([status])
+  @@index([totalTokens])
+  @@index([totalCalls])
   @@index([createdAt])
   @@index([lastUsedAt])
   @@index([expiresAt])
+  @@index([userId, status])
+  @@index([userId, totalTokens])
+  @@index([userId, lastUsedAt])
   @@map("api_keys")
 }
 
@@ -218,136 +207,6 @@ model UsageRecord {
   @@index([model])
   @@index([status])
   @@map("usage_records")
-}
-
-// ============================================
-// 通知系统
-// ============================================
-
-// 通知配置表
-model NotificationConfig {
-  id     String @id @default(uuid())
-  userId String @unique
-
-  // 渠道配置
-  channels Json
-
-  // 通知规则
-  rules Json @default("[]")
-
-  // 时间
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User[]
-
-  @@map("notification_configs")
-}
-
-// 通知记录表
-model Notification {
-  id     String  @id @default(uuid())
-  userId String?
-
-  // 通知内容
-  type    NotificationType
-  title   String
-  message String           @db.Text
-  data    Json?
-
-  // 发送状态
-  channel String
-  status  NotificationStatus @default(PENDING)
-  sentAt  DateTime?
-  readAt  DateTime?
-
-  // 错误信息
-  error String? @db.Text
-
-  // 时间
-  createdAt DateTime @default(now())
-
-  // 关系
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("notifications")
-}
-
-enum NotificationType {
-  RATE_LIMIT_WARNING
-  QUOTA_WARNING
-  ERROR_SPIKE
-  KEY_CREATED
-  KEY_DELETED
-  KEY_EXPIRED
-  KEY_EXPIRATION_WARNING
-  SYSTEM_ANNOUNCEMENT
-}
-
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
-
-// ============================================
-// 数据导出
-// ============================================
-
-// 导出任务表
-model ExportTask {
-  id     String @id @default(uuid())
-  userId String
-
-  // 任务配置
-  type    ExportType
-  format  ExportFormat
-  filters Json
-  fields  String[]
-
-  // 状态
-  status   ExportStatus @default(PROCESSING)
-  progress Int          @default(0)
-
-  // 结果
-  fileUrl     String?
-  fileSize    BigInt?
-  recordCount Int?
-  expiresAt   DateTime?
-
-  // 错误
-  error String? @db.Text
-
-  // 时间
-  createdAt   DateTime  @default(now())
-  completedAt DateTime?
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("export_tasks")
-}
-
-enum ExportType {
-  KEYS
-  USAGE
-  LOGS
-}
-
-enum ExportFormat {
-  CSV
-  JSON
-  EXCEL
-}
-
-enum ExportStatus {
-  PROCESSING
-  COMPLETED
-  FAILED
-  EXPIRED
 }
 
 // ============================================
@@ -449,201 +308,4 @@ model DailyStatistics {
   @@unique([date])
   @@index([date])
   @@map("daily_statistics")
-}
-
-// ============================================
-// 到期提醒系统
-// ============================================
-
-// 到期提醒配置表
-model ExpirationSetting {
-  id     String @id @default(uuid())
-  userId String @unique
-
-  // 提醒配置
-  reminderDays   Int[]    @default([7, 3, 1])
-  notifyChannels String[] @default(["system"])
-  enabled        Boolean  @default(true)
-
-  // 时间
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 关系
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("expiration_settings")
-}
-
-// 到期提醒记录表
-model ExpirationReminder {
-  id       String @id @default(uuid())
-  apiKeyId String
-
-  // 提醒信息
-  reminderDays Int
-  sentAt       DateTime @default(now())
-
-  // 关系
-  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
-
-  @@unique([apiKeyId, reminderDays])
-  @@index([apiKeyId])
-  @@index([sentAt])
-  @@map("expiration_reminders")
-}
-
-// ============================================
-// Cron Job 定时任务系统
-// ============================================
-
-// Cron Job 执行日志表
-model CronJobLog {
-  id      String @id @default(uuid())
-  jobName String
-
-  // 执行状态
-  status CronJobStatus @default(RUNNING)
-
-  // 执行时间
-  startAt  DateTime
-  endAt    DateTime?
-  duration Int? // 毫秒
-
-  // 执行结果
-  result Json?
-  error  String? @db.Text
-
-  // 元数据
-  metadata Json?
-
-  // 时间
-  createdAt DateTime @default(now())
-
-  @@index([jobName])
-  @@index([status])
-  @@index([startAt])
-  @@index([createdAt])
-  @@map("cron_job_logs")
-}
-
-enum CronJobStatus {
-  RUNNING
-  SUCCESS
-  FAILED
-}
-
-// ============================================
-// 监控告警系统
-// ============================================
-
-// 监控指标表
-model MonitorMetric {
-  id   String     @id @default(uuid())
-  type MetricType
-
-  // 指标信息
-  name  String
-  value Float
-  unit  String?
-  tags  Json?
-
-  // 时间
-  timestamp DateTime @default(now())
-
-  @@index([type])
-  @@index([name])
-  @@index([timestamp])
-  @@map("monitor_metrics")
-}
-
-enum MetricType {
-  RESPONSE_TIME
-  QPS
-  CPU_USAGE
-  MEMORY_USAGE
-  DATABASE_QUERY
-  API_SUCCESS_RATE
-}
-
-// 告警规则表
-model AlertRule {
-  id   String         @id @default(uuid())
-  name String
-
-  // 规则配置
-  metric    MetricType
-  condition AlertCondition
-  threshold Float
-  duration  Int // 持续时间（秒）
-  severity  AlertSeverity
-  enabled   Boolean        @default(true)
-  channels  String[] // 通知渠道：email, webhook, system
-
-  // 时间
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 关系
-  alerts AlertRecord[]
-
-  @@index([metric])
-  @@index([enabled])
-  @@map("alert_rules")
-}
-
-enum AlertCondition {
-  GREATER_THAN
-  LESS_THAN
-  EQUAL_TO
-}
-
-enum AlertSeverity {
-  INFO
-  WARNING
-  ERROR
-  CRITICAL
-}
-
-// 告警记录表
-model AlertRecord {
-  id     String @id @default(uuid())
-  ruleId String
-
-  // 告警信息
-  status      AlertStatus @default(FIRING)
-  message     String      @db.Text
-  value       Float
-  triggeredAt DateTime    @default(now())
-  resolvedAt  DateTime?
-
-  // 关系
-  rule AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
-
-  @@index([ruleId])
-  @@index([status])
-  @@index([triggeredAt])
-  @@map("alert_records")
-}
-
-enum AlertStatus {
-  FIRING
-  RESOLVED
-  SILENCED
-}
-
-// 系统健康状态表
-model SystemHealth {
-  id   String @id @default(uuid())
-
-  // 健康状态
-  status   String // healthy, degraded, unhealthy
-  services Json // 各服务健康状态
-
-  // 时间
-  timestamp DateTime @default(now())
-
-  @@index([timestamp])
-  @@map("system_health")
 }

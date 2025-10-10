@@ -4,6 +4,8 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeysTable } from '@/components/keys/KeysTable'
 import { KeyForm } from '@/components/keys/KeyForm'
+import { RenameDialog } from '@/components/keys/RenameDialog'
+import { DescriptionDialog } from '@/components/keys/DescriptionDialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ToastContainer, toast } from '@/components/ui/toast-simple'
@@ -14,7 +16,11 @@ export default function KeysPage() {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [isKeyDisplayOpen, setIsKeyDisplayOpen] = useState(false)
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
+  const [isDescriptionDialogOpen, setIsDescriptionDialogOpen] = useState(false)
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null)
+  const [renamingKey, setRenamingKey] = useState<ApiKey | null>(null)
+  const [editingDescriptionKey, setEditingDescriptionKey] = useState<ApiKey | null>(null)
   const [deletingKey, setDeletingKey] = useState<ApiKey | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [newKeyData, setNewKeyData] = useState<{ name: string; key: string } | null>(null)
@@ -62,10 +68,16 @@ export default function KeysPage() {
     setIsFormDialogOpen(true)
   }, [])
 
-  // 处理编辑密钥
+  // 处理编辑密钥（重命名）
   const handleEdit = useCallback((key: ApiKey) => {
-    setEditingKey(key)
-    setIsFormDialogOpen(true)
+    setRenamingKey(key)
+    setIsRenameDialogOpen(true)
+  }, [])
+
+  // 处理编辑描述
+  const handleEditDescription = useCallback((key: ApiKey) => {
+    setEditingDescriptionKey(key)
+    setIsDescriptionDialogOpen(true)
   }, [])
 
   // 处理删除密钥
@@ -123,6 +135,32 @@ export default function KeysPage() {
     }
   }, [keys])
 
+  // 切换密钥状态（启用/禁用）
+  const handleToggleStatus = useCallback(async (key: ApiKey) => {
+    const isActive = key.status === 'ACTIVE'
+    const action = isActive ? '禁用' : '启用'
+
+    try {
+      const response = await fetch(`/api/keys/${key.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !isActive }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        toast(errorData.error || `${action}失败`, 'error')
+        return
+      }
+
+      // 刷新列表
+      await refetch()
+      toast(`密钥已${action}`, 'success', 2000)
+    } catch (error) {
+      toast(`${action}失败，请稍后重试`, 'error')
+    }
+  }, [refetch])
+
   // 表单提交成功
   const handleFormSuccess = useCallback(async (result: any) => {
     // 刷新列表
@@ -163,8 +201,10 @@ export default function KeysPage() {
       <KeysTable
         keys={keys}
         onEdit={handleEdit}
+        onEditDescription={handleEditDescription}
         onDelete={handleDelete}
         onCopy={handleCopy}
+        onToggleStatus={handleToggleStatus}
         onRetry={refetch}
         loading={isPending}
         error={error as Error | null}
@@ -306,6 +346,34 @@ export default function KeysPage() {
           </div>
         </div>
       )}
+
+      {/* 重命名对话框 */}
+      <RenameDialog
+        apiKey={renamingKey}
+        open={isRenameDialogOpen}
+        onClose={() => {
+          setIsRenameDialogOpen(false)
+          setRenamingKey(null)
+        }}
+        onSuccess={() => {
+          refetch()
+          toast('密钥重命名成功', 'success')
+        }}
+      />
+
+      {/* 描述编辑对话框 */}
+      <DescriptionDialog
+        apiKey={editingDescriptionKey}
+        open={isDescriptionDialogOpen}
+        onClose={() => {
+          setIsDescriptionDialogOpen(false)
+          setEditingDescriptionKey(null)
+        }}
+        onSuccess={() => {
+          refetch()
+          toast('描述更新成功', 'success')
+        }}
+      />
     </div>
   )
 }
