@@ -74,3 +74,70 @@ export async function getCurrentUser(): Promise<{
     return null
   }
 }
+
+/**
+ * 获取已认证用户（支持双重认证）
+ * 优先从 Authorization Header 读取，其次从 Cookie 读取
+ *
+ * @param request - Next.js Request 对象
+ * @returns 用户信息或 null
+ *
+ * 使用场景:
+ * - API调用: 通过 Authorization Header 传递 token
+ * - 浏览器: 通过 Cookie 传递 token
+ */
+export async function getAuthenticatedUser(
+  request: Request
+): Promise<{
+  id: string
+  email: string | null
+} | null> {
+  try {
+    // 1. 尝试从 Authorization Header 获取 token
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7).trim()
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+
+          // 验证token类型
+          if (decoded.type && decoded.type !== 'access') {
+            return null
+          }
+
+          return {
+            id: decoded.userId,
+            email: decoded.email,
+          }
+        } catch (error) {
+          // Header token 无效，继续尝试 Cookie
+        }
+      }
+    }
+
+    // 2. 尝试从 Cookie 获取 token
+    const cookieStore = cookies()
+    const cookieToken = cookieStore.get('accessToken')?.value
+
+    if (cookieToken) {
+      try {
+        const decoded = jwt.verify(cookieToken, process.env.JWT_SECRET!) as any
+
+        return {
+          id: decoded.userId,
+          email: decoded.email,
+        }
+      } catch (error) {
+        // Cookie token 也无效
+        return null
+      }
+    }
+
+    // 3. 两种方式都没有有效 token
+    return null
+  } catch (error) {
+    console.error('Authentication error:', error)
+    return null
+  }
+}
