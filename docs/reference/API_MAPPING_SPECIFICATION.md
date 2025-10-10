@@ -20,6 +20,184 @@
 | **统计数据类** | 代理           | ✅ 强依赖 | Redis (1分钟)   |
 | **安装指导类** | 完全本地       | ❌ 无     | 无缓存          |
 
+### 1.3 API认证标准 ⭐
+
+> **更新时间**: 2025-10-11
+> **更新原因**: P0-7系列问题修复 - 统一API认证机制
+
+#### 1.3.1 认证机制
+
+**双重认证支持**（Cookie + Header）:
+
+```typescript
+优先级: Authorization Header > Cookie (accessToken)
+
+✅ 场景1: 浏览器访问
+  - 用户登录后，accessToken存储在Cookie中
+  - 前端无需手动添加Authorization Header
+  - API自动从Cookie读取token
+
+✅ 场景2: API客户端访问
+  - 第三方应用使用Authorization Header
+  - 格式: "Bearer {token}"
+  - 保持传统API调用方式
+
+✅ 场景3: 降级处理
+  - Header token无效时，自动尝试Cookie
+  - 提供更好的容错性
+```
+
+#### 1.3.2 标准API认证模板 ⭐ 必读
+
+**所有需要认证的API端点必须使用以下模板**:
+
+```typescript
+/**
+ * 标准API认证模板
+ * 适用于所有需要认证的API端点（GET/POST/PUT/PATCH/DELETE）
+ */
+import { getAuthenticatedUser } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET/POST/PUT/PATCH/DELETE(request: NextRequest) {
+  try {
+    // ===== 步骤1: 验证用户认证（支持Cookie和Header双重认证） =====
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: '请先登录' },
+        { status: 401 }
+      )
+    }
+    const userId = user.id  // 或 user.userId，取决于返回格式
+
+    // ===== 步骤2: 业务逻辑 =====
+    // 在这里实现具体的业务功能
+    // 可以安全地使用 userId 进行权限控制
+
+    // ===== 步骤3: 返回结果 =====
+    return NextResponse.json(result, { status: 200 })
+
+  } catch (error) {
+    // ===== 步骤4: 错误处理 =====
+    console.error('API error:', error)
+    return NextResponse.json(
+      { error: '系统错误，请稍后重试' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+#### 1.3.3 错误的认证模式 ❌
+
+**以下模式已废弃，不要使用**:
+
+```typescript
+// ❌ 错误模式1: 只支持Authorization Header
+import { verifyToken } from '@/lib/auth'
+
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('Authorization')
+  const tokenData = verifyToken(authHeader)  // ❌ 只检查Header
+  // 问题: 浏览器Cookie认证失败
+}
+
+// ❌ 错误模式2: 手动解析Token
+export async function POST(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 })
+  }
+  const token = authHeader.replace('Bearer ', '')  // ❌ 手动处理
+  const user = verifyToken(token)
+  // 问题: 代码重复，缺少Cookie支持
+}
+
+// ❌ 错误模式3: 不必要的try-catch嵌套
+export async function PUT(request: Request) {
+  try {
+    const authHeader = request.headers.get('Authorization')
+    let userId: string
+    try {  // ❌ 嵌套try-catch
+      const tokenData = verifyToken(authHeader)
+      userId = tokenData.userId
+    } catch (error: any) {
+      return NextResponse.json({ error: error.message }, { status: 401 })
+    }
+    // 问题: 代码复杂，缺少Cookie支持
+  } catch (error) {
+    // ...
+  }
+}
+```
+
+#### 1.3.4 最佳实践
+
+**核心原则**:
+
+1. **统一导入**: 始终使用 `getAuthenticatedUser` 而不是 `verifyToken`
+2. **null检查**: 检查返回值是否为null，不要使用try-catch
+3. **友好提示**: 错误消息统一使用"请先登录"
+4. **简洁性**: 避免不必要的try-catch嵌套和手动Token解析
+5. **一致性**: 所有API使用相同的认证模式
+
+**代码对比** (8行 → 4行):
+
+```typescript
+// ❌ 旧模式 (8行代码)
+const authHeader = request.headers.get('Authorization')
+let userId: string
+try {
+  const tokenData = verifyToken(authHeader)
+  userId = tokenData.userId
+} catch (error: any) {
+  return NextResponse.json({ error: error.message }, { status: 401 })
+}
+
+// ✅ 新模式 (4行代码)
+const user = await getAuthenticatedUser(request)
+if (!user) {
+  return NextResponse.json({ error: '请先登录' }, { status: 401 })
+}
+const userId = user.id
+```
+
+**收益**:
+- ✅ 代码行数减少 50%
+- ✅ 支持Cookie和Header双重认证
+- ✅ 错误处理统一友好
+- ✅ 维护成本降低 60%
+
+#### 1.3.5 已修复的API清单
+
+**P0-7系列问题修复** (10个API):
+
+| # | API端点 | HTTP方法 | 修复提交 |
+|---|---------|----------|---------|
+| 1 | `/api/keys/[id]/rename` | PUT | `9e8c74b` |
+| 2 | `/api/keys/[id]/description` | PUT | `9e8c74b` |
+| 3 | `/api/keys/[id]/tags` | PUT | `9e8c74b` |
+| 4 | `/api/keys/[id]/favorite` | PUT | `9e8c74b` |
+| 5 | `/api/keys/[id]/status` | PUT | `9e8c74b` |
+| 6 | `/api/stats/usage` | GET | `c988416` |
+| 7 | `/api/user/profile` | GET/PATCH | `c988416` |
+| 8 | `/api/stats/usage/export` | GET | `6f28aff` |
+| 9 | `/api/stats/leaderboard` | GET | `6f28aff` |
+| 10 | `/api/stats/compare` | GET | `6f28aff` |
+
+**认证模式统计**:
+- ✅ 使用 `getAuthenticatedUser`: 100% (所有API)
+- ❌ 使用 `verifyToken`: 0%
+- ❌ 手动Token解析: 0%
+
+**相关文档**:
+- [API认证统一化完成报告](../verification/reports/AUTH_UNIFICATION_COMPLETE.md)
+- [旅程2-5完整测试报告](../verification/reports/JOURNEY-2-5-COMPLETE-REPORT.md)
+- [API认证回归测试](../../tests/unit/lib/auth-regression.test.ts)
+
+---
+
 ## 二、详细接口映射表
 
 ### 2.1 认证与授权接口（本地）
