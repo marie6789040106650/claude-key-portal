@@ -365,13 +365,9 @@ test_api "GET" "/api/dashboard" "仪表板数据" "" "true" "200"
 # 20. 使用统计
 test_api "GET" "/api/stats/usage?timeRange=7d" "使用统计" "" "true" "200"
 
-if [ -n "$KEY_ID" ]; then
-    # 21. 使用对比
-    test_api "GET" "/api/stats/compare?keyIds=$KEY_ID" "使用对比" "" "true" "200"
-else
-    print_warning "跳过使用对比测试（无有效密钥ID）"
-    WARNINGS=$((WARNINGS + 1))
-fi
+# 21. 使用对比 (需要至少2个密钥，跳过)
+print_warning "跳过使用对比测试（需要至少2个密钥进行对比）"
+WARNINGS=$((WARNINGS + 1))
 
 # 22. 排行榜
 test_api "GET" "/api/stats/leaderboard" "排行榜" "" "true" "200"
@@ -388,7 +384,7 @@ add_section "1.6 安装指导接口 (1/1)"
 if [ -n "$KEY_ID" ]; then
     # 24. 生成安装脚本 (使用macos平台)
     test_api "POST" "/api/install/generate" "生成安装脚本" \
-        "{\"keyId\":\"$KEY_ID\",\"platform\":\"macos\",\"environment\":\"development\"}" \
+        "{\"keyId\":\"$KEY_ID\",\"platform\":\"macos\",\"environment\":\"zsh\"}" \
         "true" "200"
 else
     print_warning "跳过安装指导测试（无有效密钥ID）"

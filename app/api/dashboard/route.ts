@@ -6,23 +6,24 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 /**
  * GET /api/dashboard - 获取仪表板数据
  */
 export async function GET(request: Request) {
   try {
-    // 1. 验证JWT Token
-    const authHeader = request.headers.get('Authorization')
-    let userId: string
+    // 1. 验证JWT Token（支持 Authorization Header 和 Cookie）
+    const user = await getAuthenticatedUser(request)
 
-    try {
-      const tokenData = verifyToken(authHeader)
-      userId = tokenData.userId
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (!user) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
+
+    const userId = user.id
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)
@@ -66,13 +67,19 @@ export async function GET(request: Request) {
       take: 5,
     })
 
-    // 7. 构建响应
+    // 7. 转换BigInt为Number（解决JSON序列化问题）
+    const serializedRecentActivity = recentActivity.map(activity => ({
+      ...activity,
+      totalCalls: Number(activity.totalCalls),
+    }))
+
+    // 8. 构建响应
     const response: any = {
       overview,
-      recentActivity,
+      recentActivity: serializedRecentActivity,
     }
 
-    // 8. 可选：从CRS获取全局统计
+    // 9. 可选：从CRS获取全局统计
     if (includeCrsStats) {
       try {
         const crsData = await crsClient.getDashboard()

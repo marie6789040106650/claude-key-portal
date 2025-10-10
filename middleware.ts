@@ -23,6 +23,7 @@ const PROTECTED_ROUTES = [
   '/api/dashboard',
   '/api/monitor',
   '/api/install',
+  '/api/debug', // 用于测试认证
 ]
 
 /**
