@@ -1,0 +1,136 @@
+{
+  "timestamp": "2025-10-08T15:05:24.541Z",
+  "baseUrl": "https://claude.just-play.fun",
+  "summary": {
+    "success": 9,
+    "failed": 0,
+    "error": 0,
+    "total": 9,
+    "avgResponseTime": 710
+  },
+  "results": [
+    {
+      "endpoint": "/admin/dashboard",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 770,
+      "dataSize": 1602,
+      "dataSummary": {
+        "hasOverview": false,
+        "hasRecentActivity": false,
+        "hasSystemAverages": false,
+        "hasRealtimeMetrics": false,
+        "hasSystemHealth": false
+      }
+    },
+    {
+      "endpoint": "/admin/api-keys",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 960,
+      "dataSize": 79442,
+      "dataSummary": {
+        "totalKeys": 51,
+        "sampleKey": {
+          "id": "91ee8700-4902-4ae8-ae1d-21b6957f7974",
+          "name": "天卡@_23",
+          "hasUsage": true,
+          "hasLimits": false
+        }
+      }
+    },
+    {
+      "endpoint": "/admin/api-keys-usage-trend",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 728,
+      "dataSize": 3786,
+      "dataSummary": {
+        "granularity": "day",
+        "totalApiKeys": 5,
+        "topKeysCount": 5,
+        "dataPointsCount": 7
+      }
+    },
+    {
+      "endpoint": "/admin/usage-stats",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 654,
+      "dataSize": 28196,
+      "dataSummary": {
+        "hasData": true,
+        "dataType": "object"
+      }
+    },
+    {
+      "endpoint": "/admin/model-stats",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 452,
+      "dataSize": 1318,
+      "dataSummary": {
+        "hasData": true,
+        "dataType": "array",
+        "dataLength": 2
+      }
+    },
+    {
+      "endpoint": "/admin/usage-trend",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 807,
+      "dataSize": 1518,
+      "dataSummary": {
+        "hasData": true,
+        "dataType": "array",
+        "dataLength": 7
+      }
+    },
+    {
+      "endpoint": "/admin/claude-accounts",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 1094,
+      "dataSize": 4748,
+      "dataSummary": {
+        "hasData": true,
+        "dataType": "array",
+        "dataLength": 2
+      }
+    },
+    {
+      "endpoint": "/admin/gemini-accounts",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 473,
+      "dataSize": 3103,
+      "dataSummary": {
+        "hasData": true,
+        "dataType": "array",
+        "dataLength": 3
+      }
+    },
+    {
+      "endpoint": "/admin/users",
+      "method": "GET",
+      "status": "success",
+      "statusCode": 200,
+      "responseTime": 454,
+      "dataSize": 107,
+      "dataSummary": {
+        "hasData": true,
+        "dataType": "array",
+        "dataLength": 1
+      }
+    }
+  ]
+}

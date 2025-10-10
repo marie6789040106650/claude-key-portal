@@ -167,9 +167,14 @@ model ApiKey {
   @@index([userId])
   @@index([crsKeyId])
   @@index([status])
+  @@index([totalTokens])
+  @@index([totalCalls])
   @@index([createdAt])
   @@index([lastUsedAt])
   @@index([expiresAt])
+  @@index([userId, status])
+  @@index([userId, totalTokens])
+  @@index([userId, lastUsedAt])
   @@map("api_keys")
 }
 

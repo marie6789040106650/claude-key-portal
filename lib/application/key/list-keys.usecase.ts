@@ -2,13 +2,14 @@
  * ListKeysUseCase - 密钥列表查询用例
  * 负责编排密钥列表查询业务流程
  *
- * TDD Phase: 🟢 GREEN
+ * TDD Phase: 🔵 REFACTOR
  */
 
 import { Result } from '@/lib/domain/shared/result'
 import { ValidationError } from '@/lib/domain/shared/errors'
 import type { KeyRepository, DomainKey } from '@/lib/infrastructure/persistence/repositories/key.repository'
 import type { CrsClient } from '@/lib/infrastructure/external/crs-client'
+import { mergeLocalAndCrsKeys } from './key-merge.utils'
 
 /**
  * 列表查询输入
@@ -96,22 +97,21 @@ export class ListKeysUseCase {
       // 5. CRS同步（可选）
       if (input.sync) {
         try {
-          const crsKeys = await this.crsClient.listKeys(input.userId)
+          // 调用CRS getApiKeys获取完整密钥数据
+          const crsKeys = await this.crsClient.getApiKeys()
           response.syncedAt = new Date().toISOString()
 
-          // 检查数据一致性
-          const syncIssues: any[] = []
-          for (const localKey of keys) {
-            const crsKey = crsKeys.find((k: any) => k.id === localKey.crsKeyId)
-            if (crsKey && crsKey.status !== localKey.status) {
-              syncIssues.push({
-                keyId: localKey.id,
-                issue: 'status_mismatch',
-                local: localKey.status,
-                crs: crsKey.status,
-              })
-            }
-          }
+          // 使用工具函数合并本地和CRS数据
+          const { mergedKeys, syncIssues } = mergeLocalAndCrsKeys(
+            keys,
+            crsKeys,
+            input.userId
+          )
+
+          // 更新响应数据
+          response.keys = mergedKeys
+          response.total = mergedKeys.length
+          response.totalPages = Math.ceil(mergedKeys.length / limit)
 
           if (syncIssues.length > 0) {
             response.syncIssues = syncIssues

@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-10-08T15:29:48.947Z",
+  "baseUrl": "https://claude.just-play.fun",
+  "testApiKey": "cr_6a0956348e1890144...",
+  "summary": {
+    "success": 0,
+    "failed": 1,
+    "error": 0,
+    "total": 1,
+    "avgResponseTime": 2903
+  },
+  "results": [
+    {
+      "endpoint": "/apiStats/api/get-key-id",
+      "method": "POST",
+      "status": "failed",
+      "statusCode": 401,
+      "responseTime": 2903,
+      "dataSummary": {
+        "error": "Invalid API key",
+        "message": "API key is disabled"
+      }
+    }
+  ]
+}

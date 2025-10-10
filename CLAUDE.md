@@ -1046,4 +1046,120 @@ NODE_ENV=production
 
 ---
 
+## 🔄 自动化开发监控 / Automated Development Monitoring
+
+### Claude Monitor 集成
+
+本项目已集成 **Claude Auto-Dev Monitor** 工具实现自动化开发流程。
+
+### 工作流程
+
+```
+用户启动监控（设置提示词）
+  ↓
+Claude 开发任务
+  ↓
+完成后执行: claude-monitor done
+  ↓
+10秒后自动打开新终端继续下一阶段
+```
+
+### 新窗口通用提示词 ⭐ 推荐
+
+**最简洁的启动方式**:
+
+```
+claude-key-portal
+```
+
+Claude会自动：
+- ✅ 定位项目路径
+- ✅ 检查Git状态
+- ✅ 读取最新任务文档
+- ✅ 展示下一步行动
+
+**带意图的启动**:
+
+```
+claude-key-portal
+[你的意图，如: 继续测试修复 / 开始新功能]
+```
+
+**指定任务的启动**:
+
+```
+claude-key-portal
+任务: P3.1测试修复
+文档: docs/P3.1_TEST_FIX_PLAN.md
+```
+
+详见: `docs/NEW_WINDOW_PROMPT_TEMPLATE.md`
+
+### Claude 必须执行的收尾步骤
+
+**每次完成任务后，必须执行以下命令标记完成：**
+
+```bash
+claude-monitor done
+```
+
+**或者更新下一阶段提示词：**
+
+```bash
+claude-monitor done "下一阶段任务描述"
+```
+
+### 使用示例
+
+```bash
+# 场景1: 保持当前提示词继续
+claude-monitor done
+
+# 场景2: 切换到新任务
+claude-monitor done "开始P3.1测试修复 - 提升测试通过率"
+
+# 场景3: 详细的阶段切换
+claude-monitor done "任务: P3.1测试修复
+参考文档: docs/NEXT_SESSION_PROMPT_V5.md"
+```
+
+### 强制执行规则
+
+```markdown
+✅ **必须执行**:
+- 所有开发任务完成后
+- 所有测试通过后
+- 所有代码提交后（如需要）
+- 准备结束当前开发会话时
+
+❌ **禁止跳过**:
+- 不允许忘记执行 claude-monitor done
+- 不允许手动关闭会话而不标记
+- 不允许在任务未完成时执行
+```
+
+### 自动化标准检查清单
+
+完成任务前必须确认：
+
+```markdown
+- [ ] ✅ 所有测试通过（TDD流程完整）
+- [ ] ✅ 代码已提交（如需要）
+- [ ] ✅ 文档已更新（如需要）
+- [ ] ✅ **执行 `claude-monitor done` 标记完成** 👈 关键步骤！
+```
+
+### 监控工具说明
+
+- **工具**: claude-monitor
+- **安装**: 全局安装（已配置）
+- **监控文件**: `.automation/task_completed`
+- **延迟时间**: 10 秒
+- **自动化**: 打开新终端继续开发
+- **新窗口提示词**: `claude-key-portal` (极简启动)
+
+**注意**: `.automation/` 目录已添加到 `.gitignore`，不会提交到版本控制。
+
+---
+
 _"清晰的标准 + 严格的执行 = 项目成功的保障！"_

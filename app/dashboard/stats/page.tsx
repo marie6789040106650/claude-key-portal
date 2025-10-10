@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
@@ -9,8 +9,10 @@ import { StatsTable } from '@/components/stats/StatsTable'
 import { DateRangePicker } from '@/components/stats/DateRangePicker'
 import { KeyFilter } from '@/components/stats/KeyFilter'
 import { ExportDialog } from '@/components/stats/ExportDialog'
+import { CrsStatusAlert } from '@/components/stats/CrsStatusAlert'
+import { StatsSkeleton } from '@/components/stats/StatsSkeleton'
 import { useUsageStats } from '@/hooks/use-stats'
-import { generateMockTimeSeriesData } from '@/lib/date-utils'
+import { useToast } from '@/components/ui/use-toast'
 import { formatNumber } from '@/lib/ui-utils'
 import type { DateRangePreset, KeyStats, TimeSeriesDataPoint } from '@/types/stats'
 
@@ -25,12 +27,29 @@ export default function UsageStatsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
 
+  // Toast
+  const { toast } = useToast()
+
+  // 跟踪CRS警告状态
+  const prevCrsWarningRef = useRef<string | undefined>()
+
   // 数据获取 - 使用自定义 hook
   const { data, isLoading, error, refetch } = useUsageStats(
     dateRange,
     customStartDate,
     customEndDate
   )
+
+  // 监听错误状态，显示Toast
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: '加载失败',
+        description: '无法获取统计数据，请稍后重试',
+        variant: 'destructive',
+      })
+    }
+  }, [error, toast])
 
   // 数据处理和筛选
   const filteredKeys = useMemo(() => {
@@ -74,12 +93,9 @@ export default function UsageStatsPage() {
 
   // 时间序列数据聚合
   const timeSeriesData = useMemo<TimeSeriesDataPoint[]>(() => {
-    if (!data?.keys) return []
-
-    // TODO: 从后端获取已聚合的时间序列数据
-    // 当前使用模拟数据
-    return generateMockTimeSeriesData(7)
-  }, [data?.keys, selectedKeys])
+    // 使用真实的CRS趋势数据
+    return data?.trend || []
+  }, [data?.trend])
 
 
   // 时间范围变化
@@ -111,6 +127,52 @@ export default function UsageStatsPage() {
     window.location.href = `/dashboard/keys/${keyId}/stats`
   }
 
+  // 手动刷新处理
+  const handleRefresh = async () => {
+    try {
+      await refetch()
+      toast({
+        title: '刷新成功',
+        description: '统计数据已更新',
+      })
+    } catch (err) {
+      toast({
+        title: '刷新失败',
+        description: '无法刷新统计数据，请稍后重试',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  // CRS重试处理
+  const handleCrsRetry = async () => {
+    const prevWarning = data?.crsWarning
+    try {
+      const result = await refetch()
+
+      // 检查CRS状态是否恢复
+      const newWarning = result.data?.crsWarning
+      if (prevWarning && !newWarning) {
+        toast({
+          title: 'CRS连接成功',
+          description: 'CRS服务已恢复，显示完整数据',
+        })
+      } else if (newWarning) {
+        toast({
+          title: 'CRS重试失败',
+          description: 'CRS服务仍然不可用，已显示本地数据',
+          variant: 'destructive',
+        })
+      }
+    } catch (err) {
+      toast({
+        title: 'CRS重试失败',
+        description: 'CRS服务仍然不可用，已显示本地数据',
+        variant: 'destructive',
+      })
+    }
+  }
+
   // 错误状态
   if (error) {
     return (
@@ -132,22 +194,9 @@ export default function UsageStatsPage() {
     )
   }
 
-  // 骨架屏
+  // 骨架屏 - 使用优化的 StatsSkeleton 组件
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div data-testid="stats-skeleton" className="space-y-6">
-          <div className="h-8 bg-muted animate-pulse rounded w-48" />
-          <div className="grid gap-6 md:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-muted animate-pulse rounded" />
-            ))}
-          </div>
-          <div className="h-64 bg-muted animate-pulse rounded" />
-          <div className="h-96 bg-muted animate-pulse rounded" />
-        </div>
-      </div>
-    )
+    return <StatsSkeleton />
   }
 
   const summary = data?.summary || {
@@ -162,8 +211,26 @@ export default function UsageStatsPage() {
       {/* 标题和操作 */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">使用统计</h1>
-        <ExportDialog data={filteredKeys} />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? '刷新中...' : '刷新'}
+          </Button>
+          <ExportDialog data={filteredKeys} />
+        </div>
       </div>
+
+      {/* CRS服务状态提示 */}
+      <CrsStatusAlert
+        warning={data?.crsWarning}
+        onRetry={handleCrsRetry}
+        retrying={isLoading}
+      />
 
       {/* 概览卡片 */}
       <div className="grid gap-6 md:grid-cols-4">

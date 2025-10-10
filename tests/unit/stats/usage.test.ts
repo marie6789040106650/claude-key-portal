@@ -22,7 +22,9 @@ jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
 
 jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: {
+    getDashboard: jest.fn(),
     getKeyStats: jest.fn(),
+    getUsageTrend: jest.fn(),
   },
 }))
 
@@ -383,6 +385,470 @@ describe('GET /api/stats/usage', () => {
       // Assert
       expect(response.status).toBe(500)
       expect(data).toEqual({ error: '系统错误，请稍后重试' })
+    })
+  })
+
+  describe('P2.1 - CRS Dashboard API 集成 (🔴 RED)', () => {
+    const mockKeys = [
+      {
+        id: 'key-1',
+        name: 'Test Key 1',
+        status: 'ACTIVE',
+        totalTokens: 1000,
+        totalCalls: 10,
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
+      },
+    ]
+
+    const mockCrsDashboard = {
+      totalKeys: 10,
+      activeKeys: 8,
+      totalTokens: 50000,
+      totalRequests: 500,
+    }
+
+    beforeEach(() => {
+      ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue(mockKeys)
+    })
+
+    it('应该调用 CRS getDashboard API', async () => {
+      // Arrange
+      ;(crsClient.getDashboard as jest.Mock).mockResolvedValue(mockCrsDashboard)
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      await GET(request)
+
+      // Assert
+      expect(crsClient.getDashboard).toHaveBeenCalled()
+    })
+
+    it('应该在响应中包含 CRS Dashboard 数据', async () => {
+      // Arrange
+      ;(crsClient.getDashboard as jest.Mock).mockResolvedValue(mockCrsDashboard)
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.crsDashboard).toEqual(mockCrsDashboard)
+    })
+
+    it('应该合并本地聚合统计和 CRS Dashboard 数据', async () => {
+      // Arrange
+      ;(crsClient.getDashboard as jest.Mock).mockResolvedValue(mockCrsDashboard)
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      // 应该包含本地聚合统计
+      expect(data.summary).toBeDefined()
+      expect(data.summary.totalTokens).toBe(1000)
+      expect(data.summary.keyCount).toBe(1)
+      // 应该包含 CRS Dashboard 数据
+      expect(data.crsDashboard).toEqual(mockCrsDashboard)
+      expect(data.crsDashboard.totalKeys).toBe(10)
+      expect(data.crsDashboard.totalTokens).toBe(50000)
+    })
+
+    it('CRS 不可用时应该降级使用本地数据', async () => {
+      // Arrange
+      ;(crsClient.getDashboard as jest.Mock).mockRejectedValue(
+        new Error('CRS service unavailable')
+      )
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      // 应该返回本地统计
+      expect(data.summary).toBeDefined()
+      expect(data.summary.totalTokens).toBe(1000)
+      // 应该有降级警告
+      expect(data.crsWarning).toBe('CRS服务暂时不可用，显示本地统计数据')
+      // 不应该有 CRS Dashboard 数据
+      expect(data.crsDashboard).toBeUndefined()
+    })
+
+    it('CRS 超时错误应该降级处理', async () => {
+      // Arrange
+      ;(crsClient.getDashboard as jest.Mock).mockRejectedValue(
+        new Error('Request timeout')
+      )
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.summary).toBeDefined()
+      expect(data.crsWarning).toBeDefined()
+    })
+
+    it('CRS 错误不应该影响整体响应状态', async () => {
+      // Arrange
+      ;(crsClient.getDashboard as jest.Mock).mockRejectedValue(
+        new Error('Network error')
+      )
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      const response = await GET(request)
+
+      // Assert
+      // 不应该返回 500 错误
+      expect(response.status).toBe(200)
+      expect(response.status).not.toBe(500)
+    })
+
+    it('应该记录 CRS 错误日志', async () => {
+      // Arrange
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
+      ;(crsClient.getDashboard as jest.Mock).mockRejectedValue(
+        new Error('CRS timeout')
+      )
+
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      await GET(request)
+
+      // Assert
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'CRS Dashboard API unavailable, using local stats:',
+        expect.any(Error)
+      )
+
+      consoleSpy.mockRestore()
+    })
+
+    it('应该只在获取所有密钥统计时调用 CRS Dashboard', async () => {
+      // Arrange: 单个密钥查询
+      const mockKey = {
+        id: 'key-1',
+        userId: mockUserId,
+        name: 'Test Key',
+        crsKey: 'sk-ant-api03-test123',
+        status: 'ACTIVE',
+        totalTokens: 1000,
+        totalCalls: 10,
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
+      }
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(mockKey)
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?keyId=key-1',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      await GET(request)
+
+      // Assert
+      // 单个密钥查询不应该调用 getDashboard
+      expect(crsClient.getDashboard).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('P2.3 - CRS 时间序列趋势图 (🔴 RED)', () => {
+    const mockKeys = [
+      {
+        id: 'key-1',
+        name: 'Test Key 1',
+        status: 'ACTIVE',
+        totalTokens: 1000,
+        totalCalls: 10,
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
+      },
+    ]
+
+    const mockCrsTrend = [
+      {
+        date: '2025-10-01',
+        totalRequests: 50,
+        totalTokens: 5000,
+        cost: 0.05,
+      },
+      {
+        date: '2025-10-02',
+        totalRequests: 60,
+        totalTokens: 6000,
+        cost: 0.06,
+      },
+      {
+        date: '2025-10-03',
+        totalRequests: 70,
+        totalTokens: 7000,
+        cost: 0.07,
+      },
+    ]
+
+    beforeEach(() => {
+      ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue(mockKeys)
+    })
+
+    it('应该调用 CRS getUsageTrend API', async () => {
+      // Arrange
+      ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      await GET(request)
+
+      // Assert
+      expect(crsClient.getUsageTrend).toHaveBeenCalled()
+    })
+
+    it('应该支持时间范围参数传递到CRS', async () => {
+      // Arrange
+      ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true&startDate=2025-10-01&endDate=2025-10-03',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      await GET(request)
+
+      // Assert
+      expect(crsClient.getUsageTrend).toHaveBeenCalledWith({
+        startDate: '2025-10-01',
+        endDate: '2025-10-03',
+      })
+    })
+
+    it('应该返回格式化的趋势数据', async () => {
+      // Arrange
+      ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.trend).toBeDefined()
+      expect(data.trend).toHaveLength(3)
+      expect(data.trend[0]).toMatchObject({
+        date: '2025-10-01',
+        totalRequests: 50,
+        totalTokens: 5000,
+        cost: 0.05,
+      })
+    })
+
+    it('应该在响应中同时包含汇总和趋势数据', async () => {
+      // Arrange
+      ;(crsClient.getUsageTrend as jest.Mock).mockResolvedValue(mockCrsTrend)
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      // 应该包含本地汇总
+      expect(data.summary).toBeDefined()
+      expect(data.summary.totalTokens).toBe(1000)
+      // 应该包含趋势数据
+      expect(data.trend).toBeDefined()
+      expect(data.trend).toHaveLength(3)
+    })
+
+    it('CRS趋势API不可用时应该降级处理', async () => {
+      // Arrange
+      ;(crsClient.getUsageTrend as jest.Mock).mockRejectedValue(
+        new Error('CRS service unavailable')
+      )
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      // 应该返回基本统计
+      expect(data.summary).toBeDefined()
+      // 趋势数据应该为空或不存在
+      expect(data.trend).toBeUndefined()
+      // 应该有警告信息
+      expect(data.trendWarning).toBe('趋势数据暂时不可用')
+    })
+
+    it('CRS趋势超时应该降级处理', async () => {
+      // Arrange
+      ;(crsClient.getUsageTrend as jest.Mock).mockRejectedValue(
+        new Error('Request timeout')
+      )
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.trendWarning).toBeDefined()
+    })
+
+    it('应该验证趋势数据的时间范围', async () => {
+      // Arrange
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true&startDate=invalid-date',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('时间范围参数格式不正确')
+    })
+
+    it('应该记录CRS趋势API错误日志', async () => {
+      // Arrange
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
+      ;(crsClient.getUsageTrend as jest.Mock).mockRejectedValue(
+        new Error('CRS timeout')
+      )
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      await GET(request)
+
+      // Assert
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'CRS Usage Trend API unavailable:',
+        expect.any(Error)
+      )
+
+      consoleSpy.mockRestore()
+    })
+
+    it('未指定includeTrend时不应调用CRS趋势API', async () => {
+      // Arrange
+      const request = new Request('http://localhost/api/stats/usage', {
+        headers: { Authorization: mockToken },
+      })
+
+      // Act
+      await GET(request)
+
+      // Assert
+      expect(crsClient.getUsageTrend).not.toHaveBeenCalled()
+    })
+
+    it('单个密钥查询时不应调用CRS趋势API', async () => {
+      // Arrange
+      const mockKey = {
+        id: 'key-1',
+        userId: mockUserId,
+        name: 'Test Key',
+        crsKey: 'sk-ant-api03-test123',
+        status: 'ACTIVE',
+        totalTokens: 1000,
+        totalCalls: 10,
+        createdAt: new Date('2025-10-01'),
+        lastUsedAt: new Date('2025-10-03'),
+      }
+      ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(mockKey)
+
+      const request = new Request(
+        'http://localhost/api/stats/usage?keyId=key-1&includeTrend=true',
+        {
+          headers: { Authorization: mockToken },
+        }
+      )
+
+      // Act
+      await GET(request)
+
+      // Assert
+      // 趋势图仅用于整体统计，不适用于单个密钥
+      expect(crsClient.getUsageTrend).not.toHaveBeenCalled()
     })
   })
 })

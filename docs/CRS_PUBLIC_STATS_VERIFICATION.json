@@ -1,0 +1,79 @@
+{
+  "timestamp": "2025-10-08T15:09:26.711Z",
+  "baseUrl": "https://claude.just-play.fun",
+  "note": "由于没有真实API Key，只测试端点存在性",
+  "summary": {
+    "endpointExists": 0,
+    "endpointNotFound": 5,
+    "error": 0,
+    "skipped": 0,
+    "total": 5
+  },
+  "results": [
+    {
+      "endpoint": "/apiStats/get-key-id",
+      "method": "POST",
+      "status": "failed",
+      "statusCode": 404,
+      "responseTime": 2117,
+      "dataSummary": {
+        "endpointExists": false,
+        "requiresAuth": false,
+        "requiresValidData": false,
+        "error": "Not Found"
+      }
+    },
+    {
+      "endpoint": "/apiStats/user-stats",
+      "method": "POST",
+      "status": "failed",
+      "statusCode": 404,
+      "responseTime": 454,
+      "dataSummary": {
+        "endpointExists": false,
+        "requiresAuth": false,
+        "requiresValidData": false,
+        "error": "Not Found"
+      }
+    },
+    {
+      "endpoint": "/apiStats/user-model-stats",
+      "method": "POST",
+      "status": "failed",
+      "statusCode": 404,
+      "responseTime": 817,
+      "dataSummary": {
+        "endpointExists": false,
+        "requiresAuth": false,
+        "requiresValidData": false,
+        "error": "Not Found"
+      }
+    },
+    {
+      "endpoint": "/apiStats/batch-stats",
+      "method": "POST",
+      "status": "failed",
+      "statusCode": 404,
+      "responseTime": 458,
+      "dataSummary": {
+        "endpointExists": false,
+        "requiresAuth": false,
+        "requiresValidData": false,
+        "error": "Not Found"
+      }
+    },
+    {
+      "endpoint": "/apiStats/batch-model-stats",
+      "method": "POST",
+      "status": "failed",
+      "statusCode": 404,
+      "responseTime": 455,
+      "dataSummary": {
+        "endpointExists": false,
+        "requiresAuth": false,
+        "requiresValidData": false,
+        "error": "Not Found"
+      }
+    }
+  ]
+}
