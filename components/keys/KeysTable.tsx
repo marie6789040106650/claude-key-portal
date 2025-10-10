@@ -301,9 +301,9 @@ function KeysTableComponent({
                 </TableCell>
                 <TableCell>
                   <div className="text-sm">
-                    <div>{key.totalRequests.toLocaleString()} 次</div>
+                    <div>{(key.totalRequests || 0).toLocaleString()} 次</div>
                     <div className="text-muted-foreground">
-                      {key.totalTokens.toLocaleString()} tokens
+                      {(key.totalTokens || 0).toLocaleString()} tokens
                     </div>
                   </div>
                 </TableCell>

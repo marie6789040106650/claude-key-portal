@@ -25,11 +25,27 @@ export async function GET(request: Request) {
 
     const userId = user.id
 
-    // 2. 解析查询参数
+    // 2. 获取完整用户信息
+    const userInfo = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        nickname: true,
+        createdAt: true,
+        avatar: true,
+      },
+    })
+
+    if (!userInfo) {
+      return NextResponse.json({ error: '用户不存在' }, { status: 404 })
+    }
+
+    // 3. 解析查询参数
     const { searchParams } = new URL(request.url)
     const includeCrsStats = searchParams.get('includeCrsStats') === 'true'
 
-    // 3. 获取用户密钥总数
+    // 4. 获取用户密钥总数
     const totalKeys = await prisma.apiKey.count({
       where: { userId },
     })
@@ -73,8 +89,21 @@ export async function GET(request: Request) {
       totalCalls: Number(activity.totalCalls),
     }))
 
-    // 8. 构建响应
+    // 8. 构建响应 (匹配前端DashboardData接口)
     const response: any = {
+      user: {
+        id: userInfo.id,
+        email: userInfo.email,
+        nickname: userInfo.nickname,
+        createdAt: userInfo.createdAt.toISOString(),
+        avatarUrl: userInfo.avatar || undefined,
+      },
+      stats: {
+        totalKeys: overview.totalKeys,
+        activeKeys: overview.activeKeys,
+        totalRequests: overview.totalRequests,
+      },
+      // 保留完整overview供其他可能的使用
       overview,
       recentActivity: serializedRecentActivity,
     }
