@@ -1064,6 +1064,37 @@ Claude 开发任务
 10秒后自动打开新终端继续下一阶段
 ```
 
+### 新窗口通用提示词 ⭐ 推荐
+
+**最简洁的启动方式**:
+
+```
+claude-key-portal
+```
+
+Claude会自动：
+- ✅ 定位项目路径
+- ✅ 检查Git状态
+- ✅ 读取最新任务文档
+- ✅ 展示下一步行动
+
+**带意图的启动**:
+
+```
+claude-key-portal
+[你的意图，如: 继续测试修复 / 开始新功能]
+```
+
+**指定任务的启动**:
+
+```
+claude-key-portal
+任务: P3.1测试修复
+文档: docs/P3.1_TEST_FIX_PLAN.md
+```
+
+详见: `docs/NEW_WINDOW_PROMPT_TEMPLATE.md`
+
 ### Claude 必须执行的收尾步骤
 
 **每次完成任务后，必须执行以下命令标记完成：**
@@ -1082,18 +1113,14 @@ claude-monitor done "下一阶段任务描述"
 
 ```bash
 # 场景1: 保持当前提示词继续
-# 完成 Task 4 后
 claude-monitor done
 
 # 场景2: 切换到新任务
-# 完成 P2.9 所有任务，开始 P2.10
-claude-monitor done "开始 P2.10 - 性能优化任务"
+claude-monitor done "开始P3.1测试修复 - 提升测试通过率"
 
 # 场景3: 详细的阶段切换
-claude-monitor done "项目: claude-key-portal
-分支: feature/p2-usage-analytics
-当前任务: P2.10 Task 1 - 数据库查询优化
-参考文档: docs/NEXT_SESSION_PROMPT_V2.md"
+claude-monitor done "任务: P3.1测试修复
+参考文档: docs/NEXT_SESSION_PROMPT_V5.md"
 ```
 
 ### 强制执行规则
@@ -1129,6 +1156,7 @@ claude-monitor done "项目: claude-key-portal
 - **监控文件**: `.automation/task_completed`
 - **延迟时间**: 10 秒
 - **自动化**: 打开新终端继续开发
+- **新窗口提示词**: `claude-key-portal` (极简启动)
 
 **注意**: `.automation/` 目录已添加到 `.gitignore`，不会提交到版本控制。
 
