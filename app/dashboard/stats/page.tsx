@@ -159,7 +159,18 @@ export default function UsageStatsPage() {
       {/* 标题和操作 */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">使用统计</h1>
-        <ExportDialog data={filteredKeys} />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? '刷新中...' : '刷新'}
+          </Button>
+          <ExportDialog data={filteredKeys} />
+        </div>
       </div>
 
       {/* CRS服务状态提示 */}
