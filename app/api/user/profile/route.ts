@@ -82,6 +82,21 @@ export async function GET(request: NextRequest) {
  * 更新用户信息（昵称、头像、简介）
  */
 export async function PUT(request: NextRequest) {
+  return await updateProfile(request)
+}
+
+/**
+ * PATCH /api/user/profile
+ * 部分更新用户信息（昵称、头像、简介）
+ */
+export async function PATCH(request: NextRequest) {
+  return await updateProfile(request)
+}
+
+/**
+ * 共享的更新逻辑
+ */
+async function updateProfile(request: NextRequest) {
   try {
     // 1. 验证用户身份（支持Cookie和Header双重认证）
     const authenticatedUser = await getAuthenticatedUser(request)
