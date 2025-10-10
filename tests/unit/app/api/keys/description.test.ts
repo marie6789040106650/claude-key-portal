@@ -3,6 +3,7 @@
  * 路径: PUT /api/keys/[id]/description
  *
  * 🔴 RED Phase: 测试先行
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server'

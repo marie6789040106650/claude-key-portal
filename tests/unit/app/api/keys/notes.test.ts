@@ -7,6 +7,8 @@
  * - 更新备注内容
  * - 字符限制验证
  * - 权限验证
+ *
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server'

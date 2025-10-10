@@ -8,7 +8,7 @@
 import { GET } from '@/app/api/dashboard/route'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
 // Mock 依赖
@@ -17,6 +17,9 @@ jest.mock('@/lib/infrastructure/persistence/prisma', () => ({
     apiKey: {
       count: jest.fn(),
       findMany: jest.fn(),
+    },
+    user: {
+      findUnique: jest.fn(),
     },
   },
 }))
@@ -27,20 +30,27 @@ jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   },
 }))
 
-jest.mock('@/lib/auth', () => ({
-  verifyToken: jest.fn(),
-}))
+// 使用全局auth mock（在jest.setup.js中配置）
 
 describe('GET /api/dashboard', () => {
-  const mockUserId = 'user-123'
-  const mockToken = 'Bearer valid-token'
+  const mockUserId = 'test-user-id'
+  const mockUser = {
+    id: mockUserId,
+    email: 'test@example.com',
+    nickname: 'Test User',
+    createdAt: new Date('2025-01-01'),
+    avatar: null,
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(verifyToken as jest.Mock).mockReturnValue({
-      userId: mockUserId,
+    // Mock getAuthenticatedUser (使用全局mock)
+    ;(getAuthenticatedUser as jest.Mock).mockResolvedValue({
+      id: mockUserId,
       email: 'test@example.com',
     })
+    // Mock user.findUnique
+    ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
   })
 
   describe('成功场景', () => {
@@ -70,9 +80,7 @@ describe('GET /api/dashboard', () => {
       ;(prisma.apiKey.count as jest.Mock).mockResolvedValue(3)
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue(mockApiKeys)
 
-      const request = new Request('http://localhost/api/dashboard', {
-        headers: { Authorization: mockToken },
-      })
+      const request = new Request('http://localhost/api/dashboard')
 
       // Act
       const response = await GET(request)
@@ -83,14 +91,13 @@ describe('GET /api/dashboard', () => {
       expect(data.overview).toEqual({
         totalKeys: 3,
         activeKeys: 2,
-        inactiveKeys: 1, // 修正：使用 inactiveKeys 而不是 pausedKeys
+        inactiveKeys: 1,
         totalTokensUsed: 3000,
         totalRequests: 30,
-        // 移除 monthlyUsage（功能未实现）
       })
       expect(Array.isArray(data.recentActivity)).toBe(true)
 
-      expect(verifyToken).toHaveBeenCalledWith(mockToken)
+      expect(getAuthenticatedUser).toHaveBeenCalledWith(request)
       expect(prisma.apiKey.count).toHaveBeenCalledWith({
         where: { userId: mockUserId },
       })
@@ -118,9 +125,7 @@ describe('GET /api/dashboard', () => {
         .mockResolvedValueOnce([]) // overview query
         .mockResolvedValueOnce(mockRecentKeys) // recent activity query
 
-      const request = new Request('http://localhost/api/dashboard', {
-        headers: { Authorization: mockToken },
-      })
+      const request = new Request('http://localhost/api/dashboard')
 
       // Act
       const response = await GET(request)
@@ -139,9 +144,7 @@ describe('GET /api/dashboard', () => {
       ;(prisma.apiKey.count as jest.Mock).mockResolvedValue(0)
       ;(prisma.apiKey.findMany as jest.Mock).mockResolvedValue([])
 
-      const request = new Request('http://localhost/api/dashboard', {
-        headers: { Authorization: mockToken },
-      })
+      const request = new Request('http://localhost/api/dashboard')
 
       // Act
       const response = await GET(request)
@@ -163,29 +166,8 @@ describe('GET /api/dashboard', () => {
 
   describe('错误场景', () => {
     it('应该拒绝未认证的请求', async () => {
-      // Arrange
-      ;(verifyToken as jest.Mock).mockImplementation(() => {
-        throw new Error('Token无效或已过期')
-      })
-
-      const request = new Request('http://localhost/api/dashboard', {
-        headers: { Authorization: 'Bearer invalid-token' },
-      })
-
-      // Act
-      const response = await GET(request)
-      const data = await response.json()
-
-      // Assert
-      expect(response.status).toBe(401)
-      expect(data).toEqual({ error: 'Token无效或已过期' })
-    })
-
-    it('应该处理缺少Authorization头的情况', async () => {
-      // Arrange
-      ;(verifyToken as jest.Mock).mockImplementation(() => {
-        throw new Error('未提供认证令牌')
-      })
+      // Arrange - Mock认证失败
+      ;(getAuthenticatedUser as jest.Mock).mockResolvedValue(null)
 
       const request = new Request('http://localhost/api/dashboard')
 
@@ -195,7 +177,22 @@ describe('GET /api/dashboard', () => {
 
       // Assert
       expect(response.status).toBe(401)
-      expect(data.error).toBe('未提供认证令牌')
+      expect(data).toEqual({ error: '未登录或Token缺失' })
+    })
+
+    it('应该处理用户不存在的情况', async () => {
+      // Arrange
+      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
+
+      const request = new Request('http://localhost/api/dashboard')
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(404)
+      expect(data.error).toBe('用户不存在')
     })
 
     it('应该处理数据库错误', async () => {
@@ -204,9 +201,7 @@ describe('GET /api/dashboard', () => {
         new Error('Database connection failed')
       )
 
-      const request = new Request('http://localhost/api/dashboard', {
-        headers: { Authorization: mockToken },
-      })
+      const request = new Request('http://localhost/api/dashboard')
 
       // Act
       const response = await GET(request)
@@ -235,10 +230,7 @@ describe('GET /api/dashboard', () => {
       ;(crsClient.getDashboard as jest.Mock).mockResolvedValue(mockCrsStats)
 
       const request = new Request(
-        'http://localhost/api/dashboard?includeCrsStats=true',
-        {
-          headers: { Authorization: mockToken },
-        }
+        'http://localhost/api/dashboard?includeCrsStats=true'
       )
 
       // Act
@@ -259,10 +251,7 @@ describe('GET /api/dashboard', () => {
       )
 
       const request = new Request(
-        'http://localhost/api/dashboard?includeCrsStats=true',
-        {
-          headers: { Authorization: mockToken },
-        }
+        'http://localhost/api/dashboard?includeCrsStats=true'
       )
 
       // Act

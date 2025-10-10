@@ -9,6 +9,8 @@
  * - recordMemoryUsage: 记录内存使用量
  * - getMemoryTrend: 获取内存使用趋势
  * - recordDatabaseQuery: 记录数据库查询性能
+ *
+ * @jest-environment node
  */
 
 import { MetricsCollectorService } from '@/lib/infrastructure/monitoring/metrics-collector-service'

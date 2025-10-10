@@ -7,6 +7,8 @@
  * - DELETE /api/keys/[id]/tags - 删除标签
  * - 标签验证和去重
  * - 权限验证
+ *
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server'

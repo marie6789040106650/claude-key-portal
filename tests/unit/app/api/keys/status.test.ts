@@ -8,6 +8,8 @@
  * - 权限验证
  * - 错误处理
  * - CRS集成测试
+ *
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server'

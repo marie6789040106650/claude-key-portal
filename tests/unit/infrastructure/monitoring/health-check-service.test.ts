@@ -7,6 +7,8 @@
  * - checkCRS: CRS服务检查
  * - checkAll: 所有服务健康检查和聚合
  * - saveHealthCheck: 保存健康检查结果
+ *
+ * @jest-environment node
  */
 
 import { HealthCheckService } from '@/lib/infrastructure/monitoring/health-check-service'

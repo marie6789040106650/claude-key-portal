@@ -8,6 +8,8 @@
  * - resolveAlert: 恢复告警并发送通知
  * - 告警去重逻辑
  * - 错误处理
+ *
+ * @jest-environment node
  */
 
 import { AlertRuleEngine } from '@/lib/infrastructure/monitoring/alert-rule-engine'

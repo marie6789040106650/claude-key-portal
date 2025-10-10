@@ -7,6 +7,8 @@
  * - 更新收藏状态
  * - 权限验证
  * - 错误处理
+ *
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server'
