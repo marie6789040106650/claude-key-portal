@@ -5,6 +5,7 @@ import '@testing-library/jest-dom'
 import './tests/mocks/crs-client.mock'
 
 // Import统一的Mock配置
+import './tests/setup/auth-mock'
 import './tests/setup/fetch-mock'
 import './tests/setup/clipboard-mock'
 import './tests/setup/redis-mock'
