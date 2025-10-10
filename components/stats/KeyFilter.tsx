@@ -116,8 +116,8 @@ export function KeyFilter({
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    请求: {key.totalRequests.toLocaleString()} | Token:{' '}
-                    {key.totalTokens.toLocaleString()}
+                    请求: {(key.totalRequests || 0).toLocaleString()} | Token:{' '}
+                    {(key.totalTokens || 0).toLocaleString()}
                   </div>
                 </Label>
               </div>

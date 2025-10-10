@@ -183,7 +183,7 @@ export default function KeyStatsDetailPage({ params }: KeyStatsDetailPageProps) 
             <div>
               <p className="text-sm text-muted-foreground">本月使用量</p>
               <p className="mt-1 font-medium text-lg">
-                {key.monthlyUsage.toLocaleString()}
+                {(key.monthlyUsage || 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function KeyStatsDetailPage({ params }: KeyStatsDetailPageProps) 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.totalRequests.toLocaleString()}
+              {(stats.totalRequests || 0).toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -213,7 +213,7 @@ export default function KeyStatsDetailPage({ params }: KeyStatsDetailPageProps) 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.totalTokens.toLocaleString()}
+              {(stats.totalTokens || 0).toLocaleString()}
             </div>
           </CardContent>
         </Card>

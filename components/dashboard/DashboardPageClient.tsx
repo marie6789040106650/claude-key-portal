@@ -111,7 +111,7 @@ export function DashboardPageClient() {
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">总请求数</h3>
           <p className="text-3xl font-bold mt-2">
-            {data.stats.totalRequests.toLocaleString()}
+            {(data.stats.totalRequests || 0).toLocaleString()}
           </p>
         </Card>
       </div>

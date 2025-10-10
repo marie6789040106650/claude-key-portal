@@ -118,8 +118,8 @@ export function StatsTable({
   }
 
   // 格式化数字
-  const formatNumber = (num: number) => {
-    return num.toLocaleString()
+  const formatNumber = (num: number | null | undefined) => {
+    return (num || 0).toLocaleString()
   }
 
   // 格式化时间
