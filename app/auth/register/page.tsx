@@ -117,7 +117,12 @@ export default function RegisterPage() {
         </div>
 
         {/* 表单 */}
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          method="post"
+          action="#"
+          className="mt-8 space-y-6"
+        >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
               {error}
