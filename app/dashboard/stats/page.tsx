@@ -10,7 +10,6 @@ import { DateRangePicker } from '@/components/stats/DateRangePicker'
 import { KeyFilter } from '@/components/stats/KeyFilter'
 import { ExportDialog } from '@/components/stats/ExportDialog'
 import { useUsageStats } from '@/hooks/use-stats'
-import { generateMockTimeSeriesData } from '@/lib/date-utils'
 import { formatNumber } from '@/lib/ui-utils'
 import type { DateRangePreset, KeyStats, TimeSeriesDataPoint } from '@/types/stats'
 
@@ -74,12 +73,9 @@ export default function UsageStatsPage() {
 
   // 时间序列数据聚合
   const timeSeriesData = useMemo<TimeSeriesDataPoint[]>(() => {
-    if (!data?.keys) return []
-
-    // TODO: 从后端获取已聚合的时间序列数据
-    // 当前使用模拟数据
-    return generateMockTimeSeriesData(7)
-  }, [data?.keys, selectedKeys])
+    // 使用真实的CRS趋势数据
+    return data?.trend || []
+  }, [data?.trend])
 
 
   // 时间范围变化
