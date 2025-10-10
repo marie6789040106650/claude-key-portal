@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
 
@@ -17,16 +17,15 @@ export async function PUT(
   context: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    // 1. 验证认证
-    const authHeader = request.headers.get('Authorization')
-    let userId: string
-
-    try {
-      const tokenData = verifyToken(authHeader)
-      userId = tokenData.userId
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    // 1. 验证认证（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
+    const userId = user.id
 
     // 2. 解析请求体
     const body = await request.json()

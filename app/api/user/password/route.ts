@@ -5,20 +5,22 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 /**
  * 密码修改核心逻辑（POST和PUT共用）
  */
 async function changePassword(request: NextRequest) {
   try {
-    // 1. 验证用户身份
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: '未提供认证信息' }, { status: 401 })
+    // 1. 验证用户身份（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
-
-    const decoded = verifyToken(authHeader)
+    const decoded = { userId: user.id }
 
     // 2. 解析请求体
     const body = await request.json()

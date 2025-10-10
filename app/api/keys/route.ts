@@ -5,23 +5,22 @@
  */
 
 import { NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 /**
  * GET /api/keys - 列出API密钥
  */
 export async function GET(request: Request) {
   try {
-    // 1. 验证JWT Token
-    const authHeader = request.headers.get('Authorization')
-    let userId: string
-
-    try {
-      const tokenData = verifyToken(authHeader)
-      userId = tokenData.userId
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    // 1. 验证JWT Token（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
+    const userId = user.id
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)
@@ -73,16 +72,15 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    // 1. 验证JWT Token
-    const authHeader = request.headers.get('Authorization')
-    let userId: string
-
-    try {
-      const tokenData = verifyToken(authHeader)
-      userId = tokenData.userId
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    // 1. 验证JWT Token（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
+    const userId = user.id
 
     // 2. 解析请求体
     const body = await request.json()

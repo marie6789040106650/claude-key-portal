@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { generateScript, getInstructions } from '@/lib/script-templates'
 import {
@@ -31,19 +31,15 @@ export async function POST(request: NextRequest) {
 
     const { keyId, platform, environment } = body
 
-    // 2. 验证认证
-    const authHeader = request.headers.get('Authorization')
-
-    let userId: string
-    try {
-      const payload = verifyToken(authHeader || '')
-      userId = payload.userId
-    } catch (error) {
+    // 2. 验证认证（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
       return NextResponse.json(
-        { error: 'Token无效或已过期' },
+        { error: '未登录或Token缺失' },
         { status: 401 }
       )
     }
+    const userId = user.id
 
     // 3. 验证必需参数
     if (!keyId) {

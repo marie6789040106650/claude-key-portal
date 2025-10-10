@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 /**
  * GET /api/user/profile
@@ -14,17 +14,19 @@ import { verifyToken } from '@/lib/auth'
  */
 export async function GET(request: NextRequest) {
   try {
-    // 1. 验证用户身份
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: '未提供认证信息' }, { status: 401 })
+    // 1. 验证用户身份（支持Cookie和Header双重认证）
+    const authenticatedUser = await getAuthenticatedUser(request)
+    if (!authenticatedUser) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
-
-    const decoded = verifyToken(authHeader)
+    const userId = authenticatedUser.id
 
     // 2. 查询用户信息
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -42,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     // 3. 查询 API Key 数量
     const apiKeyCount = await prisma.apiKey.count({
-      where: { userId: decoded.userId },
+      where: { userId },
     })
 
     // 4. 返回用户信息和统计
@@ -81,13 +83,15 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    // 1. 验证用户身份
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: '未提供认证信息' }, { status: 401 })
+    // 1. 验证用户身份（支持Cookie和Header双重认证）
+    const authenticatedUser = await getAuthenticatedUser(request)
+    if (!authenticatedUser) {
+      return NextResponse.json(
+        { error: '未登录或Token缺失' },
+        { status: 401 }
+      )
     }
-
-    const decoded = verifyToken(authHeader)
+    const userId = authenticatedUser.id
 
     // 2. 解析请求体
     const body = await request.json()
@@ -99,7 +103,7 @@ export async function PUT(request: NextRequest) {
 
     // 4. 执行更新流程
     const result = await updateProfileUseCase.execute({
-      userId: decoded.userId,
+      userId,
       ...body,
     })
 
