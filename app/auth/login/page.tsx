@@ -62,6 +62,7 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 必须包含，否则cookie不会被设置
         body: JSON.stringify(formData),
       })
 
