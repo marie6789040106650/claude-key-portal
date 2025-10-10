@@ -139,20 +139,11 @@ export async function DELETE(
       return NextResponse.json({ error: '请先登录' }, { status: 401 })
     }
 
-    // 2. 解析请求体
-    let body
-    try {
-      body = await request.json()
-    } catch {
-      return NextResponse.json(
-        { error: '无效的请求数据' },
-        { status: 400 }
-      )
-    }
+    // 2. 从URL查询参数读取tag
+    const { searchParams } = new URL(request.url)
+    const tag = searchParams.get('tag')
 
     // 3. 验证输入
-    const { tag } = body
-
     if (!tag) {
       return NextResponse.json(
         { error: '缺少必填字段: tag' },

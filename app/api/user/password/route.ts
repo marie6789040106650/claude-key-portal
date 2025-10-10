@@ -1,16 +1,16 @@
 /**
  * Password Management API Routes
- * PUT /api/user/password - 修改密码
+ * POST /api/user/password - 修改密码
+ * PUT /api/user/password - 修改密码（别名）
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
 /**
- * PUT /api/user/password
- * 修改用户密码
+ * 密码修改核心逻辑（POST和PUT共用）
  */
-export async function PUT(request: NextRequest) {
+async function changePassword(request: NextRequest) {
   try {
     // 1. 验证用户身份
     const authHeader = request.headers.get('Authorization')
@@ -70,4 +70,20 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+/**
+ * POST /api/user/password
+ * 修改用户密码（推荐使用）
+ */
+export async function POST(request: NextRequest) {
+  return changePassword(request)
+}
+
+/**
+ * PUT /api/user/password
+ * 修改用户密码（别名，保持向后兼容）
+ */
+export async function PUT(request: NextRequest) {
+  return changePassword(request)
 }

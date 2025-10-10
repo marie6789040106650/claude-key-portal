@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAuth } from '@/lib/auth'
+import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { buildAdvancedFilters, type FilterParams } from '../filters'
 import { convertToCSV, convertToJSON, generateFilename } from './formatters'
@@ -22,7 +22,15 @@ import { convertToCSV, convertToJSON, generateFilename } from './formatters'
 export async function GET(request: NextRequest) {
   try {
     // 1. 验证认证
-    const { userId } = await verifyAuth()
+    const authHeader = request.headers.get('Authorization')
+    let userId: string
+
+    try {
+      const tokenData = verifyToken(authHeader)
+      userId = tokenData.userId
+    } catch (error: any) {
+      return NextResponse.json({ error: error.message }, { status: 401 })
+    }
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)
@@ -98,10 +106,6 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('导出统计数据失败:', error)
-
-    if (error instanceof Error && error.message === '未认证') {
-      throw error
-    }
 
     return NextResponse.json(
       { error: '导出统计数据失败，请稍后重试' },
