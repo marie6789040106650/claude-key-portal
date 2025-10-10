@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, RefreshCw, Edit, Trash2, Star, Calendar, Activity } from 'lucide-react'
 import { toast } from '@/components/ui/toast-simple'
+import type { ApiKeyStatus } from '@/types/keys'
 
 interface KeyDetailPageProps {
   params: {
@@ -15,11 +16,15 @@ interface KeyDetailPageProps {
   }
 }
 
-interface KeyData {
+/**
+ * 密钥详情数据接口
+ * 扩展了基础的ApiKey类型，添加了Portal特有的字段
+ */
+interface KeyDetailData {
   id: string
   name: string
   crsKey: string
-  status: 'ACTIVE' | 'INACTIVE' | 'PAUSED' | 'EXPIRED'
+  status: ApiKeyStatus
   description: string | null
   tags: string[]
   notes: string | null
@@ -30,6 +35,22 @@ interface KeyData {
   createdAt: string
   lastUsedAt: string | null
   updatedAt: string
+}
+
+/**
+ * 获取密钥状态对应的样式类名
+ */
+function getStatusBadgeClass(status: ApiKeyStatus): string {
+  const baseClass = 'hover:bg-opacity-90'
+  const statusClasses: Record<ApiKeyStatus, string> = {
+    ACTIVE: 'bg-green-100 text-green-800 hover:bg-green-100',
+    INACTIVE: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+    PAUSED: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
+    EXPIRED: 'bg-red-100 text-red-800 hover:bg-red-100',
+    DELETED: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+    RATE_LIMITED: 'bg-orange-100 text-orange-800 hover:bg-orange-100',
+  }
+  return statusClasses[status] || 'bg-gray-100 text-gray-800 hover:bg-gray-100'
 }
 
 export default function KeyDetailPage({ params }: KeyDetailPageProps) {
@@ -43,7 +64,7 @@ export default function KeyDetailPage({ params }: KeyDetailPageProps) {
     isLoading,
     error,
     refetch,
-  } = useQuery<KeyData>({
+  } = useQuery<KeyDetailData>({
     queryKey: ['key-details', params.id],
     queryFn: async () => {
       const response = await fetch(`/api/keys/${params.id}`)
@@ -56,22 +77,6 @@ export default function KeyDetailPage({ params }: KeyDetailPageProps) {
     staleTime: 30 * 1000, // 30秒
     gcTime: 5 * 60 * 1000, // 5分钟
   })
-
-  // 获取状态样式
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return 'bg-green-100 text-green-800 hover:bg-green-100'
-      case 'INACTIVE':
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100'
-      case 'PAUSED':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-      case 'EXPIRED':
-        return 'bg-red-100 text-red-800 hover:bg-red-100'
-      default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100'
-    }
-  }
 
   // 处理删除
   const handleDelete = async () => {
@@ -228,7 +233,7 @@ export default function KeyDetailPage({ params }: KeyDetailPageProps) {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-sm text-muted-foreground">状态</p>
-              <Badge className={`mt-1 ${getStatusVariant(keyData.status)}`}>
+              <Badge className={`mt-1 ${getStatusBadgeClass(keyData.status)}`}>
                 {keyData.status}
               </Badge>
             </div>
