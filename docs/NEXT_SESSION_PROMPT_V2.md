@@ -12,6 +12,67 @@
 
 ## ✅ 最新完成（2025-10-10）
 
+### P2.9 Task 2 - CRS降级状态提示 ✅
+
+**TDD流程完成**:
+- 🔴 RED: 10个CRS状态提示测试（条件渲染、样式、交互、loading状态）
+- 🟢 GREEN: 实现CRS状态提示组件（10/10测试通过）
+
+**交付物**:
+- ✅ 测试: `tests/unit/components/stats/CrsStatusAlert.test.tsx` (+91行, 10/10 passed)
+- ✅ 组件: `components/stats/CrsStatusAlert.tsx` (+55行)
+- ✅ 集成: `app/dashboard/stats/page.tsx` - 添加CRS状态提示显示
+- ✅ 文档: `docs/P2.9_TASK2_COMPLETION.md` (+348行)
+
+**核心功能**:
+- ✅ **CRS状态可视化** - 用户清楚知道CRS是否可用
+- ✅ 条件渲染（无警告时不显示）
+- ✅ 警告样式（黄色警告提示）
+- ✅ 重试功能（按钮+loading状态）
+- ✅ 友好提示（明确说明降级状态）
+
+**Git提交**:
+```
+7aadcb3 test(stats): add CRS status alert component tests (🔴 RED)
+ba89261 feat(stats): implement CRS status alert component (🟢 GREEN)
+cc594d3 feat(stats): integrate CRS status alert into Stats page (🟢 GREEN)
+```
+
+---
+
+### P2.9 Task 1 - CRS趋势API集成 ✅
+
+**TDD流程完成**:
+- 🔴 RED: 12个趋势数据测试（时间序列、日期范围、缓存、错误处理）
+- 🟢 GREEN: 移除模拟数据，集成真实CRS趋势API（12/12测试通过）
+- 🔵 REFACTOR: 代码已良好组织，无需重构
+
+**交付物**:
+- ✅ 测试: `tests/unit/app/api/stats/usage-trend.test.ts` (+363行, 12/12 passed)
+- ✅ API实现: `app/api/stats/usage/route.ts` - 修复CRS数据接口，添加趋势数据
+- ✅ UI更新: `app/dashboard/stats/page.tsx` - 移除`generateMockTimeSeriesData`，使用真实数据
+- ✅ Hook更新: `hooks/use-stats.ts` - 添加`trend`字段类型定义
+- ✅ 文档: `docs/P2.9_TASK1_COMPLETION.md` (+265行)
+
+**核心改进**:
+- ✅ **移除所有模拟数据** - 趋势图现在显示真实CRS使用数据
+- ✅ 支持自定义日期范围（startDate/endDate参数）
+- ✅ 支持默认日期范围（最近7天）
+- ✅ 趋势数据缓存5分钟（减少CRS负载）
+- ✅ CRS不可用时优雅降级（返回空数组+警告）
+- ✅ 修复CRS接口映射（requests/tokens字段）
+
+**Git提交**:
+```
+cc594d3 feat(stats): integrate CRS status alert into Stats page (🟢 GREEN)
+ba89261 feat(stats): implement CRS status alert component (🟢 GREEN)
+7aadcb3 test(stats): add CRS status alert component tests (🔴 RED)
+3366302 docs(p2.9): Task 1 completion summary - CRS trend API integration ✅
+26b3cac feat(stats): remove mock data and use real CRS trend data (🟢 GREEN)
+```
+
+---
+
 ### P2.8 - 性能优化（Redis缓存 + 数据库索引）✅
 
 **TDD流程完成**:
@@ -195,268 +256,189 @@ f31dd22 test(stats): add multi-key comparison API tests (🔴 RED)
 第3天 - 导出和优化:
 - [x] P2.7: CSV/JSON导出 ✅ 已完成
 - [x] P2.8: 性能优化 ✅ 已完成
-- [ ] P2.9: UI/UX完善 ← 下一任务
+- [x] P2.9: UI/UX完善 - 进行中 🚀
+  - [x] Task 1: CRS趋势API集成 ✅ 已完成
+  - [x] Task 2: CRS降级状态提示 ✅ 已完成
+  - [ ] Task 3: 手动刷新功能 ← 下一任务
+  - [ ] Task 4: 错误提示优化
+  - [ ] Task 5: 加载进度指示器
 ```
 
 ---
 
-## 📋 下一任务：P2.9 - UI/UX完善 ⭐ 当前任务
+## 📋 下一任务：P2.9 Task 3 - 手动刷新功能 ⭐ 当前任务
 
 ### 任务目标
 
-完善Stats页面用户体验，**移除所有模拟数据**，集成真实CRS趋势API，添加CRS降级提示和手动刷新功能。
+为Stats页面添加手动刷新按钮，允许用户主动刷新统计数据，提升用户体验。
 
-### 核心问题
+### 已完成任务
 
-**🔴 严重问题（P0 - 必须修复）**:
+**✅ Task 1: CRS趋势API集成** - 已完成
+- ✅ 移除模拟数据
+- ✅ 集成真实CRS趋势API
+- ✅ 支持日期范围筛选
 
-1. **使用模拟数据** (`app/dashboard/stats/page.tsx:79-81`)
-   ```typescript
-   // TODO: 从后端获取已聚合的时间序列数据
-   // 当前使用模拟数据 ← ❌ 必须移除
-   return generateMockTimeSeriesData(7)
-   ```
-   - ❌ 趋势图显示虚假数据，与实际API使用情况无关
-   - ❌ 违反项目核心原则（数据必须来自CRS）
+**✅ Task 2: CRS降级状态提示** - 已完成
+- ✅ CRS状态可视化
+- ✅ 警告提示组件
+- ✅ 重试功能
 
-2. **CRS降级状态无UI提示**
-   - API返回`crsWarning`字段，但UI完全不显示
-   - 用户不知道CRS是否可用
+### 剩余任务
 
-**🟡 中等问题（P1 - 应该修复）**:
-3. 缺少手动刷新功能
-4. 错误提示使用alert（应该用Toast）
-5. 缺少加载进度指示器
+| 任务 | 优先级 | 工作量 | TDD阶段 | 状态 |
+|------|--------|--------|---------|------|
+| Task 1: 集成CRS趋势API | 🔴 P0 | 4-6h | 🔴 🟢 🔵 | ✅ 完成 |
+| Task 2: CRS降级状态提示 | 🔴 P0 | 1-2h | 🔴 🟢 | ✅ 完成 |
+| Task 3: 手动刷新功能 | 🟡 P1 | 1h | 🟢 | ← 当前 |
+| Task 4: 错误提示优化 | 🟡 P1 | 1-2h | 🟢 | 待进行 |
+| Task 5: 加载进度指示器 | 🟡 P1 | 1h | 🟢 | 待进行 |
 
-### 5个核心任务
-
-| 任务 | 优先级 | 工作量 | TDD阶段 |
-|------|--------|--------|---------|
-| Task 1: 集成CRS趋势API | 🔴 P0 | 4-6h | 🔴 🟢 🔵 |
-| Task 2: CRS降级状态提示 | 🔴 P0 | 1-2h | 🔴 🟢 |
-| Task 3: 手动刷新功能 | 🟡 P1 | 1h | 🟢 |
-| Task 4: 错误提示优化 | 🟡 P1 | 1-2h | 🟢 |
-| Task 5: 加载进度指示器 | 🟡 P1 | 1h | 🟢 |
-
-**预计总工作量**: 8-11小时 (1.5-2天)
+**已完成**: 5-8小时 (Task 1+2)
+**剩余工作量**: 3-4小时 (0.5天)
 
 ---
 
-### Task 1: 集成CRS趋势API（核心任务）
+### ✅ Task 1: 集成CRS趋势API（已完成）
+
+**完成时间**: 2025-10-10
+**TDD阶段**: 🔴 RED → 🟢 GREEN → 🔵 REFACTOR (全部完成)
+
+#### 完成成果
+- ✅ 移除`generateMockTimeSeriesData`
+- ✅ 集成真实CRS Usage Trend API
+- ✅ 支持自定义日期范围（startDate/endDate）
+- ✅ 支持默认日期范围（最近7天）
+- ✅ 趋势数据缓存5分钟
+- ✅ CRS不可用时优雅降级
+- ✅ 12/12测试全部通过
+
+**详细报告**: `docs/P2.9_TASK1_COMPLETION.md`
+
+---
+
+### ✅ Task 2: CRS降级状态提示（已完成）
+
+**完成时间**: 2025-10-10
+**TDD阶段**: 🔴 RED → 🟢 GREEN ✅
+
+#### 完成成果
+- ✅ 创建CRS状态提示组件（`CrsStatusAlert.tsx`）
+- ✅ 10/10测试全部通过
+- ✅ 集成到Stats页面
+- ✅ 条件渲染（无警告时不显示）
+- ✅ 警告样式（黄色警告提示）
+- ✅ 重试功能（按钮+loading状态）
+
+**详细报告**: `docs/P2.9_TASK2_COMPLETION.md`
+
+---
+
+### Task 3: 手动刷新功能（当前任务）⭐
 
 #### 目标
-移除`generateMockTimeSeriesData`，集成真实的CRS Usage Trend API。
+为Stats页面添加手动刷新按钮，允许用户主动刷新统计数据（包括趋势图、概览数据、密钥列表）。
 
-#### 🔴 RED: 编写测试
+#### 需求分析
 
-**创建文件**: `tests/unit/app/api/stats/usage-trend.test.ts`
+**当前问题**:
+- ❌ 用户只能通过页面重新加载刷新数据
+- ❌ CRS状态提示的"重试"按钮只在降级时可见
+- ❌ 缺少主动刷新机制
 
-**测试用例** (12个):
-```typescript
-describe('Usage API - Trend Data Integration', () => {
-  it('应该返回时间序列趋势数据', async () => {
-    const mockTrend = [
-      { date: '2024-01-01', tokens: 1000, calls: 10 },
-      { date: '2024-01-02', tokens: 1500, calls: 15 },
-    ]
-    mockCrsClient.getUsageTrend.mockResolvedValue(mockTrend)
-
-    const response = await GET(mockRequest)
-    const data = await response.json()
-
-    expect(data.trend).toEqual([
-      { timestamp: '2024-01-01T00:00:00.000Z', tokens: 1000, requests: 10 },
-      { timestamp: '2024-01-02T00:00:00.000Z', tokens: 1500, requests: 15 },
-    ])
-  })
-
-  it('应该支持自定义日期范围', ...)
-  it('应该支持按密钥筛选趋势', ...)
-  it('应该缓存趋势数据5分钟', ...)
-  it('缓存命中时不应调用CRS API', ...)
-  it('CRS不可用时应返回空数组', ...)
-  // ... 更多测试
-})
-```
+**目标效果**:
+- ✅ 页面标题旁显示刷新按钮
+- ✅ 点击刷新所有数据（趋势+统计）
+- ✅ 显示loading状态（按钮旋转）
+- ✅ 刷新时禁用按钮防止重复点击
 
 #### 🟢 GREEN: 实现功能
 
-**文件1**: `app/api/stats/usage/route.ts` - 扩展API返回趋势数据
+**修改文件**: `app/dashboard/stats/page.tsx`
 
 ```typescript
-interface UsageResponse {
-  summary: { ... }
-  keys: KeyStats[]
-  trend?: TrendDataPoint[]  // ← 新增
-  crsDashboard?: { ... }
-  crsWarning?: string
-}
-
-export async function GET(request: NextRequest) {
-  // ... 现有代码 ...
-
-  // 3. 获取趋势数据（新增）
-  let trendData: TrendDataPoint[] = []
-  try {
-    const trendCacheKey = cacheManager.generateKey('crs', 'trend', `${startDate}-${endDate}`)
-    const cached = await cacheManager.get<any[]>(trendCacheKey)
-
-    if (cached) {
-      trendData = cached.map(transformTrendData)
-    } else {
-      const crsTrend = await crsClient.getUsageTrend({ startDate, endDate, keyIds })
-      trendData = crsTrend.map(transformTrendData)
-      await cacheManager.set(trendCacheKey, crsTrend, cacheManager.getTTL('trend'))
-    }
-  } catch (error) {
-    console.warn('[Usage API] Failed to fetch trend data:', error)
-    warnings.push('趋势数据暂时不可用，请稍后刷新')
-  }
-
-  return NextResponse.json({
-    summary,
-    keys,
-    trend: trendData,  // ← 新增
-    crsDashboard,
-    crsWarning: warnings.length > 0 ? warnings.join('; ') : undefined,
-  })
-}
+// 在页面标题区域添加刷新按钮
+<div className="flex items-center justify-between">
+  <h1 className="text-3xl font-bold">使用统计</h1>
+  <div className="flex gap-2">
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => refetch()}
+      disabled={isLoading}
+    >
+      <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+      {isLoading ? '刷新中...' : '刷新'}
+    </Button>
+    <ExportDialog data={filteredKeys} />
+  </div>
+</div>
 ```
 
-**文件2**: `app/dashboard/stats/page.tsx` - 使用真实数据
-
-```typescript
-// 删除
-- import { generateMockTimeSeriesData } from '@/lib/date-utils'
-
-// 修改
-const timeSeriesData = useMemo<TimeSeriesDataPoint[]>(() => {
--  // TODO: 从后端获取已聚合的时间序列数据
--  // 当前使用模拟数据
--  return generateMockTimeSeriesData(7)
-+  // 使用API返回的真实趋势数据
-+  return data?.trend || []
-}, [data?.trend])
-```
-
-#### 🔵 REFACTOR: 优化架构
-
-**创建文件**: `app/api/stats/usage/trend-utils.ts` - 提取趋势数据处理逻辑
-
-```typescript
-export async function fetchTrendData(options: FetchTrendOptions): Promise<TrendDataPoint[]> {
-  const cacheKey = cacheManager.generateKey('crs', 'trend', ...)
-
-  try {
-    const cached = await cacheManager.get<any[]>(cacheKey)
-    if (cached) return cached.map(transformTrendData)
-
-    const crsTrend = await crsClient.getUsageTrend(options)
-    const transformed = crsTrend.map(transformTrendData)
-    await cacheManager.set(cacheKey, crsTrend, cacheManager.getTTL('trend'))
-
-    return transformed
-  } catch (error) {
-    console.warn('[Trend Utils] Failed to fetch trend data:', error)
-    return []
-  }
-}
-```
+**工作量**: 约30分钟（无需TDD，UI改进）
 
 ---
 
-### Task 2: CRS降级状态UI提示
+### Task 4: 错误提示优化
 
-#### 🔴 RED: 编写测试
-
-**创建文件**: `tests/unit/components/stats/CrsStatusAlert.test.tsx`
-
-```typescript
-describe('CrsStatusAlert', () => {
-  it('无警告时不显示', ...)
-  it('有警告时显示Alert', ...)
-  it('显示重试按钮', ...)
-  it('点击重试按钮触发回调', ...)
-  it('使用warning样式', ...)
-})
-```
-
-#### 🟢 GREEN: 实现功能
-
-**创建文件**: `components/stats/CrsStatusAlert.tsx`
-
-```typescript
-export function CrsStatusAlert({ warning, onRetry, retrying }: CrsStatusAlertProps) {
-  if (!warning) return null
-
-  return (
-    <Alert variant="warning" className="mb-6 border-warning bg-warning/10">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>CRS服务暂时不可用</AlertTitle>
-      <AlertDescription>
-        <p>{warning}</p>
-        <p className="text-sm text-muted-foreground mb-3">
-          当前显示的是本地统计数据，部分功能暂时受限。
-        </p>
-        <Button size="sm" variant="outline" onClick={onRetry} disabled={retrying}>
-          <RefreshCw className={retrying ? 'animate-spin' : ''} />
-          {retrying ? '连接中...' : '重试连接'}
-        </Button>
-      </AlertDescription>
-    </Alert>
-  )
-}
-```
-
-**集成到**: `app/dashboard/stats/page.tsx`
-
-```typescript
-<CrsStatusAlert
-  warning={data?.crsWarning}
-  onRetry={handleRetryCrs}
-  retrying={isLoading}
-/>
-```
+**目标**: 替换alert为Toast，统一错误提示样式（1-2h）
 
 ---
 
-### Task 3-5: 快速优化
+### Task 5: 加载进度指示器
 
-**Task 3**: 手动刷新按钮（1h）
-**Task 4**: Toast替换alert（1-2h）
-**Task 5**: 加载进度指示器（1h）
+**目标**: 添加骨架屏或进度条，提升加载体验（1h）
 
 ---
 
-### 实施步骤
+### 实施步骤（Task 3）
 
 ```bash
 # 1. 确认环境
 cd /Users/bypasser/claude-project/0930/claude-key-portal
 git status
+git log --oneline -5  # 确认Task 2已提交
 
-# 2. Task 1.1 - 🔴 RED: 创建趋势测试
-mkdir -p tests/unit/app/api/stats
-touch tests/unit/app/api/stats/usage-trend.test.ts
-# 编写12个测试用例
-npm test -- usage-trend.test.ts
-# 预期: 全部失败（RED状态）
-
-# 3. Task 1.2-1.4 - 🟢 GREEN: 实现趋势功能
-# 修改 app/api/stats/usage/route.ts
-# 修改 hooks/use-stats.ts
+# 2. Task 3 - 🟢 GREEN: 添加手动刷新按钮
 # 修改 app/dashboard/stats/page.tsx
-npm test -- usage-trend.test.ts
-# 预期: 全部通过（GREEN状态）
-git commit -m "feat(stats): integrate CRS trend data and remove mock data (🟢 GREEN)"
+# 在页面标题区域添加刷新按钮
+# 位置: <h1>使用统计</h1> 旁边
+# 功能: onClick={() => refetch()}
 
-# 4. Task 1.5-1.6 - 🔵 REFACTOR: 重构工具
-# 创建 app/api/stats/usage/trend-utils.ts
-npm test
-git commit -m "refactor(stats): extract trend data utilities (🔵 REFACTOR)"
+# 代码修改:
+# <div className="flex items-center justify-between">
+#   <h1 className="text-3xl font-bold">使用统计</h1>
+#   <div className="flex gap-2">
+#     <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading}>
+#       <RefreshCw className={isLoading ? 'animate-spin' : ''} />
+#       {isLoading ? '刷新中...' : '刷新'}
+#     </Button>
+#     <ExportDialog data={filteredKeys} />
+#   </div>
+# </div>
 
-# 5. Task 2 - CRS降级提示
-# ... 继续后续任务
+# 3. 测试验证
+npm run dev  # 启动开发服务器
+# 访问 http://localhost:3000/dashboard/stats
+# 验证：
+#   1. 刷新按钮显示在标题旁边
+#   2. 点击刷新按钮，数据重新加载
+#   3. 刷新中按钮显示"刷新中..."并旋转图标
+#   4. 刷新中按钮禁用，防止重复点击
+
+# 4. 提交代码
+git add app/dashboard/stats/page.tsx
+git commit -m "feat(stats): add manual refresh button (🟢 GREEN)"
+
+# 5. 更新文档
+# 更新 docs/NEXT_SESSION_PROMPT_V2.md
+# 标记 Task 3 为已完成
+# 标记 Task 4 为下一任务
+git add docs/NEXT_SESSION_PROMPT_V2.md
+git commit -m "docs(p2.9): Task 3 completion ✅"
+
+# 6. 继续Task 4-5（如有时间）
+# ... 后续任务
 ```
 
 ---
@@ -613,17 +595,21 @@ npm test -- keys.test.ts --watch &
 cd /Users/bypasser/claude-project/0930/claude-key-portal
 git branch  # 应在 feature/p2-usage-analytics
 
-# 2. 检查状态
+# 2. 检查状态和Task 1完成情况
 git status
 git log --oneline -5
+# 应看到:
+# cc594d3 feat(stats): integrate CRS status alert into Stats page (🟢 GREEN)
+# ba89261 feat(stats): implement CRS status alert component (🟢 GREEN)
+# 7aadcb3 test(stats): add CRS status alert component tests (🔴 RED)
 
-# 3. 开始P2.1任务
-# 创建测试文件（如果不存在）
-mkdir -p tests/unit/app/api/stats
-touch tests/unit/app/api/stats/usage.test.ts
+# 3. 开始Task 2 - CRS降级状态提示
+# 创建组件测试文件
+mkdir -p tests/unit/components/stats
+touch tests/unit/components/stats/CrsStatusAlert.test.tsx
 
 # 4. 开始TDD流程
-# 🔴 RED: 编写测试...
+# 🔴 RED: 编写组件测试...
 ```
 
 ---
@@ -694,12 +680,12 @@ git push origin feature/p2-usage-analytics  # 推送
 
 ---
 
-**准备好了吗？开始P2.1任务吧！** 🚀
+**准备好了吗？开始P2.9 Task 2吧！** 🚀
 
 ---
 
 _"验证代码 → TDD开发 → 更新文档 → 持续迭代"_
 
-**版本**: v2.0
+**版本**: v2.1
 **创建时间**: 2025-10-09
-**最后更新**: 2025-10-09
+**最后更新**: 2025-10-10 (Task 1完成，准备Task 2)
