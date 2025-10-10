@@ -124,6 +124,11 @@ export async function getAuthenticatedUser(
       try {
         const decoded = jwt.verify(cookieToken, process.env.JWT_SECRET!) as any
 
+        // 验证token类型（与Header认证保持一致）
+        if (decoded.type && decoded.type !== 'access') {
+          return null
+        }
+
         return {
           id: decoded.userId,
           email: decoded.email,
