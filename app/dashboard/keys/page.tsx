@@ -123,6 +123,32 @@ export default function KeysPage() {
     }
   }, [keys])
 
+  // 切换密钥状态（启用/禁用）
+  const handleToggleStatus = useCallback(async (key: ApiKey) => {
+    const isActive = key.status === 'ACTIVE'
+    const action = isActive ? '禁用' : '启用'
+
+    try {
+      const response = await fetch(`/api/keys/${key.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !isActive }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        toast(errorData.error || `${action}失败`, 'error')
+        return
+      }
+
+      // 刷新列表
+      await refetch()
+      toast(`密钥已${action}`, 'success', 2000)
+    } catch (error) {
+      toast(`${action}失败，请稍后重试`, 'error')
+    }
+  }, [refetch])
+
   // 表单提交成功
   const handleFormSuccess = useCallback(async (result: any) => {
     // 刷新列表
@@ -165,6 +191,7 @@ export default function KeysPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onCopy={handleCopy}
+        onToggleStatus={handleToggleStatus}
         onRetry={refetch}
         loading={isPending}
         error={error as Error | null}
