@@ -9,10 +9,12 @@ import './tests/setup/fetch-mock'
 import './tests/setup/clipboard-mock'
 import './tests/setup/redis-mock'
 
-// Polyfill for Next.js Server APIs
+// Polyfill for Next.js Server APIs (only TextEncoder/TextDecoder needed)
 import { TextEncoder, TextDecoder } from 'util'
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder
+
+// Node 18+ has built-in fetch/Request/Response, no need for polyfill
 
 // Mock environment variables for testing
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db'
