@@ -36,15 +36,24 @@ export interface TokenPair {
 export class JwtService {
   private readonly defaultAccessExpiry = '24h'
   private readonly defaultRefreshExpiry = '7d'
+  private readonly secret: string
 
   /**
-   * 获取JWT密钥（延迟初始化，避免构建时错误）
+   * 构造函数 - 在初始化时验证JWT_SECRET配置
+   * @throws {Error} 如果JWT_SECRET未配置
    */
-  private getSecret(): string {
+  constructor() {
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET未配置')
     }
-    return process.env.JWT_SECRET
+    this.secret = process.env.JWT_SECRET
+  }
+
+  /**
+   * 获取JWT密钥
+   */
+  private getSecret(): string {
+    return this.secret
   }
 
   /**
