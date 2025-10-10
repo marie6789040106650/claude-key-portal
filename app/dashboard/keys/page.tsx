@@ -4,6 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeysTable } from '@/components/keys/KeysTable'
 import { KeyForm } from '@/components/keys/KeyForm'
+import { RenameDialog } from '@/components/keys/RenameDialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ToastContainer, toast } from '@/components/ui/toast-simple'
@@ -14,7 +15,9 @@ export default function KeysPage() {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [isKeyDisplayOpen, setIsKeyDisplayOpen] = useState(false)
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null)
+  const [renamingKey, setRenamingKey] = useState<ApiKey | null>(null)
   const [deletingKey, setDeletingKey] = useState<ApiKey | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [newKeyData, setNewKeyData] = useState<{ name: string; key: string } | null>(null)
@@ -62,10 +65,10 @@ export default function KeysPage() {
     setIsFormDialogOpen(true)
   }, [])
 
-  // 处理编辑密钥
+  // 处理编辑密钥（重命名）
   const handleEdit = useCallback((key: ApiKey) => {
-    setEditingKey(key)
-    setIsFormDialogOpen(true)
+    setRenamingKey(key)
+    setIsRenameDialogOpen(true)
   }, [])
 
   // 处理删除密钥
@@ -333,6 +336,20 @@ export default function KeysPage() {
           </div>
         </div>
       )}
+
+      {/* 重命名对话框 */}
+      <RenameDialog
+        apiKey={renamingKey}
+        open={isRenameDialogOpen}
+        onClose={() => {
+          setIsRenameDialogOpen(false)
+          setRenamingKey(null)
+        }}
+        onSuccess={() => {
+          refetch()
+          toast('密钥重命名成功', 'success')
+        }}
+      />
     </div>
   )
 }
