@@ -9,6 +9,7 @@ import { StatsTable } from '@/components/stats/StatsTable'
 import { DateRangePicker } from '@/components/stats/DateRangePicker'
 import { KeyFilter } from '@/components/stats/KeyFilter'
 import { ExportDialog } from '@/components/stats/ExportDialog'
+import { CrsStatusAlert } from '@/components/stats/CrsStatusAlert'
 import { useUsageStats } from '@/hooks/use-stats'
 import { formatNumber } from '@/lib/ui-utils'
 import type { DateRangePreset, KeyStats, TimeSeriesDataPoint } from '@/types/stats'
@@ -160,6 +161,13 @@ export default function UsageStatsPage() {
         <h1 className="text-3xl font-bold">使用统计</h1>
         <ExportDialog data={filteredKeys} />
       </div>
+
+      {/* CRS服务状态提示 */}
+      <CrsStatusAlert
+        warning={data?.crsWarning}
+        onRetry={() => refetch()}
+        retrying={isLoading}
+      />
 
       {/* 概览卡片 */}
       <div className="grid gap-6 md:grid-cols-4">
