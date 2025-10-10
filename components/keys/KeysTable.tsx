@@ -13,15 +13,17 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowUp, ArrowDown, Edit, Trash2, Copy, Plus } from 'lucide-react'
+import { ArrowUp, ArrowDown, Edit, Trash2, Copy, Plus, Power, FileText } from 'lucide-react'
 import { getStatusBadgeVariant } from '@/lib/utils/keys'
 import type { ApiKey } from '@/types/keys'
 
 interface KeysTableProps {
   keys: ApiKey[]
   onEdit: (key: ApiKey) => void
+  onEditDescription?: (key: ApiKey) => void
   onDelete: (key: ApiKey) => void
   onCopy: (keyId: string) => void
+  onToggleStatus?: (key: ApiKey) => void
   onCreateKey?: () => void
   onRetry?: () => void
   filterable?: boolean
@@ -38,8 +40,10 @@ type SortOrder = 'asc' | 'desc'
 function KeysTableComponent({
   keys,
   onEdit,
+  onEditDescription,
   onDelete,
   onCopy,
+  onToggleStatus,
   onCreateKey,
   onRetry,
   filterable = false,
@@ -305,14 +309,43 @@ function KeysTableComponent({
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
+                    {onToggleStatus && (
+                      <Button
+                        data-testid={`toggle-status-button-${key.id}`}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onToggleStatus(key)}
+                        title={key.status === 'ACTIVE' ? '禁用密钥' : '启用密钥'}
+                      >
+                        <Power
+                          className={`h-4 w-4 ${
+                            key.status === 'ACTIVE'
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-gray-400 dark:text-gray-600'
+                          }`}
+                        />
+                      </Button>
+                    )}
                     <Button
                       data-testid={`edit-button-${key.id}`}
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(key)}
+                      title="重命名"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
+                    {onEditDescription && (
+                      <Button
+                        data-testid={`edit-description-button-${key.id}`}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditDescription(key)}
+                        title="编辑描述"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       data-testid={`delete-button-${key.id}`}
                       variant="ghost"
