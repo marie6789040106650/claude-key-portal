@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
@@ -11,6 +11,7 @@ import { KeyFilter } from '@/components/stats/KeyFilter'
 import { ExportDialog } from '@/components/stats/ExportDialog'
 import { CrsStatusAlert } from '@/components/stats/CrsStatusAlert'
 import { useUsageStats } from '@/hooks/use-stats'
+import { useToast } from '@/components/ui/use-toast'
 import { formatNumber } from '@/lib/ui-utils'
 import type { DateRangePreset, KeyStats, TimeSeriesDataPoint } from '@/types/stats'
 
@@ -25,12 +26,29 @@ export default function UsageStatsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
 
+  // Toast
+  const { toast } = useToast()
+
+  // 跟踪CRS警告状态
+  const prevCrsWarningRef = useRef<string | undefined>()
+
   // 数据获取 - 使用自定义 hook
   const { data, isLoading, error, refetch } = useUsageStats(
     dateRange,
     customStartDate,
     customEndDate
   )
+
+  // 监听错误状态，显示Toast
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: '加载失败',
+        description: '无法获取统计数据，请稍后重试',
+        variant: 'destructive',
+      })
+    }
+  }, [error, toast])
 
   // 数据处理和筛选
   const filteredKeys = useMemo(() => {
@@ -108,6 +126,52 @@ export default function UsageStatsPage() {
     window.location.href = `/dashboard/keys/${keyId}/stats`
   }
 
+  // 手动刷新处理
+  const handleRefresh = async () => {
+    try {
+      await refetch()
+      toast({
+        title: '刷新成功',
+        description: '统计数据已更新',
+      })
+    } catch (err) {
+      toast({
+        title: '刷新失败',
+        description: '无法刷新统计数据，请稍后重试',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  // CRS重试处理
+  const handleCrsRetry = async () => {
+    const prevWarning = data?.crsWarning
+    try {
+      const result = await refetch()
+
+      // 检查CRS状态是否恢复
+      const newWarning = result.data?.crsWarning
+      if (prevWarning && !newWarning) {
+        toast({
+          title: 'CRS连接成功',
+          description: 'CRS服务已恢复，显示完整数据',
+        })
+      } else if (newWarning) {
+        toast({
+          title: 'CRS重试失败',
+          description: 'CRS服务仍然不可用，已显示本地数据',
+          variant: 'destructive',
+        })
+      }
+    } catch (err) {
+      toast({
+        title: 'CRS重试失败',
+        description: 'CRS服务仍然不可用，已显示本地数据',
+        variant: 'destructive',
+      })
+    }
+  }
+
   // 错误状态
   if (error) {
     return (
@@ -163,7 +227,7 @@ export default function UsageStatsPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetch()}
+            onClick={handleRefresh}
             disabled={isLoading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
@@ -176,7 +240,7 @@ export default function UsageStatsPage() {
       {/* CRS服务状态提示 */}
       <CrsStatusAlert
         warning={data?.crsWarning}
-        onRetry={() => refetch()}
+        onRetry={handleCrsRetry}
         retrying={isLoading}
       />
 

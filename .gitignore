@@ -80,3 +80,5 @@ Thumbs.db
 
 # Debug
 debug.log
+# Claude Auto-Dev Monitor
+.automation/
