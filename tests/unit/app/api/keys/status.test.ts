@@ -12,13 +12,29 @@
 
 import { NextRequest } from 'next/server'
 import { PATCH } from '@/app/api/keys/[id]/status/route'
-import { crsClient } from '@/lib/infrastructure/external/crs-client'
+import {
+  crsClient,
+  CrsUnavailableError,
+  CrsApiError
+} from '@/lib/infrastructure/external/crs-client'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 
 // Mock CrsClient
 jest.mock('@/lib/infrastructure/external/crs-client', () => ({
   crsClient: {
     updateKey: jest.fn(),
+  },
+  CrsUnavailableError: class CrsUnavailableError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'CrsUnavailableError'
+    }
+  },
+  CrsApiError: class CrsApiError extends Error {
+    constructor(public statusCode: number, message: string) {
+      super(message)
+      this.name = 'CrsApiError'
+    }
   },
 }))
 
@@ -233,7 +249,7 @@ describe('PATCH /api/keys/[id]/status', () => {
     it('CRS不可用应该返回 503', async () => {
       ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(mockKey)
       ;(crsClient.updateKey as jest.Mock).mockRejectedValue(
-        new Error('CRS服务暂时不可用')
+        new CrsUnavailableError('CRS服务暂时不可用')
       )
 
       const request = new NextRequest('http://localhost/api/keys/key-1/status', {
@@ -250,10 +266,9 @@ describe('PATCH /api/keys/[id]/status', () => {
 
     it('CRS返回错误应该返回 502', async () => {
       ;(prisma.apiKey.findUnique as jest.Mock).mockResolvedValue(mockKey)
-      ;(crsClient.updateKey as jest.Mock).mockRejectedValue({
-        statusCode: 500,
-        message: 'Internal server error',
-      })
+      ;(crsClient.updateKey as jest.Mock).mockRejectedValue(
+        new CrsApiError(500, 'Internal server error')
+      )
 
       const request = new NextRequest('http://localhost/api/keys/key-1/status', {
         method: 'PATCH',
