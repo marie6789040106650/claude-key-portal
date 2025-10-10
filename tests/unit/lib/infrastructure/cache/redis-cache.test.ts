@@ -26,7 +26,9 @@ describe('RedisClient', () => {
     })
     // 等待Redis连接就绪
     // ioredis-mock会同步完成连接，但我们仍需等待事件循环
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise(resolve => setTimeout(resolve, 50))
+    // 确认连接成功
+    await redisClient.isConnected()
   })
 
   afterEach(async () => {
@@ -219,7 +221,9 @@ describe('CacheManager', () => {
       port: parseInt(process.env.REDIS_PORT || '6379'),
     })
     // 等待Redis连接就绪
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise(resolve => setTimeout(resolve, 50))
+    // 确认连接成功
+    await cacheManager.isConnected()
   })
 
   afterEach(async () => {
