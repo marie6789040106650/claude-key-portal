@@ -1,4 +1,6 @@
 /**
+ * @jest-environment jsdom
+ *
  * 密钥详情页面测试
  * 测试 /app/dashboard/keys/[id]/page.tsx
  *
@@ -95,8 +97,9 @@ describe('KeyDetailPage', () => {
       // 描述
       expect(screen.getByText('Test key description')).toBeInTheDocument()
 
-      // 创建时间
-      expect(screen.getByText(/2025/)).toBeInTheDocument()
+      // 创建时间（使用getAllByText因为可能有多个）
+      const dateElements = screen.getAllByText(/2025/)
+      expect(dateElements.length).toBeGreaterThan(0)
     })
 
     it('应该显示标签信息', async () => {
@@ -123,11 +126,16 @@ describe('KeyDetailPage', () => {
       renderComponent()
 
       await waitFor(() => {
-        expect(screen.getByText('5,000')).toBeInTheDocument() // totalCalls
+        // 验证所有统计数据都存在（使用getAllByText因为某些数字可能出现多次）
+        const callsElements = screen.getAllByText('5,000')
+        expect(callsElements.length).toBeGreaterThan(0)
       })
 
-      expect(screen.getByText('250,000')).toBeInTheDocument() // totalTokens
-      expect(screen.getByText('1,500')).toBeInTheDocument() // monthlyUsage
+      const tokensElements = screen.getAllByText('250,000')
+      expect(tokensElements.length).toBeGreaterThan(0)
+
+      const usageElements = screen.getAllByText('1,500')
+      expect(usageElements.length).toBeGreaterThan(0)
     })
 
     it('应该显示备注信息', async () => {
