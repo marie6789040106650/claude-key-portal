@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeysTable } from '@/components/keys/KeysTable'
 import { KeyForm } from '@/components/keys/KeyForm'
 import { RenameDialog } from '@/components/keys/RenameDialog'
+import { DescriptionDialog } from '@/components/keys/DescriptionDialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ToastContainer, toast } from '@/components/ui/toast-simple'
@@ -16,8 +17,10 @@ export default function KeysPage() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [isKeyDisplayOpen, setIsKeyDisplayOpen] = useState(false)
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
+  const [isDescriptionDialogOpen, setIsDescriptionDialogOpen] = useState(false)
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null)
   const [renamingKey, setRenamingKey] = useState<ApiKey | null>(null)
+  const [editingDescriptionKey, setEditingDescriptionKey] = useState<ApiKey | null>(null)
   const [deletingKey, setDeletingKey] = useState<ApiKey | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [newKeyData, setNewKeyData] = useState<{ name: string; key: string } | null>(null)
@@ -69,6 +72,12 @@ export default function KeysPage() {
   const handleEdit = useCallback((key: ApiKey) => {
     setRenamingKey(key)
     setIsRenameDialogOpen(true)
+  }, [])
+
+  // 处理编辑描述
+  const handleEditDescription = useCallback((key: ApiKey) => {
+    setEditingDescriptionKey(key)
+    setIsDescriptionDialogOpen(true)
   }, [])
 
   // 处理删除密钥
@@ -192,6 +201,7 @@ export default function KeysPage() {
       <KeysTable
         keys={keys}
         onEdit={handleEdit}
+        onEditDescription={handleEditDescription}
         onDelete={handleDelete}
         onCopy={handleCopy}
         onToggleStatus={handleToggleStatus}
@@ -348,6 +358,20 @@ export default function KeysPage() {
         onSuccess={() => {
           refetch()
           toast('密钥重命名成功', 'success')
+        }}
+      />
+
+      {/* 描述编辑对话框 */}
+      <DescriptionDialog
+        apiKey={editingDescriptionKey}
+        open={isDescriptionDialogOpen}
+        onClose={() => {
+          setIsDescriptionDialogOpen(false)
+          setEditingDescriptionKey(null)
+        }}
+        onSuccess={() => {
+          refetch()
+          toast('描述更新成功', 'success')
         }}
       />
     </div>
