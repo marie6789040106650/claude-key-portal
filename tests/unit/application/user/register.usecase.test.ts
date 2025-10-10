@@ -20,6 +20,8 @@ describe('RegisterUseCase', () => {
     mockUserRepository = {
       findByEmail: jest.fn(),
       findByPhone: jest.fn(),
+      existsByEmail: jest.fn(),
+      existsByPhone: jest.fn(),
       create: jest.fn(),
     } as any
 
@@ -44,9 +46,9 @@ describe('RegisterUseCase', () => {
         nickname: 'TestUser',
       }
 
-      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
+      ;(mockUserRepository.existsByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
-        value: null, // 用户不存在
+        value: false, // 用户不存在
       })
 
       ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
@@ -72,7 +74,7 @@ describe('RegisterUseCase', () => {
       // Assert
       expect(result.isSuccess).toBe(true)
       expect(result.value).toEqual(mockUser)
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('test@example.com')
+      expect(mockUserRepository.existsByEmail).toHaveBeenCalledWith('test@example.com')
       expect(mockPasswordService.hash).toHaveBeenCalledWith('Test@1234')
       expect(mockUserRepository.create).toHaveBeenCalledWith({
         email: 'test@example.com',
@@ -88,9 +90,9 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
+      ;(mockUserRepository.existsByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
-        value: null,
+        value: false,
       })
 
       ;(mockPasswordService.hash as jest.Mock).mockResolvedValue({
@@ -114,7 +116,7 @@ describe('RegisterUseCase', () => {
 
       // Assert
       expect(result.isSuccess).toBe(true)
-      expect(mockUserRepository.findByPhone).toHaveBeenCalledWith('13800138000')
+      expect(mockUserRepository.existsByPhone).toHaveBeenCalledWith('13800138000')
     })
 
     it('should fail when email already exists', async () => {
@@ -124,9 +126,9 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      ;(mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
+      ;(mockUserRepository.existsByEmail as jest.Mock).mockResolvedValue({
         isSuccess: true,
-        value: { id: 'existing_user', email: 'existing@example.com' },
+        value: true,
       })
 
       // Act
@@ -146,9 +148,9 @@ describe('RegisterUseCase', () => {
         password: 'Test@1234',
       }
 
-      ;(mockUserRepository.findByPhone as jest.Mock).mockResolvedValue({
+      ;(mockUserRepository.existsByPhone as jest.Mock).mockResolvedValue({
         isSuccess: true,
-        value: { id: 'existing_user', phone: '13800138000' },
+        value: true,
       })
 
       // Act

@@ -8,8 +8,8 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  // Use node environment for API route tests to avoid Web API polyfill issues
-  testEnvironment: 'node',
+  // Default to jsdom for React components, but allow override via @jest-environment docblock
+  testEnvironment: 'jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },

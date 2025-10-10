@@ -19,11 +19,14 @@ import { CacheManager } from '@/lib/infrastructure/cache/cache-manager'
 describe('RedisClient', () => {
   let redisClient: RedisClient
 
-  beforeEach(() => {
+  beforeEach(async () => {
     redisClient = new RedisClient({
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
     })
+    // 等待Redis连接就绪
+    // ioredis-mock会同步完成连接，但我们仍需等待事件循环
+    await new Promise(resolve => setTimeout(resolve, 10))
   })
 
   afterEach(async () => {
@@ -210,11 +213,13 @@ describe('RedisClient', () => {
 describe('CacheManager', () => {
   let cacheManager: CacheManager
 
-  beforeEach(() => {
+  beforeEach(async () => {
     cacheManager = new CacheManager({
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
     })
+    // 等待Redis连接就绪
+    await new Promise(resolve => setTimeout(resolve, 10))
   })
 
   afterEach(async () => {

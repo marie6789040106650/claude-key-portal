@@ -25,6 +25,7 @@ describe('ListKeysUseCase', () => {
     // Mock CrsClient
     mockCrsClient = {
       listKeys: jest.fn(),
+      getApiKeys: jest.fn(),
     }
 
     // 创建UseCase实例
@@ -197,14 +198,14 @@ describe('ListKeysUseCase', () => {
         },
       ]
 
-      ;(mockCrsClient.listKeys as jest.Mock).mockResolvedValue(mockCrsKeys)
+      ;(mockCrsClient.getApiKeys as jest.Mock).mockResolvedValue(mockCrsKeys)
 
       // Act
       const result = await listKeysUseCase.execute(input)
 
       // Assert
       expect(result.isSuccess).toBe(true)
-      expect(mockCrsClient.listKeys).toHaveBeenCalledWith('user_123')
+      expect(mockCrsClient.getApiKeys).toHaveBeenCalled()
       expect(result.value?.syncedAt).toBeDefined()
     })
 
@@ -243,7 +244,7 @@ describe('ListKeysUseCase', () => {
         value: 1,
       })
 
-      ;(mockCrsClient.listKeys as jest.Mock).mockRejectedValue(
+      ;(mockCrsClient.getApiKeys as jest.Mock).mockRejectedValue(
         new Error('CRS unavailable')
       )
 

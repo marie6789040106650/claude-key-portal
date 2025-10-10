@@ -59,11 +59,6 @@ export class RedisClient {
 
       this.client = new Redis(redisOptions)
 
-      // 在测试环境中（ioredis-mock），连接是立即成功的
-      if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) {
-        this.connected = true
-      }
-
       this.client.on('connect', () => {
         this.connected = true
         console.log('[Redis] Connected successfully')
@@ -73,6 +68,18 @@ export class RedisClient {
         this.connected = true
         console.log('[Redis] Ready to accept commands')
       })
+
+      // 在测试环境中（ioredis-mock），连接是立即成功的
+      // 但我们仍然需要等待ready事件
+      if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) {
+        // ioredis-mock会同步触发ready事件
+        // 但为了保险起见，我们延迟一点让事件循环完成
+        setTimeout(() => {
+          if (this.client && this.client.status === 'ready') {
+            this.connected = true
+          }
+        }, 0)
+      }
 
       this.client.on('error', (error) => {
         this.connected = false
