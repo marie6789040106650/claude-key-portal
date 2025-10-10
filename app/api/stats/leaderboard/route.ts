@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 import { getCacheManager } from '@/lib/infrastructure/cache/cache-manager'
 import {
   type SortBy,
@@ -29,16 +29,12 @@ const cacheManager = getCacheManager()
  */
 export async function GET(request: Request) {
   try {
-    // 1. 验证 JWT Token
-    const authHeader = request.headers.get('Authorization')
-    let userId: string
-
-    try {
-      const tokenData = verifyToken(authHeader)
-      userId = tokenData.userId
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    // 1. 验证用户认证（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: '请先登录' }, { status: 401 })
     }
+    const userId = user.userId
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)

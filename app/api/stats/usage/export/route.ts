@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { buildAdvancedFilters, type FilterParams } from '../filters'
 import { convertToCSV, convertToJSON, generateFilename } from './formatters'
@@ -21,16 +21,12 @@ import { convertToCSV, convertToJSON, generateFilename } from './formatters'
  */
 export async function GET(request: NextRequest) {
   try {
-    // 1. 验证认证
-    const authHeader = request.headers.get('Authorization')
-    let userId: string
-
-    try {
-      const tokenData = verifyToken(authHeader)
-      userId = tokenData.userId
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    // 1. 验证用户认证（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: '请先登录' }, { status: 401 })
     }
+    const userId = user.userId
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)

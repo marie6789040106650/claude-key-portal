@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth'
 import { prisma } from '@/lib/infrastructure/persistence/prisma'
 import { crsClient } from '@/lib/infrastructure/external/crs-client'
 import { getCacheManager } from '@/lib/infrastructure/cache/cache-manager'
@@ -101,13 +101,11 @@ async function fetchKeyStatsInParallel(
  */
 export async function GET(request: NextRequest) {
   try {
-    // 1. 验证认证
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 })
+    // 1. 验证用户认证（支持Cookie和Header双重认证）
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: '请先登录' }, { status: 401 })
     }
-
-    const user = verifyToken(authHeader.replace('Bearer ', ''))
 
     // 2. 获取并验证参数
     const { searchParams } = new URL(request.url)
