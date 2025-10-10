@@ -1046,4 +1046,92 @@ NODE_ENV=production
 
 ---
 
+## 🔄 自动化开发监控 / Automated Development Monitoring
+
+### Claude Monitor 集成
+
+本项目已集成 **Claude Auto-Dev Monitor** 工具实现自动化开发流程。
+
+### 工作流程
+
+```
+用户启动监控（设置提示词）
+  ↓
+Claude 开发任务
+  ↓
+完成后执行: claude-monitor done
+  ↓
+10秒后自动打开新终端继续下一阶段
+```
+
+### Claude 必须执行的收尾步骤
+
+**每次完成任务后，必须执行以下命令标记完成：**
+
+```bash
+claude-monitor done
+```
+
+**或者更新下一阶段提示词：**
+
+```bash
+claude-monitor done "下一阶段任务描述"
+```
+
+### 使用示例
+
+```bash
+# 场景1: 保持当前提示词继续
+# 完成 Task 4 后
+claude-monitor done
+
+# 场景2: 切换到新任务
+# 完成 P2.9 所有任务，开始 P2.10
+claude-monitor done "开始 P2.10 - 性能优化任务"
+
+# 场景3: 详细的阶段切换
+claude-monitor done "项目: claude-key-portal
+分支: feature/p2-usage-analytics
+当前任务: P2.10 Task 1 - 数据库查询优化
+参考文档: docs/NEXT_SESSION_PROMPT_V2.md"
+```
+
+### 强制执行规则
+
+```markdown
+✅ **必须执行**:
+- 所有开发任务完成后
+- 所有测试通过后
+- 所有代码提交后（如需要）
+- 准备结束当前开发会话时
+
+❌ **禁止跳过**:
+- 不允许忘记执行 claude-monitor done
+- 不允许手动关闭会话而不标记
+- 不允许在任务未完成时执行
+```
+
+### 自动化标准检查清单
+
+完成任务前必须确认：
+
+```markdown
+- [ ] ✅ 所有测试通过（TDD流程完整）
+- [ ] ✅ 代码已提交（如需要）
+- [ ] ✅ 文档已更新（如需要）
+- [ ] ✅ **执行 `claude-monitor done` 标记完成** 👈 关键步骤！
+```
+
+### 监控工具说明
+
+- **工具**: claude-monitor
+- **安装**: 全局安装（已配置）
+- **监控文件**: `.automation/task_completed`
+- **延迟时间**: 10 秒
+- **自动化**: 打开新终端继续开发
+
+**注意**: `.automation/` 目录已添加到 `.gitignore`，不会提交到版本控制。
+
+---
+
 _"清晰的标准 + 严格的执行 = 项目成功的保障！"_
