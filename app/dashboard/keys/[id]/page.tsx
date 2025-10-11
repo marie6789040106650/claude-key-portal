@@ -9,6 +9,16 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, RefreshCw, Edit, Trash2, Star, Calendar, Activity } from 'lucide-react'
 import { toast } from '@/components/ui/toast-simple'
 import type { ApiKeyStatus } from '@/types/keys'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts'
 
 interface KeyDetailPageProps {
   params: {
@@ -38,6 +48,36 @@ interface KeyDetailData {
 }
 
 /**
+ * 趋势数据点接口
+ */
+interface TrendDataPoint {
+  timestamp: string
+  tokens: number
+  requests: number
+}
+
+/**
+ * 实时统计数据接口
+ */
+interface RealtimeStats {
+  key: {
+    id: string
+    name: string
+    status: string
+    totalTokens: number
+    totalRequests: number
+    createdAt: string
+    lastUsedAt: string | null
+    realtimeStats?: {
+      totalTokens: number
+      totalRequests: number
+      averageTokensPerRequest: number
+    }
+  }
+  crsWarning?: string
+}
+
+/**
  * 获取密钥状态对应的样式类名
  */
 function getStatusBadgeClass(status: ApiKeyStatus): string {
@@ -45,12 +85,65 @@ function getStatusBadgeClass(status: ApiKeyStatus): string {
   const statusClasses: Record<ApiKeyStatus, string> = {
     ACTIVE: 'bg-green-100 text-green-800 hover:bg-green-100',
     INACTIVE: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
-    PAUSED: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
     EXPIRED: 'bg-red-100 text-red-800 hover:bg-red-100',
     DELETED: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
     RATE_LIMITED: 'bg-orange-100 text-orange-800 hover:bg-orange-100',
   }
   return statusClasses[status] || 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+}
+
+/**
+ * 使用趋势图表组件
+ */
+function UsageTrendChart({ data }: { data: TrendDataPoint[] }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        暂无趋势数据
+      </div>
+    )
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="timestamp"
+          tickFormatter={(value) => {
+            const date = new Date(value)
+            return `${date.getMonth() + 1}/${date.getDate()}`
+          }}
+        />
+        <YAxis yAxisId="left" />
+        <YAxis yAxisId="right" orientation="right" />
+        <Tooltip
+          labelFormatter={(value) => {
+            const date = new Date(value as string)
+            return date.toLocaleDateString('zh-CN')
+          }}
+          formatter={(value: number) => [value.toLocaleString(), '']}
+        />
+        <Legend />
+        <Line
+          yAxisId="left"
+          type="monotone"
+          dataKey="requests"
+          stroke="#8884d8"
+          name="请求数"
+          strokeWidth={2}
+        />
+        <Line
+          yAxisId="right"
+          type="monotone"
+          dataKey="tokens"
+          stroke="#82ca9d"
+          name="Token数"
+          strokeWidth={2}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  )
 }
 
 export default function KeyDetailPage({ params }: KeyDetailPageProps) {
@@ -76,6 +169,46 @@ export default function KeyDetailPage({ params }: KeyDetailPageProps) {
     },
     staleTime: 30 * 1000, // 30秒
     gcTime: 5 * 60 * 1000, // 5分钟
+  })
+
+  // 获取实时统计数据（包含趋势）
+  const {
+    data: realtimeStats,
+    isLoading: isLoadingRealtime,
+  } = useQuery<RealtimeStats>({
+    queryKey: ['key-stats-realtime', params.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/stats/usage?keyId=${params.id}&realtime=true`)
+      if (!response.ok) throw new Error('获取失败')
+      return response.json()
+    },
+    staleTime: 10 * 1000, // 10秒刷新一次
+    enabled: !!keyData, // 只有在密钥数据加载后才获取实时统计
+  })
+
+  // 获取趋势数据（最近7天）
+  const {
+    data: trendData,
+    isLoading: isLoadingTrend,
+  } = useQuery<{ trend?: TrendDataPoint[]; trendWarning?: string }>({
+    queryKey: ['key-trend', params.id],
+    queryFn: async () => {
+      // 计算最近7天的日期范围
+      const now = new Date()
+      const sevenDaysAgo = new Date(now)
+      sevenDaysAgo.setDate(now.getDate() - 7)
+
+      const startDate = sevenDaysAgo.toISOString().split('T')[0]
+      const endDate = now.toISOString().split('T')[0]
+
+      const response = await fetch(
+        `/api/stats/usage?keyId=${params.id}&startDate=${startDate}&endDate=${endDate}`
+      )
+      if (!response.ok) throw new Error('获取失败')
+      return response.json()
+    },
+    staleTime: 5 * 60 * 1000, // 5分钟刷新一次
+    enabled: !!keyData, // 只有在密钥数据加载后才获取趋势数据
   })
 
   // 处理删除
@@ -278,43 +411,112 @@ export default function KeyDetailPage({ params }: KeyDetailPageProps) {
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              总请求数
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                总请求数
+              </CardTitle>
+              {realtimeStats?.key?.realtimeStats && (
+                <Badge variant="outline" className="text-xs">
+                  实时
+                </Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {keyData.totalCalls.toLocaleString()}
+            {isLoadingRealtime ? (
+              <div className="h-8 bg-muted animate-pulse rounded w-24" />
+            ) : (
+              <div className="text-2xl font-bold">
+                {(
+                  realtimeStats?.key?.realtimeStats?.totalRequests ??
+                  keyData.totalCalls
+                ).toLocaleString()}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                总 Token 数
+              </CardTitle>
+              {realtimeStats?.key?.realtimeStats && (
+                <Badge variant="outline" className="text-xs">
+                  实时
+                </Badge>
+              )}
             </div>
+          </CardHeader>
+          <CardContent>
+            {isLoadingRealtime ? (
+              <div className="h-8 bg-muted animate-pulse rounded w-24" />
+            ) : (
+              <div className="text-2xl font-bold">
+                {(
+                  realtimeStats?.key?.realtimeStats?.totalTokens ??
+                  keyData.totalTokens
+                ).toLocaleString()}
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              总 Token 数
+              平均 Token/请求
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {keyData.totalTokens.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              本月使用
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {keyData.monthlyUsage.toLocaleString()}
-            </div>
+            {isLoadingRealtime ? (
+              <div className="h-8 bg-muted animate-pulse rounded w-24" />
+            ) : (
+              <div className="text-2xl font-bold">
+                {(
+                  realtimeStats?.key?.realtimeStats?.averageTokensPerRequest ??
+                  (keyData.totalCalls > 0
+                    ? Math.round(keyData.totalTokens / keyData.totalCalls)
+                    : 0)
+                ).toLocaleString()}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* CRS警告提示 */}
+      {realtimeStats?.crsWarning && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-sm text-yellow-800">{realtimeStats.crsWarning}</p>
+        </div>
+      )}
+
+      {/* 使用趋势图表 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>使用趋势（最近7天）</CardTitle>
+            {isLoadingTrend && (
+              <Badge variant="outline" className="text-xs">
+                加载中...
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoadingTrend ? (
+            <div className="h-64 bg-muted animate-pulse rounded" />
+          ) : trendData?.trend && trendData.trend.length > 0 ? (
+            <UsageTrendChart data={trendData.trend} />
+          ) : (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              {trendData?.trendWarning || '暂无趋势数据'}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* 描述和标签 */}
       <Card>

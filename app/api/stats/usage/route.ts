@@ -244,7 +244,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 })
     }
-    const userId = user.userId
+    const userId = user.id
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)
@@ -286,7 +286,7 @@ export async function GET(request: Request) {
     }
 
     // 5. 否则返回所有密钥的聚合统计（应用高级筛选）
-    return await getAllKeysStats(userId, startDate, endDate, filterParams)
+    return await getAllKeysStats(userId, startDate, endDate, false, filterParams)
   } catch (error: any) {
     console.error('Usage stats error:', error)
     return NextResponse.json(

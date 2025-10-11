@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 })
     }
-    const userId = user.userId
+    const userId = user.id
 
     // 2. 解析查询参数
     const { searchParams } = new URL(request.url)

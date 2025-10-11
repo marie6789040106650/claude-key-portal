@@ -36,7 +36,7 @@ export function validateDate(dateString: string): Date | null {
 /**
  * 验证状态参数
  */
-export function validateStatus(status: string | null): ValidationResult {
+export function validateStatus(status: string | null | undefined): ValidationResult {
   if (!status) {
     return { valid: true }
   }
@@ -53,8 +53,8 @@ export function validateStatus(status: string | null): ValidationResult {
  * 验证使用量范围参数
  */
 export function validateUsageRange(
-  minValue: string | null,
-  maxValue: string | null,
+  minValue: string | null | undefined,
+  maxValue: string | null | undefined,
   fieldName: string
 ): ValidationResult {
   if (!minValue && !maxValue) {
@@ -83,8 +83,8 @@ export function validateUsageRange(
  * 验证最后使用时间参数
  */
 export function validateLastUsedTime(
-  lastUsedAfter: string | null,
-  lastUsedBefore: string | null
+  lastUsedAfter: string | null | undefined,
+  lastUsedBefore: string | null | undefined
 ): ValidationResult {
   if (lastUsedAfter) {
     const date = validateDate(lastUsedAfter)

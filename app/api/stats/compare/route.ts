@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
     const keys = await prisma.apiKey.findMany({
       where: {
         id: { in: keyIds },
-        userId: user.userId,
+        userId: user.id,
       },
       select: {
         id: true,
