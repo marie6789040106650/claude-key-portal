@@ -275,6 +275,65 @@ async getProfile(userId: string) {
 | `POST /api/v1/keys/batch` | 代理      | `DELETE/PUT /admin/api-keys/batch` | ✅ 批量映射ID   | ✅ 批量更新本地  |
 | `GET /api/v1/keys/tags`   | 代理      | `GET /admin/api-keys/tags`         | ❌ 直通         | ❌ 直通          |
 
+#### 字段别名说明 ⭐
+
+**问题背景** (P0修复):
+- 数据库字段名: `totalCalls` (历史命名)
+- 前端期望字段: `totalRequests` (语义化命名)
+- 影响范围: 密钥列表、详情、更新等API
+
+**解决方案** (向后兼容):
+所有返回密钥数据的API响应中，同时提供 `totalCalls` 和 `totalRequests` 两个字段，值完全相同。
+
+**字段映射实现**:
+```typescript
+// GET /api/keys (列表)
+const response = {
+  keys: result.value!.keys.map(key => ({
+    ...key,
+    totalRequests: key.totalCalls,  // 添加别名字段
+  })),
+}
+
+// GET /api/keys/[id] (详情)
+return NextResponse.json({
+  ...keyData,
+  totalCalls: Number(totalCalls),
+  totalRequests: Number(totalCalls),  // 别名字段
+})
+
+// PUT/PATCH /api/keys/[id] (更新)
+return NextResponse.json({
+  key: {
+    ...key,
+    totalRequests: key.totalCalls,  // 别名字段
+  }
+})
+```
+
+**字段定义**:
+- `totalCalls`: 密钥累计调用总数（原始字段，保留向后兼容）
+- `totalRequests`: 密钥累计请求总数（别名字段，推荐使用）
+- **数值保证**: `totalRequests === totalCalls` (完全相同)
+
+**测试覆盖**:
+- ✅ 字段存在性验证 (tests/unit/app/api/keys/field-alias.test.ts)
+- ✅ 数值一致性验证
+- ✅ 类型安全性验证 (number类型)
+- ✅ 向后兼容性验证
+
+**前端使用**:
+```typescript
+// 新代码（推荐）
+<p>总请求数: {key.totalRequests}</p>
+
+// 旧代码（仍可用）
+<p>总调用数: {key.totalCalls}</p>
+
+// 两者值相同
+key.totalRequests === key.totalCalls  // true
+```
+
 #### 详细数据流程
 
 ##### 2.3.1 获取密钥列表
