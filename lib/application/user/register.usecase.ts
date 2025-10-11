@@ -99,7 +99,7 @@ export class RegisterUseCase {
       return Result.ok({
         id: createResult.value!.id,
         email: createResult.value!.email,
-        phone: createResult.value!.phone,
+        phone: createResult.value!.phone ?? null, // 将 undefined 转换为 null
         nickname: createResult.value!.nickname,
         createdAt: createResult.value!.createdAt,
       })

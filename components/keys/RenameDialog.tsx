@@ -89,7 +89,7 @@ export function RenameDialog({ apiKey, open, onClose, onSuccess }: RenameDialogP
         <DialogHeader>
           <DialogTitle>重命名密钥</DialogTitle>
           <DialogDescription>
-            为密钥 <span className="font-mono">{apiKey?.crsKey.slice(0, 12)}...</span> 设置新名称
+            为密钥 <span className="font-mono">{apiKey?.keyMasked || apiKey?.keyPrefix}</span> 设置新名称
           </DialogDescription>
         </DialogHeader>
 

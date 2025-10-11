@@ -137,7 +137,7 @@ export class LoginUseCase {
         user: {
           id: user.id,
           email: user.email,
-          phone: user.phone,
+          phone: user.phone ?? null, // 将 undefined 转换为 null
           nickname: user.nickname,
           avatar: user.avatar,
         },

@@ -49,3 +49,9 @@ dist/
 
 # 原型文件
 prototypes/
+
+# 存档文件（包含旧代码，不应编译）
+archives/
+
+# Playwright MCP截图
+.playwright-mcp/

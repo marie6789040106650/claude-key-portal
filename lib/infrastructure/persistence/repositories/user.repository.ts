@@ -27,15 +27,15 @@ import type { User as PrismaUser } from '@prisma/client'
 export interface DomainUser {
   id: string
   email: string | null
-  phone: string | null
+  phone?: string | null  // 可选字段（数据库中暂未实现）
   passwordHash: string
   nickname: string | null
   avatar: string | null
   bio: string | null
   status: UserStatus
-  emailVerified: boolean
-  phoneVerified: boolean
-  lastLoginAt: Date | null
+  emailVerified?: boolean  // 可选字段（数据库中暂未实现）
+  phoneVerified?: boolean  // 可选字段（数据库中暂未实现）
+  lastLoginAt?: Date | null  // 可选字段（数据库中暂未实现）
   createdAt: Date
   updatedAt: Date
 }
@@ -84,21 +84,13 @@ export class UserRepository {
 
   /**
    * 通过手机号查找用户
+   *
+   * @deprecated 数据库模型中暂未包含 phone 字段，此功能暂不可用
    */
   async findByPhone(phone: string): Promise<Result<DomainUser>> {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { phone },
-      })
-
-      if (!user) {
-        return Result.fail(new UserNotFoundError(phone))
-      }
-
-      return Result.ok(this.toDomain(user))
-    } catch (error) {
-      return Result.fail(error as Error)
-    }
+    // 注意：当前数据库 schema 中没有 phone 字段
+    // 如需启用手机号登录，请先在 schema.prisma 中添加 phone 字段并执行迁移
+    return Result.fail(new Error('Phone login is not yet implemented. Please use email to login.'))
   }
 
   /**
@@ -119,18 +111,13 @@ export class UserRepository {
 
   /**
    * 检查手机号是否已存在
+   *
+   * @deprecated 数据库模型中暂未包含 phone 字段，此功能暂不可用
    */
   async existsByPhone(phone: string): Promise<Result<boolean>> {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { phone },
-        select: { id: true },
-      })
-
-      return Result.ok(user !== null)
-    } catch (error) {
-      return Result.fail(error as Error)
-    }
+    // 注意：当前数据库 schema 中没有 phone 字段
+    // 始终返回 false（不存在）
+    return Result.ok(false)
   }
 
   /**
@@ -138,10 +125,15 @@ export class UserRepository {
    */
   async create(props: CreateUserProps): Promise<Result<DomainUser>> {
     try {
+      // 验证必需字段
+      if (!props.email) {
+        return Result.fail(new Error('Email is required for user creation'))
+      }
+
       const user = await prisma.user.create({
         data: {
           email: props.email,
-          phone: props.phone,
+          // phone: props.phone, // 数据库 schema 中暂未包含 phone 字段
           passwordHash: props.passwordHash,
           nickname: props.nickname,
         },
@@ -229,15 +221,15 @@ export class UserRepository {
     return {
       id: prismaUser.id,
       email: prismaUser.email,
-      phone: prismaUser.phone,
+      // phone: prismaUser.phone, // 数据库 schema 中暂未包含 phone 字段
       passwordHash: prismaUser.passwordHash,
       nickname: prismaUser.nickname,
       avatar: prismaUser.avatar,
       bio: prismaUser.bio,
       status: prismaUser.status as UserStatus,
-      emailVerified: prismaUser.emailVerified,
-      phoneVerified: prismaUser.phoneVerified,
-      lastLoginAt: prismaUser.lastLoginAt,
+      // emailVerified: prismaUser.emailVerified, // 数据库 schema 中暂未包含字段
+      // phoneVerified: prismaUser.phoneVerified, // 数据库 schema 中暂未包含字段
+      // lastLoginAt: prismaUser.lastLoginAt, // 数据库 schema 中暂未包含字段
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
     }

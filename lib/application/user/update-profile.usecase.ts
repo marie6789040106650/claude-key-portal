@@ -88,7 +88,7 @@ export class UpdateProfileUseCase {
       return Result.ok({
         id: updateResult.value!.id,
         email: updateResult.value!.email,
-        phone: updateResult.value!.phone,
+        phone: updateResult.value!.phone ?? null, // 将 undefined 转换为 null
         nickname: updateResult.value!.nickname,
         avatar: updateResult.value!.avatar,
         updatedAt: updateResult.value!.updatedAt,

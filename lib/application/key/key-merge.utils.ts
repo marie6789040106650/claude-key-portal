@@ -73,12 +73,15 @@ export function detectSyncIssue(
   localKey: DomainKey,
   crsKey: CrsApiKey
 ): SyncIssue | null {
-  // 检查状态不一致
-  if (crsKey.status !== localKey.status) {
+  // 检查状态不一致（将CRS状态转换为大写以匹配KeyStatus枚举）
+  const normalizedCrsStatus = crsKey.status.toUpperCase()
+  const normalizedLocalStatus = String(localKey.status).toUpperCase()
+
+  if (normalizedCrsStatus !== normalizedLocalStatus) {
     return {
       keyId: localKey.id,
       issue: 'status_mismatch',
-      local: localKey.status,
+      local: String(localKey.status),
       crs: crsKey.status,
     }
   }
